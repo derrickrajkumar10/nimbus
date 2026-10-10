@@ -8,9 +8,13 @@ Street-level flood prediction and response for Chennai (hackathon build). The sp
 - Read `contracts/README.md`. Shared shapes live in `contracts/`. Never redefine an entity or event locally; import or generate it. Contract changes go through `contracts/generate.sh`.
 - Every record and event carries `run_id`. Domain logic uses `sim_time`, never the wall clock.
 
+## Working here
+
+Four people build in parallel. Who owns which folder, how PRs reach `main`, and the checkpoints are in `docs/workflow.md`. Edit only your own lane's folders. If you need another lane's work, build against `contracts/fixtures/` and open an issue for that lane.
+
 ## Layout
 
-`contracts/` shared models and fixtures · `engines/` deterministic code · `agents/` Strands agents · `replay/` Storm Replay · `infra/` CDK (us-east-1) · `console/` React ward console · `app/` Flutter citizen app
+`contracts/` shared models and fixtures · `engines/` deterministic code · `agents/` Strands agents · `replay/` Storm Replay · `infra/` CDK (us-east-1) · `api/` HTTP API · `console/` React ward console · `app/` Flutter citizen app
 
 ## Agent skills
 
