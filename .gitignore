@@ -1,11 +1,63 @@
+# ---- Secrets: never commit ----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials
+credentials.json
+.aws/
+# Firebase Admin SDK service account keys (the secret ones; go in AWS Secrets Manager)
+*firebase-adminsdk*.json
+service-account*.json
+serviceAccount*.json
+# Android app signing
+*.jks
+*.keystore
+key.properties
+
+# ---- Python ----
 .venv/
 __pycache__/
 *.pyc
+*.egg-info/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+
+# ---- Node / React console ----
 node_modules/
-.env
-.env.*
-.DS_Store
-# Flutter
+npm-debug.log*
+yarn-error.log*
+.vite/
+
+# ---- AWS CDK / SAM build output ----
+cdk.out/
+cdk.context.json.bak
+.aws-sam/
+
+# ---- Flutter ----
 .dart_tool/
 build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+local.properties
+*.iml
+
+# ---- Logs and local run output ----
+*.log
+logs/
+
+# ---- Editors / OS / personal tool settings ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.claude/settings.local.json
