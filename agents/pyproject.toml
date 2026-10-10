@@ -1,0 +1,27 @@
+[project]
+name = "nimbus-agents"
+version = "0.1.0"
+description = "NIMBUS Strands agents on Amazon Nova, with Cedar policy checks."
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.111",
+    "cedarpy>=4.12.1",
+    "nimbus-contracts",
+    "strands-agents>=1.59.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+# Not an installable package: agent Lambdas are bundled from this folder as-is.
+package = false
+
+[tool.uv.sources]
+nimbus-contracts = { path = "../contracts", editable = true }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
