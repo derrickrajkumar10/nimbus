@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "ResourceKind": {
+      "enum": [
+        "pump",
+        "desilting_crew",
+        "tree_crew"
+      ],
+      "title": "ResourceKind",
+      "type": "string"
+    },
+    "ResourceStatus": {
+      "enum": [
+        "free",
+        "en_route",
+        "working"
+      ],
+      "title": "ResourceStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "resource_id": {
+      "title": "Resource Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/ResourceKind"
+    },
+    "label": {
+      "examples": [
+        "Pump 2"
+      ],
+      "title": "Label",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ResourceStatus"
+    },
+    "location": {
+      "$ref": "#/$defs/GeoPoint"
+    }
+  },
+  "required": [
+    "resource_id",
+    "run_id",
+    "kind",
+    "label",
+    "status",
+    "location"
+  ],
+  "title": "Resource",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

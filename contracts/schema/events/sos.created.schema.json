@@ -1,0 +1,166 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "Sos": {
+      "additionalProperties": false,
+      "properties": {
+        "sos_id": {
+          "title": "Sos Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "reporter_id": {
+          "title": "Reporter Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "people_count": {
+          "minimum": 1,
+          "title": "People Count",
+          "type": "integer"
+        },
+        "flags": {
+          "$ref": "#/$defs/VulnerabilityFlags"
+        },
+        "photo_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Photo Key"
+        }
+      },
+      "required": [
+        "sos_id",
+        "run_id",
+        "reporter_id",
+        "created_at",
+        "location",
+        "people_count",
+        "flags"
+      ],
+      "title": "Sos",
+      "type": "object"
+    },
+    "VulnerabilityFlags": {
+      "additionalProperties": false,
+      "properties": {
+        "elderly": {
+          "default": false,
+          "title": "Elderly",
+          "type": "boolean"
+        },
+        "child": {
+          "default": false,
+          "title": "Child",
+          "type": "boolean"
+        },
+        "medical": {
+          "default": false,
+          "title": "Medical",
+          "type": "boolean"
+        }
+      },
+      "title": "VulnerabilityFlags",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "sos.created",
+      "default": "sos.created",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/Sos"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "SosCreated",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

@@ -1,0 +1,2001 @@
+{
+  "title": "Nimbus",
+  "$defs": {
+    "Agent": {
+      "enum": [
+        "sentinel",
+        "verifier",
+        "triage",
+        "pathfinder",
+        "dispatcher",
+        "herald",
+        "chronicler",
+        "commander"
+      ],
+      "title": "Agent",
+      "type": "string"
+    },
+    "AgentActivity": {
+      "additionalProperties": false,
+      "description": "One line in the console's agent activity feed.",
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "agent.activity",
+          "default": "agent.activity",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/AgentActivityDetail"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "AgentActivity",
+      "type": "object"
+    },
+    "AgentActivityDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/Agent"
+        },
+        "saw": {
+          "title": "Saw",
+          "type": "string"
+        },
+        "decided": {
+          "title": "Decided",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "saw",
+        "decided",
+        "why"
+      ],
+      "title": "AgentActivityDetail",
+      "type": "object"
+    },
+    "Alert": {
+      "additionalProperties": false,
+      "properties": {
+        "alert_id": {
+          "title": "Alert Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/AlertScope"
+        },
+        "sent_at": {
+          "format": "date-time",
+          "title": "Sent At",
+          "type": "string"
+        },
+        "segment_ids": {
+          "items": {
+            "examples": [
+              "27320162-0"
+            ],
+            "pattern": "^\\d+-\\d+$",
+            "type": "string"
+          },
+          "title": "Segment Ids",
+          "type": "array"
+        },
+        "recipient_count": {
+          "minimum": 0,
+          "title": "Recipient Count",
+          "type": "integer"
+        },
+        "message_en": {
+          "title": "Message En",
+          "type": "string"
+        },
+        "message_ta": {
+          "title": "Message Ta",
+          "type": "string"
+        },
+        "proposal_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set for Ward Alerts, which go out only via an approved Proposal.",
+          "title": "Proposal Id"
+        }
+      },
+      "required": [
+        "alert_id",
+        "run_id",
+        "scope",
+        "sent_at",
+        "segment_ids",
+        "recipient_count",
+        "message_en",
+        "message_ta"
+      ],
+      "title": "Alert",
+      "type": "object"
+    },
+    "AlertScope": {
+      "enum": [
+        "place",
+        "ward"
+      ],
+      "title": "AlertScope",
+      "type": "string"
+    },
+    "AlertSent": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "alert.sent",
+          "default": "alert.sent",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Alert"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "AlertSent",
+      "type": "object"
+    },
+    "ClockTick": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "clock.tick",
+          "default": "clock.tick",
+          "title": "Type",
+          "type": "string"
+        },
+        "step_minutes": {
+          "default": 15,
+          "exclusiveMinimum": 0,
+          "title": "Step Minutes",
+          "type": "integer"
+        },
+        "tick_index": {
+          "minimum": 0,
+          "title": "Tick Index",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "tick_index"
+      ],
+      "title": "ClockTick",
+      "type": "object"
+    },
+    "DepthBand": {
+      "enum": [
+        "dry",
+        "ankle",
+        "knee",
+        "waist",
+        "above_waist"
+      ],
+      "title": "DepthBand",
+      "type": "string"
+    },
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "Hazard": {
+      "additionalProperties": false,
+      "properties": {
+        "hazard_id": {
+          "title": "Hazard Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "hazard_class": {
+          "$ref": "#/$defs/HazardClass"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "owner": {
+          "$ref": "#/$defs/HazardOwner"
+        },
+        "status": {
+          "$ref": "#/$defs/HazardStatus"
+        },
+        "detected_at": {
+          "format": "date-time",
+          "title": "Detected At",
+          "type": "string"
+        },
+        "no_go_radius_m": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "No Go Radius M",
+          "type": "number"
+        },
+        "source_report_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Report Id"
+        }
+      },
+      "required": [
+        "hazard_id",
+        "run_id",
+        "hazard_class",
+        "location",
+        "owner",
+        "status",
+        "detected_at"
+      ],
+      "title": "Hazard",
+      "type": "object"
+    },
+    "HazardClass": {
+      "enum": [
+        "open_manhole",
+        "live_wire",
+        "fallen_tree",
+        "stranded_vehicle"
+      ],
+      "title": "HazardClass",
+      "type": "string"
+    },
+    "HazardDetected": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "hazard.detected",
+          "default": "hazard.detected",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Hazard"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "HazardDetected",
+      "type": "object"
+    },
+    "HazardOwner": {
+      "enum": [
+        "corporation",
+        "power_utility"
+      ],
+      "title": "HazardOwner",
+      "type": "string"
+    },
+    "HazardStatus": {
+      "enum": [
+        "open",
+        "acknowledged",
+        "cleared"
+      ],
+      "title": "HazardStatus",
+      "type": "string"
+    },
+    "LineString": {
+      "additionalProperties": false,
+      "description": "GeoJSON LineString geometry. Coordinates are [lon, lat].",
+      "properties": {
+        "type": {
+          "default": "LineString",
+          "pattern": "^LineString$",
+          "title": "Type",
+          "type": "string"
+        },
+        "coordinates": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "minItems": 2,
+          "title": "Coordinates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "coordinates"
+      ],
+      "title": "LineString",
+      "type": "object"
+    },
+    "Passability": {
+      "additionalProperties": false,
+      "properties": {
+        "two_wheeler": {
+          "title": "Two Wheeler",
+          "type": "boolean"
+        },
+        "car": {
+          "title": "Car",
+          "type": "boolean"
+        },
+        "ambulance": {
+          "title": "Ambulance",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "two_wheeler",
+        "car",
+        "ambulance"
+      ],
+      "title": "Passability",
+      "type": "object"
+    },
+    "PolicyDecided": {
+      "additionalProperties": false,
+      "description": "Every Cedar decision, allowed or denied. Feeds the console activity feed.",
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "policy.decided",
+          "default": "policy.decided",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/PolicyDecidedDetail"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "PolicyDecided",
+      "type": "object"
+    },
+    "PolicyDecidedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "principal": {
+          "$ref": "#/$defs/Agent"
+        },
+        "action": {
+          "examples": [
+            "SendAlert",
+            "ProposeWorkOrder",
+            "DispatchCrew",
+            "ReadSOS"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "resource": {
+          "title": "Resource",
+          "type": "string"
+        },
+        "allowed": {
+          "title": "Allowed",
+          "type": "boolean"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "principal",
+        "action",
+        "resource",
+        "allowed",
+        "reason"
+      ],
+      "title": "PolicyDecidedDetail",
+      "type": "object"
+    },
+    "Proposal": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "proposed_by": {
+          "$ref": "#/$defs/Agent"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "action": {
+          "discriminator": {
+            "mapping": {
+              "ward_alert": "#/$defs/WardAlertDraft",
+              "work_order": "#/$defs/WorkOrder"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkOrder"
+            },
+            {
+              "$ref": "#/$defs/WardAlertDraft"
+            }
+          ],
+          "title": "Action"
+        },
+        "status": {
+          "$ref": "#/$defs/ProposalStatus",
+          "default": "pending"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided At"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "run_id",
+        "proposed_by",
+        "created_at",
+        "rank",
+        "reason",
+        "action"
+      ],
+      "title": "Proposal",
+      "type": "object"
+    },
+    "ProposalCreated": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "proposal.created",
+          "default": "proposal.created",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Proposal"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "ProposalCreated",
+      "type": "object"
+    },
+    "ProposalDecided": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "proposal.decided",
+          "default": "proposal.decided",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/ProposalDecidedDetail"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "ProposalDecided",
+      "type": "object"
+    },
+    "ProposalDecidedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approved",
+            "edited",
+            "rejected"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "decided_by": {
+          "title": "Decided By",
+          "type": "string"
+        },
+        "proposal": {
+          "$ref": "#/$defs/Proposal",
+          "description": "The Proposal as approved, including any officer edits."
+        }
+      },
+      "required": [
+        "proposal_id",
+        "decision",
+        "decided_by",
+        "proposal"
+      ],
+      "title": "ProposalDecidedDetail",
+      "type": "object"
+    },
+    "ProposalStatus": {
+      "enum": [
+        "pending",
+        "approved",
+        "edited",
+        "rejected"
+      ],
+      "title": "ProposalStatus",
+      "type": "string"
+    },
+    "RankedSos": {
+      "additionalProperties": false,
+      "properties": {
+        "sos_id": {
+          "title": "Sos Id",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "danger_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Danger Score",
+          "type": "integer"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "maxItems": 3,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "merged_sos_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Merged Sos Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sos_id",
+        "rank",
+        "danger_score",
+        "reasons"
+      ],
+      "title": "RankedSos",
+      "type": "object"
+    },
+    "Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "reading_id": {
+          "title": "Reading Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "depth": {
+          "$ref": "#/$defs/DepthBand"
+        },
+        "reference_object": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "kerb",
+            "tyre",
+            "knee",
+            "wall"
+          ],
+          "title": "Reference Object"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "passable": {
+          "$ref": "#/$defs/Passability"
+        },
+        "report_ids": {
+          "description": "Reports merged into this Reading.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Report Ids",
+          "type": "array"
+        },
+        "hazards_seen": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/HazardClass"
+          },
+          "title": "Hazards Seen",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reading_id",
+        "run_id",
+        "segment_id",
+        "observed_at",
+        "depth",
+        "reference_object",
+        "confidence",
+        "passable",
+        "report_ids"
+      ],
+      "title": "Reading",
+      "type": "object"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "examples": [
+            "forecast_exceeds_threshold",
+            "antecedent_rain",
+            "high_tide",
+            "nearby_reading"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "examples": [
+            "38 mm forecast in 3 h against a 30 mm threshold"
+          ],
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "Report": {
+      "additionalProperties": false,
+      "properties": {
+        "report_id": {
+          "title": "Report Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "reporter_id": {
+          "description": "Anonymous app-install identity.",
+          "title": "Reporter Id",
+          "type": "string"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "photo_key": {
+          "description": "S3 object key of the photo.",
+          "title": "Photo Key",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "source": {
+          "$ref": "#/$defs/ReportSource",
+          "default": "app"
+        }
+      },
+      "required": [
+        "report_id",
+        "run_id",
+        "reporter_id",
+        "captured_at",
+        "location",
+        "photo_key"
+      ],
+      "title": "Report",
+      "type": "object"
+    },
+    "ReportCreated": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "report.created",
+          "default": "report.created",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Report"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "ReportCreated",
+      "type": "object"
+    },
+    "ReportSource": {
+      "enum": [
+        "app",
+        "simulated"
+      ],
+      "title": "ReportSource",
+      "type": "string"
+    },
+    "ReportVerified": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "report.verified",
+          "default": "report.verified",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Reading"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "ReportVerified",
+      "type": "object"
+    },
+    "Resource": {
+      "additionalProperties": false,
+      "properties": {
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ResourceKind"
+        },
+        "label": {
+          "examples": [
+            "Pump 2"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/ResourceStatus"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        }
+      },
+      "required": [
+        "resource_id",
+        "run_id",
+        "kind",
+        "label",
+        "status",
+        "location"
+      ],
+      "title": "Resource",
+      "type": "object"
+    },
+    "ResourceKind": {
+      "enum": [
+        "pump",
+        "desilting_crew",
+        "tree_crew"
+      ],
+      "title": "ResourceKind",
+      "type": "string"
+    },
+    "ResourceStatus": {
+      "enum": [
+        "free",
+        "en_route",
+        "working"
+      ],
+      "title": "ResourceStatus",
+      "type": "string"
+    },
+    "RiskBand": {
+      "enum": [
+        "low",
+        "watch",
+        "likely",
+        "flooded"
+      ],
+      "title": "RiskBand",
+      "type": "string"
+    },
+    "RiskChanged": {
+      "additionalProperties": false,
+      "description": "Fires only when a Segment crosses a Risk Band.",
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "risk.changed",
+          "default": "risk.changed",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/RiskChangedDetail"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "RiskChanged",
+      "type": "object"
+    },
+    "RiskChangedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "previous_band": {
+          "$ref": "#/$defs/RiskBand"
+        },
+        "band": {
+          "$ref": "#/$defs/RiskBand"
+        },
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "integer"
+        },
+        "minutes_to_flood": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Minutes To Flood"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "maxItems": 3,
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "previous_band",
+        "band",
+        "score",
+        "minutes_to_flood",
+        "reasons"
+      ],
+      "title": "RiskChangedDetail",
+      "type": "object"
+    },
+    "SavedPlace": {
+      "additionalProperties": false,
+      "properties": {
+        "place_id": {
+          "title": "Place Id",
+          "type": "string"
+        },
+        "device_id": {
+          "title": "Device Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SavedPlaceKind"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "radius_m": {
+          "default": 150,
+          "exclusiveMinimum": 0,
+          "title": "Radius M",
+          "type": "number"
+        },
+        "segment_ids": {
+          "items": {
+            "examples": [
+              "27320162-0"
+            ],
+            "pattern": "^\\d+-\\d+$",
+            "type": "string"
+          },
+          "title": "Segment Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "place_id",
+        "device_id",
+        "label",
+        "kind",
+        "location",
+        "segment_ids"
+      ],
+      "title": "SavedPlace",
+      "type": "object"
+    },
+    "SavedPlaceKind": {
+      "enum": [
+        "home",
+        "office",
+        "school",
+        "vehicle_parking",
+        "other"
+      ],
+      "title": "SavedPlaceKind",
+      "type": "string"
+    },
+    "Segment": {
+      "additionalProperties": false,
+      "description": "Static, run-independent. Produced once by F1 and frozen.",
+      "properties": {
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "osm_way_id": {
+          "title": "Osm Way Id",
+          "type": "integer"
+        },
+        "street_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Street Name"
+        },
+        "ward": {
+          "examples": [
+            "velachery"
+          ],
+          "title": "Ward",
+          "type": "string"
+        },
+        "geometry": {
+          "$ref": "#/$defs/LineString"
+        },
+        "length_m": {
+          "exclusiveMinimum": 0,
+          "title": "Length M",
+          "type": "number"
+        },
+        "baseline_threshold_mm": {
+          "description": "Accumulated rain over the rolling window at which this Segment floods, from terrain alone.",
+          "exclusiveMinimum": 0,
+          "title": "Baseline Threshold Mm",
+          "type": "number"
+        },
+        "terrain": {
+          "$ref": "#/$defs/TerrainFactors"
+        },
+        "buildings_nearby": {
+          "description": "OSM building count in the catchment; the impact proxy.",
+          "minimum": 0,
+          "title": "Buildings Nearby",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "segment_id",
+        "osm_way_id",
+        "street_name",
+        "ward",
+        "geometry",
+        "length_m",
+        "baseline_threshold_mm",
+        "terrain",
+        "buildings_nearby"
+      ],
+      "title": "Segment",
+      "type": "object"
+    },
+    "SegmentRisk": {
+      "additionalProperties": false,
+      "description": "A Segment's current state within one Run.",
+      "properties": {
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "integer"
+        },
+        "band": {
+          "$ref": "#/$defs/RiskBand"
+        },
+        "minutes_to_flood": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None when flooding isn't expected within the forecast horizon.",
+          "title": "Minutes To Flood"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "maxItems": 3,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "flood_threshold_mm": {
+          "description": "Baseline Threshold after Reading nudges in this Run.",
+          "exclusiveMinimum": 0,
+          "title": "Flood Threshold Mm",
+          "type": "number"
+        }
+      },
+      "required": [
+        "run_id",
+        "segment_id",
+        "sim_time",
+        "score",
+        "band",
+        "minutes_to_flood",
+        "reasons",
+        "flood_threshold_mm"
+      ],
+      "title": "SegmentRisk",
+      "type": "object"
+    },
+    "Sos": {
+      "additionalProperties": false,
+      "properties": {
+        "sos_id": {
+          "title": "Sos Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "reporter_id": {
+          "title": "Reporter Id",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "people_count": {
+          "minimum": 1,
+          "title": "People Count",
+          "type": "integer"
+        },
+        "flags": {
+          "$ref": "#/$defs/VulnerabilityFlags"
+        },
+        "photo_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Photo Key"
+        }
+      },
+      "required": [
+        "sos_id",
+        "run_id",
+        "reporter_id",
+        "created_at",
+        "location",
+        "people_count",
+        "flags"
+      ],
+      "title": "Sos",
+      "type": "object"
+    },
+    "SosCreated": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "sos.created",
+          "default": "sos.created",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/Sos"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "SosCreated",
+      "type": "object"
+    },
+    "SosRanked": {
+      "additionalProperties": false,
+      "properties": {
+        "event_id": {
+          "title": "Event Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "sim_time": {
+          "format": "date-time",
+          "title": "Sim Time",
+          "type": "string"
+        },
+        "emitted_at": {
+          "description": "Wall time, for logs only. Domain logic uses sim_time.",
+          "format": "date-time",
+          "title": "Emitted At",
+          "type": "string"
+        },
+        "source": {
+          "examples": [
+            "sentinel",
+            "replay-driver",
+            "console"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "type": {
+          "const": "sos.ranked",
+          "default": "sos.ranked",
+          "title": "Type",
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/SosRankedDetail"
+        }
+      },
+      "required": [
+        "event_id",
+        "run_id",
+        "sim_time",
+        "emitted_at",
+        "source",
+        "detail"
+      ],
+      "title": "SosRanked",
+      "type": "object"
+    },
+    "SosRankedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "ranking": {
+          "items": {
+            "$ref": "#/$defs/RankedSos"
+          },
+          "title": "Ranking",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ranking"
+      ],
+      "title": "SosRankedDetail",
+      "type": "object"
+    },
+    "TerrainFactors": {
+      "additionalProperties": false,
+      "properties": {
+        "depression_depth_m": {
+          "minimum": 0,
+          "title": "Depression Depth M",
+          "type": "number"
+        },
+        "catchment_area_m2": {
+          "minimum": 0,
+          "title": "Catchment Area M2",
+          "type": "number"
+        },
+        "distance_to_water_m": {
+          "minimum": 0,
+          "title": "Distance To Water M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "depression_depth_m",
+        "catchment_area_m2",
+        "distance_to_water_m"
+      ],
+      "title": "TerrainFactors",
+      "type": "object"
+    },
+    "VulnerabilityFlags": {
+      "additionalProperties": false,
+      "properties": {
+        "elderly": {
+          "default": false,
+          "title": "Elderly",
+          "type": "boolean"
+        },
+        "child": {
+          "default": false,
+          "title": "Child",
+          "type": "boolean"
+        },
+        "medical": {
+          "default": false,
+          "title": "Medical",
+          "type": "boolean"
+        }
+      },
+      "title": "VulnerabilityFlags",
+      "type": "object"
+    },
+    "WardAlertDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ward_alert",
+          "default": "ward_alert",
+          "title": "Kind",
+          "type": "string"
+        },
+        "message_en": {
+          "title": "Message En",
+          "type": "string"
+        },
+        "message_ta": {
+          "title": "Message Ta",
+          "type": "string"
+        },
+        "recipient_count": {
+          "minimum": 0,
+          "title": "Recipient Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "message_en",
+        "message_ta",
+        "recipient_count"
+      ],
+      "title": "WardAlertDraft",
+      "type": "object"
+    },
+    "WorkOrder": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "work_order",
+          "default": "work_order",
+          "title": "Kind",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "buildings_affected": {
+          "minimum": 0,
+          "title": "Buildings Affected",
+          "type": "integer"
+        },
+        "reading_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reading Ids",
+          "type": "array"
+        },
+        "sos_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Sos Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "resource_id",
+        "segment_id",
+        "buildings_affected"
+      ],
+      "title": "WorkOrder",
+      "type": "object"
+    },
+    "Event": {
+      "title": "Event",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ClockTick"
+        },
+        {
+          "$ref": "#/$defs/RiskChanged"
+        },
+        {
+          "$ref": "#/$defs/ReportCreated"
+        },
+        {
+          "$ref": "#/$defs/ReportVerified"
+        },
+        {
+          "$ref": "#/$defs/HazardDetected"
+        },
+        {
+          "$ref": "#/$defs/SosCreated"
+        },
+        {
+          "$ref": "#/$defs/SosRanked"
+        },
+        {
+          "$ref": "#/$defs/ProposalCreated"
+        },
+        {
+          "$ref": "#/$defs/ProposalDecided"
+        },
+        {
+          "$ref": "#/$defs/AlertSent"
+        },
+        {
+          "$ref": "#/$defs/PolicyDecided"
+        },
+        {
+          "$ref": "#/$defs/AgentActivity"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "type"
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

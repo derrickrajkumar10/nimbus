@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "AlertScope": {
+      "enum": [
+        "place",
+        "ward"
+      ],
+      "title": "AlertScope",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "alert_id": {
+      "title": "Alert Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "scope": {
+      "$ref": "#/$defs/AlertScope"
+    },
+    "sent_at": {
+      "format": "date-time",
+      "title": "Sent At",
+      "type": "string"
+    },
+    "segment_ids": {
+      "items": {
+        "examples": [
+          "27320162-0"
+        ],
+        "pattern": "^\\d+-\\d+$",
+        "type": "string"
+      },
+      "title": "Segment Ids",
+      "type": "array"
+    },
+    "recipient_count": {
+      "minimum": 0,
+      "title": "Recipient Count",
+      "type": "integer"
+    },
+    "message_en": {
+      "title": "Message En",
+      "type": "string"
+    },
+    "message_ta": {
+      "title": "Message Ta",
+      "type": "string"
+    },
+    "proposal_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Set for Ward Alerts, which go out only via an approved Proposal.",
+      "title": "Proposal Id"
+    }
+  },
+  "required": [
+    "alert_id",
+    "run_id",
+    "scope",
+    "sent_at",
+    "segment_ids",
+    "recipient_count",
+    "message_en",
+    "message_ta"
+  ],
+  "title": "Alert",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

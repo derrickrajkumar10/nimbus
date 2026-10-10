@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "LineString": {
+      "additionalProperties": false,
+      "description": "GeoJSON LineString geometry. Coordinates are [lon, lat].",
+      "properties": {
+        "type": {
+          "default": "LineString",
+          "pattern": "^LineString$",
+          "title": "Type",
+          "type": "string"
+        },
+        "coordinates": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "minItems": 2,
+          "title": "Coordinates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "coordinates"
+      ],
+      "title": "LineString",
+      "type": "object"
+    },
+    "TerrainFactors": {
+      "additionalProperties": false,
+      "properties": {
+        "depression_depth_m": {
+          "minimum": 0,
+          "title": "Depression Depth M",
+          "type": "number"
+        },
+        "catchment_area_m2": {
+          "minimum": 0,
+          "title": "Catchment Area M2",
+          "type": "number"
+        },
+        "distance_to_water_m": {
+          "minimum": 0,
+          "title": "Distance To Water M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "depression_depth_m",
+        "catchment_area_m2",
+        "distance_to_water_m"
+      ],
+      "title": "TerrainFactors",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Static, run-independent. Produced once by F1 and frozen.",
+  "properties": {
+    "segment_id": {
+      "examples": [
+        "27320162-0"
+      ],
+      "pattern": "^\\d+-\\d+$",
+      "title": "Segment Id",
+      "type": "string"
+    },
+    "osm_way_id": {
+      "title": "Osm Way Id",
+      "type": "integer"
+    },
+    "street_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Street Name"
+    },
+    "ward": {
+      "examples": [
+        "velachery"
+      ],
+      "title": "Ward",
+      "type": "string"
+    },
+    "geometry": {
+      "$ref": "#/$defs/LineString"
+    },
+    "length_m": {
+      "exclusiveMinimum": 0,
+      "title": "Length M",
+      "type": "number"
+    },
+    "baseline_threshold_mm": {
+      "description": "Accumulated rain over the rolling window at which this Segment floods, from terrain alone.",
+      "exclusiveMinimum": 0,
+      "title": "Baseline Threshold Mm",
+      "type": "number"
+    },
+    "terrain": {
+      "$ref": "#/$defs/TerrainFactors"
+    },
+    "buildings_nearby": {
+      "description": "OSM building count in the catchment; the impact proxy.",
+      "minimum": 0,
+      "title": "Buildings Nearby",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "segment_id",
+    "osm_way_id",
+    "street_name",
+    "ward",
+    "geometry",
+    "length_m",
+    "baseline_threshold_mm",
+    "terrain",
+    "buildings_nearby"
+  ],
+  "title": "Segment",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

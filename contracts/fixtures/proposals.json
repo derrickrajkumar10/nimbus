@@ -1,0 +1,23 @@
+[
+  {
+    "proposal_id": "pr-0001",
+    "run_id": "replay-michaung",
+    "proposed_by": "dispatcher",
+    "created_at": "2023-12-04T02:00:00+05:30",
+    "rank": 1,
+    "reason": "Send Pump 2 to Velachery Main Road: 3 Reports merged into a knee-deep Reading, about 17 buildings nearby.",
+    "action": {
+      "kind": "work_order",
+      "resource_id": "rs-pump-2",
+      "segment_id": "27480309-1",
+      "buildings_affected": 17,
+      "reading_ids": [
+        "rd-0001"
+      ],
+      "sos_ids": []
+    },
+    "status": "pending",
+    "decided_by": null,
+    "decided_at": null
+  }
+]

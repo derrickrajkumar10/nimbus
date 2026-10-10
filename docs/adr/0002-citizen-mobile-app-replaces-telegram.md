@@ -1,0 +1,3 @@
+# Citizens use a Flutter mobile app, not a Telegram bot
+
+The design lock specified a Telegram bot as the citizen channel, for alerts, photo Reports and citizen identity. We're replacing it with a Flutter mobile app (Android first) that receives alerts as push notifications. The ward console stays a web app. A Reporter is an anonymous app install instead of a Telegram account, because phone-number sign-up would need SMS to Indian numbers, which is blocked by DLT registration. The trade-off is a heavier build in exchange for one product that owns the whole citizen experience. iOS is roadmap, because iOS push needs a paid Apple Developer account.

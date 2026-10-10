@@ -1,0 +1,3 @@
+# Everything runs in us-east-1 on Amazon Nova
+
+Claude models on Bedrock are billed through AWS Marketplace and probably aren't covered by Free Tier credits, so all agents use Amazon Nova (Lite for high-volume and vision steps, Pro for the Dispatcher, Commander and Chronicler). Nova still draws on the credits, so it's affordable for a demo but not free indefinitely. We deploy to us-east-1 rather than ap-south-1, because ap-south-1 lacks the faster AgentCore Runtime and has thinner Bedrock model coverage. Latency to Chennai doesn't matter for a recorded demo. Model IDs live in one per-agent config so they can be swapped.

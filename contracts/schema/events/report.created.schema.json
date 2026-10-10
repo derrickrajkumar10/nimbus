@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "Report": {
+      "additionalProperties": false,
+      "properties": {
+        "report_id": {
+          "title": "Report Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "reporter_id": {
+          "description": "Anonymous app-install identity.",
+          "title": "Reporter Id",
+          "type": "string"
+        },
+        "captured_at": {
+          "format": "date-time",
+          "title": "Captured At",
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "photo_key": {
+          "description": "S3 object key of the photo.",
+          "title": "Photo Key",
+          "type": "string"
+        },
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "source": {
+          "$ref": "#/$defs/ReportSource",
+          "default": "app"
+        }
+      },
+      "required": [
+        "report_id",
+        "run_id",
+        "reporter_id",
+        "captured_at",
+        "location",
+        "photo_key"
+      ],
+      "title": "Report",
+      "type": "object"
+    },
+    "ReportSource": {
+      "enum": [
+        "app",
+        "simulated"
+      ],
+      "title": "ReportSource",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "report.created",
+      "default": "report.created",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/Report"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "ReportCreated",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

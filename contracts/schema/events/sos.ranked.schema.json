@@ -1,0 +1,149 @@
+{
+  "$defs": {
+    "RankedSos": {
+      "additionalProperties": false,
+      "properties": {
+        "sos_id": {
+          "title": "Sos Id",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "danger_score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Danger Score",
+          "type": "integer"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "maxItems": 3,
+          "title": "Reasons",
+          "type": "array"
+        },
+        "merged_sos_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Merged Sos Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "sos_id",
+        "rank",
+        "danger_score",
+        "reasons"
+      ],
+      "title": "RankedSos",
+      "type": "object"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "examples": [
+            "forecast_exceeds_threshold",
+            "antecedent_rain",
+            "high_tide",
+            "nearby_reading"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "examples": [
+            "38 mm forecast in 3 h against a 30 mm threshold"
+          ],
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "SosRankedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "ranking": {
+          "items": {
+            "$ref": "#/$defs/RankedSos"
+          },
+          "title": "Ranking",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ranking"
+      ],
+      "title": "SosRankedDetail",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "sos.ranked",
+      "default": "sos.ranked",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/SosRankedDetail"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "SosRanked",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

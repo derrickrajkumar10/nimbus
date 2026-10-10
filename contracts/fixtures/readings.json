@@ -1,0 +1,24 @@
+[
+  {
+    "reading_id": "rd-0001",
+    "run_id": "replay-michaung",
+    "segment_id": "27480309-1",
+    "observed_at": "2023-12-04T01:50:00+05:30",
+    "depth": "knee",
+    "reference_object": "tyre",
+    "confidence": 0.82,
+    "passable": {
+      "two_wheeler": false,
+      "car": false,
+      "ambulance": true
+    },
+    "report_ids": [
+      "rp-0001",
+      "rp-0002",
+      "rp-0003"
+    ],
+    "hazards_seen": [
+      "open_manhole"
+    ]
+  }
+]

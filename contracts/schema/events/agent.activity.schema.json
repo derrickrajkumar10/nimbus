@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "Agent": {
+      "enum": [
+        "sentinel",
+        "verifier",
+        "triage",
+        "pathfinder",
+        "dispatcher",
+        "herald",
+        "chronicler",
+        "commander"
+      ],
+      "title": "Agent",
+      "type": "string"
+    },
+    "AgentActivityDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "$ref": "#/$defs/Agent"
+        },
+        "saw": {
+          "title": "Saw",
+          "type": "string"
+        },
+        "decided": {
+          "title": "Decided",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agent",
+        "saw",
+        "decided",
+        "why"
+      ],
+      "title": "AgentActivityDetail",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One line in the console's agent activity feed.",
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "agent.activity",
+      "default": "agent.activity",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/AgentActivityDetail"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "AgentActivity",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

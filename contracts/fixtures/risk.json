@@ -1,0 +1,329 @@
+[
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27480309-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 92,
+    "band": "flooded",
+    "minutes_to_flood": 0,
+    "reasons": [
+      {
+        "code": "nearby_reading",
+        "text": "Knee-deep Reading from 3 merged Reports"
+      },
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "32 mm forecast in 3 h against a 68 mm threshold"
+      },
+      {
+        "code": "antecedent_rain",
+        "text": "140 mm in the last 72 h; ground is saturated"
+      }
+    ],
+    "flood_threshold_mm": 67.5
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27480309-2",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 5,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "56 mm forecast in 3 h against a 57 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 57.4
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27480309-3",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 58,
+    "band": "watch",
+    "minutes_to_flood": 60,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "42 mm forecast in 3 h against a 89 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 89.0
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27480309-4",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 82,
+    "band": "likely",
+    "minutes_to_flood": 30,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "49 mm forecast in 3 h against a 89 mm threshold"
+      },
+      {
+        "code": "antecedent_rain",
+        "text": "140 mm in the last 72 h; ground is saturated"
+      }
+    ],
+    "flood_threshold_mm": 89.3
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320162-0",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 13,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "50 mm forecast in 3 h against a 49 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 49.3
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320162-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 68,
+    "band": "watch",
+    "minutes_to_flood": 120,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "21 mm forecast in 3 h against a 83 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 82.7
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320162-2",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 37,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "46 mm forecast in 3 h against a 75 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 74.9
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320166-0",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 28,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "34 mm forecast in 3 h against a 33 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 32.7
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320166-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 14,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "49 mm forecast in 3 h against a 62 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 62.0
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320166-2",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 16,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "49 mm forecast in 3 h against a 58 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 58.0
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "27320166-3",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 64,
+    "band": "watch",
+    "minutes_to_flood": 180,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "54 mm forecast in 3 h against a 61 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 60.7
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30604295-0",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 41,
+    "band": "watch",
+    "minutes_to_flood": 180,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "44 mm forecast in 3 h against a 87 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 87.4
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30604295-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 51,
+    "band": "watch",
+    "minutes_to_flood": 30,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "39 mm forecast in 3 h against a 65 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 64.6
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30604295-2",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 61,
+    "band": "watch",
+    "minutes_to_flood": 90,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "55 mm forecast in 3 h against a 36 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 36.2
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30604295-3",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 26,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "52 mm forecast in 3 h against a 53 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 53.1
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "428734761-0",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 6,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "24 mm forecast in 3 h against a 35 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 34.7
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "428734761-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 52,
+    "band": "watch",
+    "minutes_to_flood": 180,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "51 mm forecast in 3 h against a 55 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 54.9
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30605099-0",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 38,
+    "band": "low",
+    "minutes_to_flood": null,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "42 mm forecast in 3 h against a 77 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 77.4
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30605099-1",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 48,
+    "band": "watch",
+    "minutes_to_flood": 180,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "44 mm forecast in 3 h against a 62 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 62.4
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30605099-2",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 68,
+    "band": "watch",
+    "minutes_to_flood": 120,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "56 mm forecast in 3 h against a 66 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 66.3
+  },
+  {
+    "run_id": "replay-michaung",
+    "segment_id": "30605099-3",
+    "sim_time": "2023-12-04T02:00:00+05:30",
+    "score": 69,
+    "band": "watch",
+    "minutes_to_flood": 90,
+    "reasons": [
+      {
+        "code": "forecast_exceeds_threshold",
+        "text": "23 mm forecast in 3 h against a 62 mm threshold"
+      }
+    ],
+    "flood_threshold_mm": 62.4
+  }
+]

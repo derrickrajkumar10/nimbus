@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "examples": [
+            "forecast_exceeds_threshold",
+            "antecedent_rain",
+            "high_tide",
+            "nearby_reading"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "examples": [
+            "38 mm forecast in 3 h against a 30 mm threshold"
+          ],
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "RiskBand": {
+      "enum": [
+        "low",
+        "watch",
+        "likely",
+        "flooded"
+      ],
+      "title": "RiskBand",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A Segment's current state within one Run.",
+  "properties": {
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "segment_id": {
+      "examples": [
+        "27320162-0"
+      ],
+      "pattern": "^\\d+-\\d+$",
+      "title": "Segment Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "score": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Score",
+      "type": "integer"
+    },
+    "band": {
+      "$ref": "#/$defs/RiskBand"
+    },
+    "minutes_to_flood": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "None when flooding isn't expected within the forecast horizon.",
+      "title": "Minutes To Flood"
+    },
+    "reasons": {
+      "items": {
+        "$ref": "#/$defs/Reason"
+      },
+      "maxItems": 3,
+      "title": "Reasons",
+      "type": "array"
+    },
+    "flood_threshold_mm": {
+      "description": "Baseline Threshold after Reading nudges in this Run.",
+      "exclusiveMinimum": 0,
+      "title": "Flood Threshold Mm",
+      "type": "number"
+    }
+  },
+  "required": [
+    "run_id",
+    "segment_id",
+    "sim_time",
+    "score",
+    "band",
+    "minutes_to_flood",
+    "reasons",
+    "flood_threshold_mm"
+  ],
+  "title": "SegmentRisk",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

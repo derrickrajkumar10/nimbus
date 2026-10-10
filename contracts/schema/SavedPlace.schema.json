@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "SavedPlaceKind": {
+      "enum": [
+        "home",
+        "office",
+        "school",
+        "vehicle_parking",
+        "other"
+      ],
+      "title": "SavedPlaceKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "place_id": {
+      "title": "Place Id",
+      "type": "string"
+    },
+    "device_id": {
+      "title": "Device Id",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/SavedPlaceKind"
+    },
+    "location": {
+      "$ref": "#/$defs/GeoPoint"
+    },
+    "radius_m": {
+      "default": 150,
+      "exclusiveMinimum": 0,
+      "title": "Radius M",
+      "type": "number"
+    },
+    "segment_ids": {
+      "items": {
+        "examples": [
+          "27320162-0"
+        ],
+        "pattern": "^\\d+-\\d+$",
+        "type": "string"
+      },
+      "title": "Segment Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "place_id",
+    "device_id",
+    "label",
+    "kind",
+    "location",
+    "segment_ids"
+  ],
+  "title": "SavedPlace",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

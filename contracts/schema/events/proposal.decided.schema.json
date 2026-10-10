@@ -1,0 +1,293 @@
+{
+  "$defs": {
+    "Agent": {
+      "enum": [
+        "sentinel",
+        "verifier",
+        "triage",
+        "pathfinder",
+        "dispatcher",
+        "herald",
+        "chronicler",
+        "commander"
+      ],
+      "title": "Agent",
+      "type": "string"
+    },
+    "Proposal": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "proposed_by": {
+          "$ref": "#/$defs/Agent"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "action": {
+          "discriminator": {
+            "mapping": {
+              "ward_alert": "#/$defs/WardAlertDraft",
+              "work_order": "#/$defs/WorkOrder"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/WorkOrder"
+            },
+            {
+              "$ref": "#/$defs/WardAlertDraft"
+            }
+          ],
+          "title": "Action"
+        },
+        "status": {
+          "$ref": "#/$defs/ProposalStatus",
+          "default": "pending"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided At"
+        }
+      },
+      "required": [
+        "proposal_id",
+        "run_id",
+        "proposed_by",
+        "created_at",
+        "rank",
+        "reason",
+        "action"
+      ],
+      "title": "Proposal",
+      "type": "object"
+    },
+    "ProposalDecidedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "proposal_id": {
+          "title": "Proposal Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "approved",
+            "edited",
+            "rejected"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "decided_by": {
+          "title": "Decided By",
+          "type": "string"
+        },
+        "proposal": {
+          "$ref": "#/$defs/Proposal",
+          "description": "The Proposal as approved, including any officer edits."
+        }
+      },
+      "required": [
+        "proposal_id",
+        "decision",
+        "decided_by",
+        "proposal"
+      ],
+      "title": "ProposalDecidedDetail",
+      "type": "object"
+    },
+    "ProposalStatus": {
+      "enum": [
+        "pending",
+        "approved",
+        "edited",
+        "rejected"
+      ],
+      "title": "ProposalStatus",
+      "type": "string"
+    },
+    "WardAlertDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "ward_alert",
+          "default": "ward_alert",
+          "title": "Kind",
+          "type": "string"
+        },
+        "message_en": {
+          "title": "Message En",
+          "type": "string"
+        },
+        "message_ta": {
+          "title": "Message Ta",
+          "type": "string"
+        },
+        "recipient_count": {
+          "minimum": 0,
+          "title": "Recipient Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "message_en",
+        "message_ta",
+        "recipient_count"
+      ],
+      "title": "WardAlertDraft",
+      "type": "object"
+    },
+    "WorkOrder": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "work_order",
+          "default": "work_order",
+          "title": "Kind",
+          "type": "string"
+        },
+        "resource_id": {
+          "title": "Resource Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "buildings_affected": {
+          "minimum": 0,
+          "title": "Buildings Affected",
+          "type": "integer"
+        },
+        "reading_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reading Ids",
+          "type": "array"
+        },
+        "sos_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Sos Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "resource_id",
+        "segment_id",
+        "buildings_affected"
+      ],
+      "title": "WorkOrder",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "proposal.decided",
+      "default": "proposal.decided",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/ProposalDecidedDetail"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "ProposalDecided",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

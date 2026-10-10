@@ -1,0 +1,195 @@
+{
+  "$defs": {
+    "DepthBand": {
+      "enum": [
+        "dry",
+        "ankle",
+        "knee",
+        "waist",
+        "above_waist"
+      ],
+      "title": "DepthBand",
+      "type": "string"
+    },
+    "HazardClass": {
+      "enum": [
+        "open_manhole",
+        "live_wire",
+        "fallen_tree",
+        "stranded_vehicle"
+      ],
+      "title": "HazardClass",
+      "type": "string"
+    },
+    "Passability": {
+      "additionalProperties": false,
+      "properties": {
+        "two_wheeler": {
+          "title": "Two Wheeler",
+          "type": "boolean"
+        },
+        "car": {
+          "title": "Car",
+          "type": "boolean"
+        },
+        "ambulance": {
+          "title": "Ambulance",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "two_wheeler",
+        "car",
+        "ambulance"
+      ],
+      "title": "Passability",
+      "type": "object"
+    },
+    "Reading": {
+      "additionalProperties": false,
+      "properties": {
+        "reading_id": {
+          "title": "Reading Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "depth": {
+          "$ref": "#/$defs/DepthBand"
+        },
+        "reference_object": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "examples": [
+            "kerb",
+            "tyre",
+            "knee",
+            "wall"
+          ],
+          "title": "Reference Object"
+        },
+        "confidence": {
+          "maximum": 1,
+          "minimum": 0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "passable": {
+          "$ref": "#/$defs/Passability"
+        },
+        "report_ids": {
+          "description": "Reports merged into this Reading.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Report Ids",
+          "type": "array"
+        },
+        "hazards_seen": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/HazardClass"
+          },
+          "title": "Hazards Seen",
+          "type": "array"
+        }
+      },
+      "required": [
+        "reading_id",
+        "run_id",
+        "segment_id",
+        "observed_at",
+        "depth",
+        "reference_object",
+        "confidence",
+        "passable",
+        "report_ids"
+      ],
+      "title": "Reading",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "report.verified",
+      "default": "report.verified",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/Reading"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "ReportVerified",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

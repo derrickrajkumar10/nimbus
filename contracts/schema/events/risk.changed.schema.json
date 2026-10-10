@@ -1,0 +1,153 @@
+{
+  "$defs": {
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "examples": [
+            "forecast_exceeds_threshold",
+            "antecedent_rain",
+            "high_tide",
+            "nearby_reading"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "examples": [
+            "38 mm forecast in 3 h against a 30 mm threshold"
+          ],
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "RiskBand": {
+      "enum": [
+        "low",
+        "watch",
+        "likely",
+        "flooded"
+      ],
+      "title": "RiskBand",
+      "type": "string"
+    },
+    "RiskChangedDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {
+          "examples": [
+            "27320162-0"
+          ],
+          "pattern": "^\\d+-\\d+$",
+          "title": "Segment Id",
+          "type": "string"
+        },
+        "previous_band": {
+          "$ref": "#/$defs/RiskBand"
+        },
+        "band": {
+          "$ref": "#/$defs/RiskBand"
+        },
+        "score": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Score",
+          "type": "integer"
+        },
+        "minutes_to_flood": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Minutes To Flood"
+        },
+        "reasons": {
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "maxItems": 3,
+          "title": "Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "segment_id",
+        "previous_band",
+        "band",
+        "score",
+        "minutes_to_flood",
+        "reasons"
+      ],
+      "title": "RiskChangedDetail",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Fires only when a Segment crosses a Risk Band.",
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "risk.changed",
+      "default": "risk.changed",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/RiskChangedDetail"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "RiskChanged",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

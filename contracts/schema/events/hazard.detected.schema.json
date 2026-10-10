@@ -1,0 +1,174 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "Hazard": {
+      "additionalProperties": false,
+      "properties": {
+        "hazard_id": {
+          "title": "Hazard Id",
+          "type": "string"
+        },
+        "run_id": {
+          "examples": [
+            "live",
+            "replay-michaung"
+          ],
+          "pattern": "^(live|replay-[a-z0-9-]+)$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "hazard_class": {
+          "$ref": "#/$defs/HazardClass"
+        },
+        "location": {
+          "$ref": "#/$defs/GeoPoint"
+        },
+        "owner": {
+          "$ref": "#/$defs/HazardOwner"
+        },
+        "status": {
+          "$ref": "#/$defs/HazardStatus"
+        },
+        "detected_at": {
+          "format": "date-time",
+          "title": "Detected At",
+          "type": "string"
+        },
+        "no_go_radius_m": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "title": "No Go Radius M",
+          "type": "number"
+        },
+        "source_report_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Report Id"
+        }
+      },
+      "required": [
+        "hazard_id",
+        "run_id",
+        "hazard_class",
+        "location",
+        "owner",
+        "status",
+        "detected_at"
+      ],
+      "title": "Hazard",
+      "type": "object"
+    },
+    "HazardClass": {
+      "enum": [
+        "open_manhole",
+        "live_wire",
+        "fallen_tree",
+        "stranded_vehicle"
+      ],
+      "title": "HazardClass",
+      "type": "string"
+    },
+    "HazardOwner": {
+      "enum": [
+        "corporation",
+        "power_utility"
+      ],
+      "title": "HazardOwner",
+      "type": "string"
+    },
+    "HazardStatus": {
+      "enum": [
+        "open",
+        "acknowledged",
+        "cleared"
+      ],
+      "title": "HazardStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "title": "Event Id",
+      "type": "string"
+    },
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sim_time": {
+      "format": "date-time",
+      "title": "Sim Time",
+      "type": "string"
+    },
+    "emitted_at": {
+      "description": "Wall time, for logs only. Domain logic uses sim_time.",
+      "format": "date-time",
+      "title": "Emitted At",
+      "type": "string"
+    },
+    "source": {
+      "examples": [
+        "sentinel",
+        "replay-driver",
+        "console"
+      ],
+      "title": "Source",
+      "type": "string"
+    },
+    "type": {
+      "const": "hazard.detected",
+      "default": "hazard.detected",
+      "title": "Type",
+      "type": "string"
+    },
+    "detail": {
+      "$ref": "#/$defs/Hazard"
+    }
+  },
+  "required": [
+    "event_id",
+    "run_id",
+    "sim_time",
+    "emitted_at",
+    "source",
+    "detail"
+  ],
+  "title": "HazardDetected",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

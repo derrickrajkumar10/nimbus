@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "examples": [
+            "forecast_exceeds_threshold",
+            "antecedent_rain",
+            "high_tide",
+            "nearby_reading"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "text": {
+          "examples": [
+            "38 mm forecast in 3 h against a 30 mm threshold"
+          ],
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "text"
+      ],
+      "title": "Reason",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "sos_id": {
+      "title": "Sos Id",
+      "type": "string"
+    },
+    "rank": {
+      "minimum": 1,
+      "title": "Rank",
+      "type": "integer"
+    },
+    "danger_score": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Danger Score",
+      "type": "integer"
+    },
+    "reasons": {
+      "items": {
+        "$ref": "#/$defs/Reason"
+      },
+      "maxItems": 3,
+      "title": "Reasons",
+      "type": "array"
+    },
+    "merged_sos_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Merged Sos Ids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "sos_id",
+    "rank",
+    "danger_score",
+    "reasons"
+  ],
+  "title": "RankedSos",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}
