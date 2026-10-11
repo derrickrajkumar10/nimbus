@@ -171,7 +171,9 @@ export function MapView() {
     if (!at) return
     flownTo.current = key
     map.flyTo({ center: at, zoom: FOCUS_ZOOM, speed: 1.4, offset: [-160, 0] })
-    popup.setLngLat(at).addTo(map)
+    // Re-adding an open popup closes it first (and fires 'close'), so only move it.
+    popup.setLngLat(at)
+    if (!popup.isOpen()) popup.addTo(map)
   }, [ready, target, data])
 
   return (

@@ -124,7 +124,9 @@ export class FakePopup {
     this.node = node
     return this
   }
+  // Like MapLibre 6: re-adding an open popup removes it first, which fires 'close'.
   addTo(map: FakeMap) {
+    if (this.open) this.remove()
     this.open = true
     if (this.node) map.container.appendChild(this.node)
     return this
@@ -140,8 +142,10 @@ export class FakePopup {
     return this.open
   }
   remove() {
+    if (!this.open) return this
     this.open = false
     this.node?.remove()
+    ;(this.handlers.close ?? []).forEach((fn) => fn())
     return this
   }
 }

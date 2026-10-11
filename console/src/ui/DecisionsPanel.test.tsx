@@ -121,6 +121,36 @@ test('event_not_sent offers retry', async () => {
   expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
 })
 
+test('a saved decision whose alert failed keeps offering Retry after the next poll', async () => {
+  const base = fakeSource()
+  // The API saved the decision but couldn't send the event, twice.
+  const decide = vi.fn(async (...args: Parameters<typeof base.decide>): ReturnType<typeof base.decide> => {
+    await base.decide(...args).catch(() => undefined)
+    throw new DecisionError('event_not_sent', 'x')
+  })
+  setup({ ...base, decide })
+  await screen.findByRole('article', { name: WARD_ALERT })
+  await userEvent.click(within(card(WARD_ALERT)).getByRole('button', { name: 'Approve' }))
+  expect(await screen.findByText("Saved, but the alert didn't go out.")).toBeInTheDocument()
+  await new Promise((r) => setTimeout(r, 2300)) // one heartbeat now reports it approved
+  expect(screen.getByText("Saved, but the alert didn't go out.")).toBeInTheDocument()
+  expect(screen.queryByText(/Ward Alert sending/)).toBeNull()
+  decide.mockImplementation(base.decide)
+  await userEvent.click(screen.getByRole('button', { name: 'Retry' }))
+  expect(await screen.findByText('Approved by K. Priya · Ward Alert sending')).toBeInTheDocument()
+})
+
+test('after a keyboard approval the next pending card is selected', async () => {
+  setup()
+  await screen.findByRole('article', { name: WORK_ORDER })
+  await waitFor(() => expect(screen.getByTestId('probe')).toHaveAttribute('data-proposal', 'pr-0001'))
+  await userEvent.keyboard('a')
+  await screen.findByText('Approved by K. Priya · Pump 2 en route')
+  await waitFor(() => expect(screen.getByTestId('probe')).toHaveAttribute('data-proposal', 'pr-0002'))
+  await userEvent.keyboard('a')
+  expect(await screen.findByText('Approved by K. Priya · Ward Alert sending')).toBeInTheDocument()
+})
+
 test('other errors restore the buttons with a message', async () => {
   setup(fakeSource({ decide: () => Promise.reject(new DecisionError('network', 'offline')) }))
   await screen.findByRole('article', { name: WORK_ORDER })

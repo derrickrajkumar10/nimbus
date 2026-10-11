@@ -50,6 +50,27 @@ test('MapView flies to the selected Work Order Segment and opens the inspector',
   expect(await screen.findByText('Flooded · Reading')).toBeInTheDocument()
 })
 
+function InspectButton({ target }: { target: { kind: 'resource'; id: string } }) {
+  const { inspect } = useSelection()
+  return <button onClick={() => inspect(target)}>inspect {target.id}</button>
+}
+
+test('inspecting a second target switches the open inspector to it', async () => {
+  render(
+    <>
+      <Select id="27480309-1" />
+      <InspectButton target={{ kind: 'resource', id: 'rs-pump-2' }} />
+      <MapView />
+      <SelectionProbe />
+    </>,
+    { wrapper: providers() },
+  )
+  await screen.findByText('Flooded · Reading')
+  await userEvent.click(screen.getByRole('button', { name: 'inspect rs-pump-2' }))
+  expect(await screen.findByRole('heading', { name: 'Pump 2' })).toBeInTheDocument()
+  expect(screen.getByTestId('probe')).toHaveTextContent('resource:rs-pump-2')
+})
+
 test('clicking a Segment line inspects it', async () => {
   render(
     <>

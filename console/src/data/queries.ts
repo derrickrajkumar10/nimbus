@@ -13,6 +13,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
   useSyncExternalStore,
 } from 'react'
@@ -60,12 +61,39 @@ export function createSyncStore() {
   }
 }
 
+/**
+ * Decisions sent but not yet answered, by Proposal. Overlaid on every poll so a
+ * heartbeat can't undo an optimistic decision, and a failure drops only its own entry.
+ */
+export function createInflightStore() {
+  let snap: ReadonlyMap<string, Partial<Proposal>> = new Map()
+  const listeners = new Set<() => void>()
+  const set = (next: Map<string, Partial<Proposal>>) => {
+    snap = next
+    listeners.forEach((l) => l())
+  }
+  return {
+    get: () => snap,
+    subscribe: (l: () => void) => {
+      listeners.add(l)
+      return () => listeners.delete(l)
+    },
+    add: (id: string, patch: Partial<Proposal>) => set(new Map(snap).set(id, patch)),
+    drop: (id: string) => {
+      const next = new Map(snap)
+      next.delete(id)
+      set(next)
+    },
+  }
+}
+
 type ActivityLog = { cursor: string | null; events: Event[]; seen: Set<string> }
 
 export type SourceCtx = {
   source: NimbusSource
   config: Config
   sync: ReturnType<typeof createSyncStore>
+  inflight: ReturnType<typeof createInflightStore>
   activity: Map<string, ActivityLog>
 }
 
@@ -88,8 +116,9 @@ export function useConfig(): Config {
 const heartbeatKey = (runId: string) => ['heartbeat', runId] as const
 
 export function useConsoleData(): ConsoleData {
-  const { source, config, sync, activity } = useCtx()
+  const { source, config, sync, inflight, activity } = useCtx()
   const runId = config.runId
+  const pendingDecisions = useSyncExternalStore(inflight.subscribe, inflight.get)
 
   const heartbeat = useQuery({
     queryKey: heartbeatKey(runId),
@@ -130,6 +159,15 @@ export function useConsoleData(): ConsoleData {
   const hb = heartbeat.data
   const risk = hb?.risk ?? []
   const events = hb?.events ?? []
+  const polled = hb?.proposals
+  const proposals = useMemo(
+    () =>
+      (polled ?? []).map((p) => {
+        const patch = pendingDecisions.get(p.proposal_id)
+        return patch ? { ...p, ...patch } : p
+      }),
+    [polled, pendingDecisions],
+  )
   return {
     segments: segments.data ?? [],
     risk,
@@ -137,7 +175,7 @@ export function useConsoleData(): ConsoleData {
     hazards: hazards.data ?? [],
     resources: hb?.resources ?? [],
     sos: hb?.sos ?? [],
-    proposals: hb?.proposals ?? [],
+    proposals,
     events,
     rain: rain.data ?? [],
     clock: stormClock([...risk.map((r) => r.sim_time), ...events.map((e) => e.sim_time)]),
@@ -146,23 +184,29 @@ export function useConsoleData(): ConsoleData {
 }
 
 export function useDecide(): (proposalId: string, input: DecisionInput) => Promise<Proposal> {
-  const { source, config } = useCtx()
+  const { source, config, inflight } = useCtx()
   const qc = useQueryClient()
   const runId = config.runId
 
   return useCallback(
     async (proposalId, input) => {
       const key = heartbeatKey(runId)
-      const patch = (fields: Partial<Proposal>) =>
+      const patchCache = async (fields: Partial<Proposal>) => {
+        // Drop any poll still in flight so it can't land stale data over this.
+        await qc.cancelQueries({ queryKey: key })
         qc.setQueryData<Heartbeat>(key, (hb) =>
           hb && {
             ...hb,
             proposals: hb.proposals.map((p) => (p.proposal_id === proposalId ? { ...p, ...fields } : p)),
           },
         )
-      await qc.cancelQueries({ queryKey: key })
-      const previous = qc.getQueryData<Heartbeat>(key)
-      patch({ status: input.decision, decided_by: input.decided_by, ...(input.action ? { action: input.action } : {}) })
+      }
+      const optimistic: Partial<Proposal> = {
+        status: input.decision,
+        decided_by: input.decided_by,
+        ...(input.action ? { action: input.action } : {}),
+      }
+      inflight.add(proposalId, optimistic)
 
       try {
         let decided: Proposal
@@ -173,19 +217,23 @@ export function useDecide(): (proposalId: string, input: DecisionInput) => Promi
           // The decision was saved; re-sending repeats the same event (api/README.md).
           decided = await source.decide(runId, proposalId, input)
         }
-        patch(decided)
+        await patchCache(decided)
         void qc.invalidateQueries({ queryKey: key })
         return decided
       } catch (e) {
         if (e instanceof DecisionError && e.code === 'already_decided') {
-          patch({ status: e.detail.current_status, decided_by: e.detail.decided_by ?? null })
-        } else {
-          qc.setQueryData(key, previous)
+          await patchCache({ status: e.detail.current_status, decided_by: e.detail.decided_by ?? null })
+        } else if (e instanceof DecisionError && e.code === 'event_not_sent') {
+          // Saved on the server even though the event didn't go out; don't pretend it's pending.
+          await patchCache(optimistic)
         }
+        // Any other failure: dropping the overlay is the rollback, for this Proposal only.
         throw e
+      } finally {
+        inflight.drop(proposalId)
       }
     },
-    [qc, runId, source],
+    [qc, runId, source, inflight],
   )
 }
 

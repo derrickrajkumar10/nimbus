@@ -28,13 +28,16 @@ export function DecisionsPanel() {
     if (isWorkOrder(p.action)) inspect({ kind: 'segment', id: p.action.segment_id })
   }
 
+  // Keep a pending card selected so A, E and R always have a target: on load, and
+  // once the selected card is decided here or elsewhere.
   const first = pending[0]
+  const selectedIsPending = pending.some((p) => p.proposal_id === proposalId)
   useEffect(() => {
-    if (!proposalId && first) {
+    if (!selectedIsPending && first) {
       selectProposal(first.proposal_id)
       if (isWorkOrder(first.action)) inspect({ kind: 'segment', id: first.action.segment_id })
     }
-  }, [proposalId, first, selectProposal, inspect])
+  }, [selectedIsPending, first, selectProposal, inspect])
 
   return (
     <PanelSection title="Decisions" count={pending.length} hint="Ranked by people affected">

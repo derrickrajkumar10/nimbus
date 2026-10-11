@@ -16,14 +16,25 @@ test('/ focuses the input and A typed there does not approve', async () => {
   expect(screen.queryByText(/Approved by/)).toBeNull()
 })
 
+test('typing while the Commander answers does not approve anything', async () => {
+  render(<App />, { wrapper: providers() })
+  await screen.findByRole('article', { name: 'Send Pump 2 to Velachery Main Road' })
+  const input = screen.getByLabelText('Ask the Commander')
+  await userEvent.type(input, 'What changed?{Enter}')
+  await userEvent.keyboard('a')
+  expect(input).toHaveFocus()
+  await waitFor(() => expect(input).not.toHaveAttribute('readonly'), { timeout: 4000 })
+  expect(screen.queryByText(/Approved by/)).toBeNull()
+})
+
 test('submitting shows the question and streamed answer in the feed, input disabled until done', async () => {
   render(<App />, { wrapper: providers() })
   await screen.findByRole('article', { name: 'Send Pump 2 to Velachery Main Road' })
   const input = screen.getByLabelText('Ask the Commander')
   await userEvent.type(input, 'What changed in the last hour?{Enter}')
-  expect(input).toBeDisabled()
+  expect(input).toHaveAttribute('readonly')
   expect(await screen.findByText('What changed in the last hour?')).toBeInTheDocument()
-  await waitFor(() => expect(input).toBeEnabled(), { timeout: 4000 })
+  await waitFor(() => expect(input).not.toHaveAttribute('readonly'), { timeout: 4000 })
   expect(screen.getByText(/Decisions are waiting for you/)).toBeInTheDocument()
   expect(input).toHaveValue('')
 })

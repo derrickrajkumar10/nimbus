@@ -75,6 +75,49 @@ test('event_not_sent retries once', async () => {
   expect(result.current.data.proposals.find((x) => x.proposal_id === 'pr-0001')?.status).toBe('approved')
 })
 
+test('a heartbeat during an in-flight decision keeps the optimistic state', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  const base = fakeSource()
+  let release!: () => void
+  const gate = new Promise<void>((r) => (release = r))
+  const decide = vi.fn(async (...args: Parameters<typeof base.decide>) => {
+    await gate
+    return base.decide(...args)
+  })
+  const { result } = renderHook(useBoth, { wrapper: providers({ ...base, decide }) })
+  await waitFor(() => expect(result.current.data.isLoading).toBe(false))
+  let done!: Promise<unknown>
+  act(() => {
+    done = result.current.decide('pr-0001', approve)
+  })
+  await act(() => vi.advanceTimersByTimeAsync(2100)) // a poll lands; the source still says pending
+  expect(result.current.data.proposals.find((x) => x.proposal_id === 'pr-0001')?.status).toBe('approved')
+  release()
+  await act(() => done)
+})
+
+test('a failed decision rolls back only its own Proposal', async () => {
+  const base = fakeSource()
+  const decide = vi.fn(async (run: string, id: string, input: Parameters<typeof base.decide>[2]) => {
+    if (id === 'pr-0001') {
+      await new Promise((r) => setTimeout(r, 30))
+      throw new DecisionError('network', 'offline')
+    }
+    return base.decide(run, id, input)
+  })
+  const { result } = renderHook(useBoth, { wrapper: providers({ ...base, decide }) })
+  await waitFor(() => expect(result.current.data.isLoading).toBe(false))
+  await act(async () => {
+    const first = result.current.decide('pr-0001', approve).catch(() => undefined)
+    await result.current.decide('pr-0002', approve)
+    await first
+  })
+  await waitFor(() => {
+    const byId = Object.fromEntries(result.current.data.proposals.map((p) => [p.proposal_id, p.status]))
+    expect(byId).toEqual({ 'pr-0001': 'pending', 'pr-0002': 'approved' })
+  })
+})
+
 test('two failed polls mark reconnecting, then recovery clears it', async () => {
   vi.useFakeTimers({ shouldAdvanceTime: true })
   const base = fakeSource()

@@ -39,7 +39,7 @@
   color: var(--faint);
 }
 
-.field input:disabled {
+.field input:read-only {
   opacity: 0.6;
 }
 

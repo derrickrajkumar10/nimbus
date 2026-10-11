@@ -99,6 +99,14 @@ export function DecisionCard(props: {
 
       {mode.kind === 'conflict' ? (
         <p className={s.conflict}>{mode.text}</p>
+      ) : mode.kind === 'notSent' ? (
+        // Saved on the server, so the Proposal reads as decided, but the event never went out.
+        <div className={s.confirm}>
+          <span>Saved, but the alert didn't go out.</span>
+          <button className={s.secondary} onClick={() => send(mode.input)}>
+            Retry
+          </button>
+        </div>
       ) : !pending ? (
         <p className={s.done}>
           <Check color="var(--teal)" />
@@ -119,13 +127,6 @@ export function DecisionCard(props: {
           </button>
           <button className={s.secondary} onClick={() => setMode({ kind: 'idle' })}>
             Cancel
-          </button>
-        </div>
-      ) : mode.kind === 'notSent' ? (
-        <div className={s.confirm}>
-          <span>Saved, but the alert didn't go out.</span>
-          <button className={s.secondary} onClick={() => send(mode.input)}>
-            Retry
           </button>
         </div>
       ) : (

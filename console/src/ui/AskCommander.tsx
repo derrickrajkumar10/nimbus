@@ -64,7 +64,9 @@ export function AskCommander({ onItem }: { onItem(item: CommanderItem): void }) 
           id={id}
           ref={input}
           value={question}
-          disabled={busy}
+          // Read-only, not disabled: a disabled input drops focus, and keys would then reach the shortcuts.
+          readOnly={busy}
+          aria-busy={busy}
           autoComplete="off"
           placeholder="What changed in the last hour?"
           onChange={(e) => setQuestion(e.target.value)}
