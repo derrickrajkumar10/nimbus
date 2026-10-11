@@ -11,6 +11,8 @@
 //     final resource = resourceFromJson(jsonString);
 //     final proposal = proposalFromJson(jsonString);
 //     final alert = alertFromJson(jsonString);
+//     final routeRequest = routeRequestFromJson(jsonString);
+//     final routeResponse = routeResponseFromJson(jsonString);
 
 import 'package:meta/meta.dart';
 import 'dart:convert';
@@ -58,6 +60,14 @@ String proposalToJson(Proposal data) => json.encode(data.toJson());
 Alert alertFromJson(String str) => Alert.fromJson(json.decode(str));
 
 String alertToJson(Alert data) => json.encode(data.toJson());
+
+RouteRequest routeRequestFromJson(String str) => RouteRequest.fromJson(json.decode(str));
+
+String routeRequestToJson(RouteRequest data) => json.encode(data.toJson());
+
+RouteResponse routeResponseFromJson(String str) => RouteResponse.fromJson(json.decode(str));
+
+String routeResponseToJson(RouteResponse data) => json.encode(data.toJson());
 
 
 ///Static, run-independent. Produced once by F1 and frozen.
@@ -919,6 +929,102 @@ enum AlertScope {
 final alertScopeValues = EnumValues({
     "place": AlertScope.PLACE,
     "ward": AlertScope.WARD
+});
+
+class RouteRequest {
+    GeoPoint destination;
+    GeoPoint origin;
+    String runId;
+    VehicleType vehicle;
+
+    RouteRequest({
+        required this.destination,
+        required this.origin,
+        required this.runId,
+        required this.vehicle,
+    });
+
+    factory RouteRequest.fromJson(Map<String, dynamic> json) => RouteRequest(
+        destination: GeoPoint.fromJson(json["destination"]),
+        origin: GeoPoint.fromJson(json["origin"]),
+        runId: json["run_id"],
+        vehicle: vehicleTypeValues.map[json["vehicle"]]!,
+    );
+
+    Map<String, dynamic> toJson() => {
+        "destination": destination.toJson(),
+        "origin": origin.toJson(),
+        "run_id": runId,
+        "vehicle": vehicleTypeValues.reverse[vehicle],
+    };
+}
+
+enum VehicleType {
+    AMBULANCE,
+    CAR,
+    TWO_WHEELER
+}
+
+final vehicleTypeValues = EnumValues({
+    "ambulance": VehicleType.AMBULANCE,
+    "car": VehicleType.CAR,
+    "two_wheeler": VehicleType.TWO_WHEELER
+});
+
+class RouteResponse {
+    
+    ///Segments the route keeps out of, flooded now or expected to flood before arrival.
+    List<String> avoidedSegmentIds;
+    double distanceM;
+    int durationS;
+    
+    ///The route. None when status is no_safe_route.
+    LineString geometry;
+    
+    ///One line for the traveller, in English.
+    String reason;
+    String runId;
+    RouteStatus status;
+
+    RouteResponse({
+        required this.avoidedSegmentIds,
+        required this.distanceM,
+        required this.durationS,
+        required this.geometry,
+        required this.reason,
+        required this.runId,
+        required this.status,
+    });
+
+    factory RouteResponse.fromJson(Map<String, dynamic> json) => RouteResponse(
+        avoidedSegmentIds: List<String>.from(json["avoided_segment_ids"].map((x) => x)),
+        distanceM: json["distance_m"]?.toDouble(),
+        durationS: json["duration_s"],
+        geometry: LineString.fromJson(json["geometry"]),
+        reason: json["reason"],
+        runId: json["run_id"],
+        status: routeStatusValues.map[json["status"]]!,
+    );
+
+    Map<String, dynamic> toJson() => {
+        "avoided_segment_ids": List<dynamic>.from(avoidedSegmentIds.map((x) => x)),
+        "distance_m": distanceM,
+        "duration_s": durationS,
+        "geometry": geometry.toJson(),
+        "reason": reason,
+        "run_id": runId,
+        "status": routeStatusValues.reverse[status],
+    };
+}
+
+enum RouteStatus {
+    NO_SAFE_ROUTE,
+    OK
+}
+
+final routeStatusValues = EnumValues({
+    "no_safe_route": RouteStatus.NO_SAFE_ROUTE,
+    "ok": RouteStatus.OK
 });
 
 class EnumValues<T> {

@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "LineString": {
+      "additionalProperties": false,
+      "description": "GeoJSON LineString geometry. Coordinates are [lon, lat].",
+      "properties": {
+        "type": {
+          "default": "LineString",
+          "pattern": "^LineString$",
+          "title": "Type",
+          "type": "string"
+        },
+        "coordinates": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "minItems": 2,
+          "title": "Coordinates",
+          "type": "array"
+        }
+      },
+      "required": [
+        "coordinates"
+      ],
+      "title": "LineString",
+      "type": "object"
+    },
+    "RouteStatus": {
+      "enum": [
+        "ok",
+        "no_safe_route"
+      ],
+      "title": "RouteStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/RouteStatus"
+    },
+    "geometry": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LineString"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The route. None when status is no_safe_route."
+    },
+    "distance_m": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Distance M"
+    },
+    "duration_s": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duration S"
+    },
+    "avoided_segment_ids": {
+      "default": [],
+      "description": "Segments the route keeps out of, flooded now or expected to flood before arrival.",
+      "items": {
+        "examples": [
+          "27320162-0"
+        ],
+        "pattern": "^\\d+-\\d+$",
+        "type": "string"
+      },
+      "title": "Avoided Segment Ids",
+      "type": "array"
+    },
+    "reason": {
+      "description": "One line for the traveller, in English.",
+      "examples": [
+        "Avoids 2 streets reported knee-deep."
+      ],
+      "title": "Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "status",
+    "reason"
+  ],
+  "title": "RouteResponse",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

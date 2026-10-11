@@ -11,7 +11,7 @@ from pathlib import Path
 from pydantic import TypeAdapter
 from pydantic.json_schema import models_json_schema
 
-from nimbus_contracts import entities
+from nimbus_contracts import entities, routes
 from nimbus_contracts.events import EVENT_TYPES, Event
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,6 +29,8 @@ ENTITIES = [
     entities.Resource,
     entities.Proposal,
     entities.Alert,
+    routes.RouteRequest,
+    routes.RouteResponse,
 ]
 
 

@@ -29,6 +29,7 @@ from nimbus_contracts.entities import (
     VulnerabilityFlags,
     WorkOrder,
 )
+from nimbus_contracts.routes import RouteRequest, RouteResponse, RouteStatus
 from nimbus_contracts.rules import band_for_score
 from nimbus_contracts.segments import OsmWay, split_ways
 
@@ -198,6 +199,38 @@ def build_scene(segments):
     return {"readings": [reading], "hazards": [hazard], "resources": resources, "proposals": [proposal], "sos": [sos]}
 
 
+def build_routes(segments):
+    """Two answers for a two-wheeler: a detour around the flooded Segment, and no safe route."""
+    flooded = flooded_segment(segments)
+    bystreet = [s for s in segments if s.street_name == "Ram Nagar Main Road"][:2]
+    origin, destination = midpoint(bystreet[0]), midpoint(bystreet[-1])
+    coords = [c for s in bystreet for c in s.geometry.coordinates]
+    metres = sum(haversine_m(a, b) for a, b in zip(coords, coords[1:]))
+    two_wheeler_m_per_s = 25 / 3.6
+    requests = [
+        RouteRequest(run_id=RUN, origin=origin, destination=destination, vehicle="two_wheeler"),
+        RouteRequest(run_id=RUN, origin=origin, destination=midpoint(flooded), vehicle="car"),
+    ]
+    responses = [
+        RouteResponse(
+            run_id=RUN,
+            status=RouteStatus.OK,
+            geometry=LineString(coordinates=coords),
+            distance_m=round(metres, 1),
+            duration_s=round(metres / two_wheeler_m_per_s),
+            avoided_segment_ids=[flooded.segment_id],
+            reason=f"Avoids {flooded.street_name}, reported knee-deep.",
+        ),
+        RouteResponse(
+            run_id=RUN,
+            status=RouteStatus.NO_SAFE_ROUTE,
+            avoided_segment_ids=[flooded.segment_id],
+            reason="Every way to this point crosses water too deep for a car.",
+        ),
+    ]
+    return requests, responses
+
+
 def dump(name, models):
     data = [m.model_dump(mode="json") for m in models]
     (OUT / name).write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
@@ -218,6 +251,9 @@ def main():
     dump("risk.json", build_risk(segments))
     for name, models in build_scene(segments).items():
         dump(f"{name}.json", models)
+    requests, responses = build_routes(segments)
+    dump("route_requests.json", requests)
+    dump("routes.json", responses)
     print(f"{len(segments)} segments written to {OUT.relative_to(ROOT.parent)}")
 
 
