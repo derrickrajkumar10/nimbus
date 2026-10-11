@@ -2,9 +2,48 @@
 
 HTTP API: API Gateway HTTP API plus Python Lambdas, typed with `nimbus_contracts`. **Owner: Varun.** Citizen routes serve the Flutter app. Console routes serve the ward console. Document every route here with its request and response contract types, so Derrick can build against it.
 
-## Event persistence (plan)
+## Console API (#8)
 
-Agents and engines publish events to the bus. The console and app read DynamoDB. Nothing in the repo copied events into the tables, so `GET /activity`, `GET /proposals` and the rest would read empty tables. This is the plan for closing that gap. It is a plan, not built yet.
+`api/console/`, one Lambda behind an API Gateway HTTP API (`nimbus-console`, stack `NimbusApi`). The base URL is the stack output `ConsoleApiUrl` and the SSM parameter `/nimbus/api/console-url`. **There is no login yet** (issue #19), so treat it as open.
+
+Every route needs `run_id` (`live` or `replay-<name>`). A request can't see another Run's rows (ADR 0001). Errors are `{"error": "<code>", "message": "..."}`.
+
+| Route | Returns | Contract type |
+|---|---|---|
+| `GET /risk?run_id=` | latest risk per Segment | `SegmentRisk[]` |
+| `GET /readings?run_id=` | verified Readings | `Reading[]` |
+| `GET /hazards?run_id=` | Hazards | `Hazard[]` |
+| `GET /resources?run_id=` | Resources | `Resource[]` |
+| `GET /sos?run_id=` | SOS calls, ranked ones first | `Sos` plus `rank`, `danger_score`, `reasons`, `merged_sos_ids` once Triage has ranked it. Officers only once #19 lands |
+| `GET /proposals?run_id=&status=pending` | Proposals by `rank`; `status` is optional (`pending`, `approved`, `edited`, `rejected`) | `Proposal[]` |
+| `GET /activity?run_id=&since=&limit=` | agent feed, oldest first | `{items: Event[], cursor: string \| null}` |
+| `POST /proposals/{proposal_id}/decision` | the decided Proposal | body `DecisionRequest`, response `Proposal` |
+
+**Polling the feed.** Call `/activity` with no `since`, then pass the returned `cursor` as `since` on each poll (every 2 s). The cursor is opaque and exclusive, so nothing repeats. `since` also accepts an ISO time with an offset. `limit` is 1 to 500 (default 100). Only `agent.activity` and `policy.decided` events are in the feed.
+
+**Deciding a Proposal.** Body:
+
+```json
+{"run_id": "replay-michaung", "decision": "approved", "decided_by": "officer-1"}
+```
+
+`decision` is `approved`, `edited` or `rejected`. An `edited` decision must also carry `action`: the edited `WorkOrder` or `WardAlertDraft` (same `kind` as the original, with its `kind` field set). `approved` and `rejected` must not carry one.
+
+| Status | Meaning |
+|---|---|
+| 200 | decided; the body is the updated `Proposal`. `proposal.decided` was emitted |
+| 404 `proposal_not_found` | no such Proposal in that Run |
+| 409 `already_decided` | already decided by someone else or differently; `current_status` and `decided_by` say how |
+| 422 | invalid body, missing `action` on an edit, an `action` on an approval, or a changed `kind` |
+| 502 `event_not_sent` | the decision **was saved** but the event wasn't sent. Retry the same request: it re-sends the same event (the id derives from the Proposal), so nothing is decided twice |
+
+Repeating the same decision by the same officer returns 200 again. `decided_at` is the Run's storm time: `Runs.sim_time` for a Replay, the wall clock for `live`, and the Proposal's own `created_at` while a Replay has no `Runs` row yet. It's never earlier than the Proposal.
+
+Not built yet, blocked on the questions at the bottom of this file: `GET/POST /runs`, `GET /hit-rate`, `GET /after-action`.
+
+## Event persistence
+
+Agents and engines publish events to the bus. The console and app read DynamoDB. Nothing used to copy events into the tables, so `GET /activity`, `GET /proposals` and the rest would have read empty tables. The projector (`api/projector/`, built in #40) closes that gap.
 
 ### Rule: one writer per table
 
@@ -39,7 +78,7 @@ A table is written either by the **projector** (below), or by the **lane that ow
 
 ### Proposal decisions
 
-`POST /proposals/{id}/decision` updates the row itself with a conditional write (`status = pending`), then emits `proposal.decided`. That makes a double approval fail cleanly, and the console sees the new status on its next 2 s poll without waiting for the projector.
+`POST /proposals/{id}/decision` updates the row itself with a conditional write (`status = pending`), then emits `proposal.decided` with `source` `nimbus.console`. That makes a double approval fail cleanly, and the console sees the new status on its next 2 s poll without waiting for the projector. The projector deliberately ignores `proposal.decided`. Details are in "Console API" above.
 
 ### Settled by the issues
 

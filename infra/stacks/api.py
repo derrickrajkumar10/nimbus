@@ -1,16 +1,22 @@
-"""NimbusApi: the event projector now; HTTP API routes and the FCM sender come with issues #8, #7, #6.
+"""NimbusApi: the event projector and the console HTTP API. The citizen API and FCM sender come with #7 and #6.
 
 The projector (api/projector/) copies bus events into the tables the console and app read.
 It may write only the tables below. Every other table has its own writer (api/README.md).
+
+The console API (api/console/) reads those tables and updates one thing: a Proposal's decision.
+Both Lambdas share one bundle.
 """
 
 from pathlib import Path
 
-from aws_cdk import BundlingOptions, Duration, Stack
+from aws_cdk import BundlingOptions, CfnOutput, Duration, Stack
+from aws_cdk import aws_apigatewayv2 as apigw
+from aws_cdk import aws_apigatewayv2_integrations as integrations
 from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_sqs as sqs
+from aws_cdk import aws_ssm as ssm
 from constructs import Construct
 
 from stacks.shared import NimbusShared
@@ -30,14 +36,29 @@ PROJECTED_EVENT_TYPES = (
 )
 WRITTEN_TABLES = ("Activity", "Proposals", "Alerts", "Hazards", "Readings", "Sos")
 
-# Everything the projector bundle doesn't need, so the asset hash only moves when api/ or contracts/ do.
+# Keep in step with Console.router.table and TABLE_KEYS in api/console. api/tests/test_console.py checks it.
+CONSOLE_ROUTES = (
+    ("GET", "/risk"),
+    ("GET", "/readings"),
+    ("GET", "/hazards"),
+    ("GET", "/resources"),
+    ("GET", "/sos"),
+    ("GET", "/proposals"),
+    ("GET", "/activity"),
+    ("POST", "/proposals/{proposal_id}/decision"),
+)
+# Read-only, except a Proposal's decision (UpdateItem on Proposals).
+CONSOLE_READ_TABLES = ("SegmentRisk", "Readings", "Hazards", "Resources", "Sos", "Proposals", "Activity", "Runs")
+CONSOLE_UPDATED_TABLE = "Proposals"
+
+# Everything the bundle doesn't need, so the asset hash only moves when api/ or contracts/ do.
 _EXCLUDE = [
     ".git", ".github", "agents", "app", "console", "docs", "engines", "infra", "replay",
     "NIMBUS-Design-Lock.pdf", "**/.venv", "**/__pycache__", "**/.pytest_cache", "**/cdk.out", "**/node_modules",
 ]
 
 
-def _projector_code() -> lambda_.Code:
+def _api_code() -> lambda_.Code:
     # Needs a container runtime (Docker, or Podman with CDK_DOCKER=podman) at synth. Tests
     # skip it with the context {"aws:cdk:bundling-stacks": []}.
     return lambda_.Code.from_asset(
@@ -48,7 +69,7 @@ def _projector_code() -> lambda_.Code:
             command=[
                 "bash",
                 "-c",
-                "pip install --no-cache-dir ./contracts -t /asset-output && cp -r api/projector /asset-output/projector",
+                "pip install --no-cache-dir ./contracts -t /asset-output && cp -r api/projector api/console /asset-output/",
             ],
             # Same options as stacks/agents.py. Rootless Podman maps the host user to root, and
             # SELinux (Fedora) needs label=disable for the mounts. Harmless under Docker.
@@ -63,6 +84,11 @@ class NimbusApi(Stack):
     def __init__(self, scope: Construct, construct_id: str, *, shared: NimbusShared, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        code = _api_code()
+        self._projector(shared, code)
+        self._console(shared, code)
+
+    def _projector(self, shared: NimbusShared, code: lambda_.Code) -> None:
         self.projector_dlq = sqs.Queue(self, "ProjectorDlq", retention_period=Duration.days(14))
 
         self.projector = lambda_.Function(
@@ -70,7 +96,7 @@ class NimbusApi(Stack):
             "Projector",
             runtime=lambda_.Runtime.PYTHON_3_12,
             handler="projector.handler.handler",
-            code=_projector_code(),
+            code=code,
             memory_size=256,
             timeout=Duration.seconds(30),
             description="Copies nimbus.* events into the console and app tables",
@@ -90,3 +116,44 @@ class NimbusApi(Stack):
             ),
             targets=[targets.LambdaFunction(self.projector, dead_letter_queue=self.projector_dlq, retry_attempts=2)],
         )
+
+    def _console(self, shared: NimbusShared, code: lambda_.Code) -> None:
+        self.console = lambda_.Function(
+            self,
+            "Console",
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            handler="console.handler.handler",
+            code=code,
+            memory_size=256,
+            timeout=Duration.seconds(15),
+            description="Ward console HTTP API: reads, and officers' decisions on Proposals",
+            environment={
+                "NIMBUS_EVENT_BUS": shared.bus.event_bus_name,
+                **{f"NIMBUS_TABLE_{name.upper()}": shared.tables[name].table_name for name in CONSOLE_READ_TABLES},
+            },
+        )
+        for name in CONSOLE_READ_TABLES:
+            shared.tables[name].grant_read_data(self.console)
+        shared.tables[CONSOLE_UPDATED_TABLE].grant(self.console, "dynamodb:UpdateItem")
+        shared.bus.grant_put_events_to(self.console)  # to emit proposal.decided
+
+        self.console_api = apigw.HttpApi(
+            self,
+            "ConsoleApi",
+            api_name="nimbus-console",
+            description="NIMBUS ward console API (issue #8). No authorizer until issue #19.",
+            cors_preflight=apigw.CorsPreflightOptions(
+                allow_origins=["*"],  # tighten to the Amplify domain with #29
+                allow_methods=[apigw.CorsHttpMethod.GET, apigw.CorsHttpMethod.POST, apigw.CorsHttpMethod.OPTIONS],
+                allow_headers=["content-type"],
+                max_age=Duration.hours(1),
+            ),
+        )
+        integration = integrations.HttpLambdaIntegration("ConsoleIntegration", self.console)
+        for method, path in CONSOLE_ROUTES:
+            self.console_api.add_routes(path=path, methods=[apigw.HttpMethod(method)], integration=integration)
+
+        ssm.StringParameter(
+            self, "ParamApiConsoleUrl", parameter_name="/nimbus/api/console-url", string_value=self.console_api.api_endpoint
+        )
+        CfnOutput(self, "ConsoleApiUrl", value=self.console_api.api_endpoint)
