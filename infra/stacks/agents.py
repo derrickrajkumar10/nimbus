@@ -7,8 +7,8 @@ risk engine #4 lands).
 
 Context values (cdk.json or `-c key=value`):
   nova_lite_id, nova_pro_id   Bedrock inference-profile IDs from issue #1
-  send_push_function          the send-push Lambda name, once #6 ships; until then
-                              the Herald has no invoke permission and fails only if it sends
+  send_push_function          the send-push Lambda name (default nimbus-send-push, as
+                              NimbusApi names it in #6); "" leaves the Herald without it
 
 Bundling runs in the Lambda Python 3.12 build image. With Podman instead of
 Docker, set CDK_DOCKER=podman. Tests skip bundling (aws:cdk:bundling-stacks).
@@ -35,6 +35,7 @@ AGENT_PACKAGES = ("common", "policies", "sentinel", "herald")
 
 DEFAULT_NOVA_LITE_ID = "us.amazon.nova-lite-v1:0"
 DEFAULT_NOVA_PRO_ID = "us.amazon.nova-pro-v1:0"
+DEFAULT_SEND_PUSH_FUNCTION = "nimbus-send-push"  # NimbusApi (#6) names it so
 # A "us." inference profile routes to these regions, and each needs its own model permission.
 NOVA_PROFILE_REGIONS = ("us-east-1", "us-east-2", "us-west-2")
 
@@ -88,7 +89,8 @@ class NimbusAgents(Stack):
 
         self.nova_lite_id = self.node.try_get_context("nova_lite_id") or DEFAULT_NOVA_LITE_ID
         self.nova_pro_id = self.node.try_get_context("nova_pro_id") or DEFAULT_NOVA_PRO_ID
-        self.send_push_function = self.node.try_get_context("send_push_function") or ""
+        send_push = self.node.try_get_context("send_push_function")
+        self.send_push_function = DEFAULT_SEND_PUSH_FUNCTION if send_push is None else send_push
 
         bus_name = self._ssm("bus/name")
         self.bus = events.EventBus.from_event_bus_name(self, "Bus", bus_name)

@@ -111,10 +111,10 @@ def test_bedrock_covers_the_profile_and_every_routed_region(template):
     assert "inference-profile/us.amazon.nova-lite-v1:0" in text
 
 
-def test_herald_gets_push_permission_only_once_the_sender_exists():
-    without = synth()
-    assert not any("lambda:InvokeFunction" in actions for _, actions, _ in statements(without))
-    with_sender = synth(send_push_function="nimbus-send-push")
+def test_herald_can_invoke_send_push_by_its_agreed_name():
+    disabled = synth(send_push_function="")
+    assert not any("lambda:InvokeFunction" in actions for _, actions, _ in statements(disabled))
+    with_sender = synth()  # default: nimbus-send-push, as NimbusApi names it
     invoke = [r for _, actions, r in statements(with_sender) if "lambda:InvokeFunction" in actions]
     assert len(invoke) == 1 and "function:nimbus-send-push" in str(invoke[0])
     herald_env = next(
