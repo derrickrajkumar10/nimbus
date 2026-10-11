@@ -100,15 +100,35 @@ def test_fixture_tick_alerts_the_demo_phones_in_tamil_and_english():
     assert herald_checks and all(e.detail.allowed for e in herald_checks)
 
 
-def test_safer_street_is_a_different_low_risk_street():
+def test_without_a_fully_low_street_the_alert_says_higher_ground():
+    # In the fixture scene every street has at least one Segment above low.
     w = World()
     w.sentinel_tick()
-    safer = w.herald.safer_street(w.run_id, LIKELY_VMR)
-    assert safer and safer != "Velachery Main Road"
-    current = w.risks.latest(w.run_id)
-    low_streets = {s.street_name for s in load_segments() if current[s.segment_id].band == RiskBand.LOW}
-    assert safer in low_streets
-    assert f"to {safer} now" in next(p for p in w.sender.sent if "demo-phone-3" in p.device_ids).body["en"]
+    assert w.herald.safer_street(w.run_id, LIKELY_VMR) is None
+    assert "to higher ground now" in next(p for p in w.sender.sent if "demo-phone-3" in p.device_ids).body["en"]
+
+
+def test_a_street_is_safer_only_if_all_its_segments_are_low():
+    # Ram Nagar Main Road is at risk; the nearest low Segment is on a street that is
+    # partly at risk itself, so it must not be offered as the place to move to.
+    segments = load_segments()
+    w = World()
+    here = next(s for s in segments if s.segment_id == "27320162-0")
+    others = [s for s in segments if s.street_name != here.street_name]
+    origin = here.geometry.coordinates[0]
+    nearest = min(others, key=lambda s: (s.geometry.coordinates[0][0] - origin[0]) ** 2 + (s.geometry.coordinates[0][1] - origin[1]) ** 2)
+    partly_at_risk = nearest.street_name
+    risky_twin = next(s for s in others if s.street_name == partly_at_risk and s.segment_id != nearest.segment_id)
+
+    base = next(iter(FixtureScorer()(segments, w.run_id, T0)))
+    w.risks.save([
+        base.model_copy(update={"segment_id": s.segment_id, "band": RiskBand.WATCH if s.segment_id in (here.segment_id, risky_twin.segment_id) else RiskBand.LOW})
+        for s in segments
+    ])
+
+    safer = w.herald.safer_street(w.run_id, here.segment_id)
+    assert safer is not None
+    assert safer not in (here.street_name, partly_at_risk)
 
 
 def test_live_run_has_no_replay_prefix():

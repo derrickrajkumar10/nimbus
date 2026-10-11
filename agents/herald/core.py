@@ -90,18 +90,22 @@ class Herald:
         return (segment.street_name if segment else None) or segment_id
 
     def safer_street(self, run_id: str, segment_id: str) -> str | None:
-        """Nearest Segment on a different street that's currently low risk in this Run."""
+        """Nearest different street whose every Segment is currently low risk in this Run.
+
+        One low Segment isn't enough: the rest of that street may already be at risk."""
         here = self.segments.get(segment_id)
         if here is None:
             return None
         current = self.risks.latest(run_id)
+        unsafe = {
+            s.street_name
+            for s in self.segments.values()
+            if s.segment_id not in current or current[s.segment_id].band != RiskBand.LOW
+        }
         candidates = [
             s
             for s in self.segments.values()
-            if s.street_name
-            and s.street_name != here.street_name
-            and s.segment_id in current
-            and current[s.segment_id].band == RiskBand.LOW
+            if s.street_name and s.street_name != here.street_name and s.street_name not in unsafe
         ]
         if not candidates:
             return None
