@@ -1,0 +1,15 @@
+{
+  "@@locale": "en",
+  "bandLow": "Low",
+  "bandWatch": "Watch",
+  "bandLikely": "Likely",
+  "bandFlooded": "Flooded",
+  "durationHm": "{h}h {m}m",
+  "@durationHm": {
+    "placeholders": {"h": {"type": "int"}, "m": {"type": "int"}}
+  },
+  "durationM": "{m}m",
+  "@durationM": {
+    "placeholders": {"m": {"type": "int"}}
+  }
+}

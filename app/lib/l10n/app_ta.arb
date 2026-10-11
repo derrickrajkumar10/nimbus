@@ -1,0 +1,9 @@
+{
+  "@@locale": "ta",
+  "bandLow": "குறைவு",
+  "bandWatch": "கவனம்",
+  "bandLikely": "வாய்ப்பு அதிகம்",
+  "bandFlooded": "வெள்ளம்",
+  "durationHm": "{h} மணி {m} நிமி",
+  "durationM": "{m} நிமி"
+}
