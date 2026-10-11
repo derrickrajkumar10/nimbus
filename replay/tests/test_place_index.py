@@ -111,6 +111,7 @@ def test_write_retries_unprocessed_rows_then_gives_up():
 
 def test_driver_seeds_place_index_before_the_first_tick(monkeypatch, capsys):
     monkeypatch.delenv(place_index.TABLE_ENV, raising=False)
+    monkeypatch.delenv("NIMBUS_TABLE_RESOURCES", raising=False)
     clients = {service: fake_client(service) for service in ("ssm", "dynamodb", "events")}
     calls = []
     monkeypatch.setattr(driver, "_aws_client", lambda service: clients[service])
@@ -120,6 +121,8 @@ def test_driver_seeds_place_index_before_the_first_tick(monkeypatch, capsys):
     stubs["ssm"].add_response("get_parameter", table_param("pi"))
     for _ in range(7):  # 2 demo rows + 150 simulated, 25 per batch
         stubs["dynamodb"].add_response("batch_write_item", {"UnprocessedItems": {}})
+    stubs["ssm"].add_response("get_parameter", table_param("res"), {"Name": "/nimbus/tables/Resources"})
+    stubs["dynamodb"].add_response("batch_write_item", {"UnprocessedItems": {}})  # 3 Resources
     stubs["events"].add_response("put_events", {"FailedEntryCount": 0, "Entries": [{"EventId": "aws-1"}]})
     for stub in stubs.values():
         stub.activate()
@@ -128,8 +131,10 @@ def test_driver_seeds_place_index_before_the_first_tick(monkeypatch, capsys):
 
     for stub in stubs.values():
         stub.assert_no_pending_responses()
-    assert calls == ["GetParameter"] + ["BatchWriteItem"] * 7 + ["PutEvents"]
-    assert "PlaceIndex pi: 1 demo phone(s)" in capsys.readouterr().err
+    assert calls == ["GetParameter"] + ["BatchWriteItem"] * 7 + ["GetParameter", "BatchWriteItem", "PutEvents"]
+    err = capsys.readouterr().err
+    assert "PlaceIndex pi: 1 demo phone(s)" in err
+    assert "Resources res: 3 for Run replay-michaung" in err
 
 
 def test_driver_sends_no_ticks_when_seeding_fails(monkeypatch, capsys):

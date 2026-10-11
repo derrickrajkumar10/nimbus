@@ -1,7 +1,8 @@
 """Replay Driver (#14), minimal: plays a storm's clock by publishing clock.tick events.
 
-Before the first tick it seeds PlaceIndex for the Run (see place_index.py): the demo
-phones given with --demo-phone, and 150 simulated Subscribers.
+Before the first tick it seeds the Run: PlaceIndex (place_index.py) with the demo
+phones given with --demo-phone and 150 simulated Subscribers, and Resources
+(resources.py) with the fixture pumps and crews.
 
 Each tick advances sim_time by 15 storm-minutes; --speed is the real seconds between
 ticks. The agents are Lambdas that wake on these events. Events go to EventBridge as
@@ -27,6 +28,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from nimbus_contracts.events import ClockTick
 
 import place_index
+import resources
 
 SOURCE = "replay-driver"
 BUS_NAME_ENV = "NIMBUS_EVENT_BUS"
@@ -99,11 +101,19 @@ def _aws_client(service: str) -> Any:
 
 
 def seed(run_id: str, phones: Sequence[tuple[str, str]]) -> str:
-    """Index the demo phones and the simulated Subscribers for this Run. Returns a summary line."""
+    """Index the demo phones and simulated Subscribers, and put the Run's Resources. Returns a summary."""
+
+    def ssm() -> Any:
+        return _aws_client("ssm")
+
+    dynamodb = _aws_client("dynamodb")
     rows = place_index.demo_rows(run_id, phones) + place_index.crowd_rows(run_id)
-    table = place_index.table_name(lambda: _aws_client("ssm"))
-    place_index.write(_aws_client("dynamodb"), table, rows)
-    return f"PlaceIndex {table}: {_seed_summary(run_id, phones)}"
+    index_table = place_index.table_name(ssm)
+    place_index.write(dynamodb, index_table, rows)
+    run_resources = resources.for_run(run_id)
+    resource_table = resources.table_name(ssm)
+    resources.write(dynamodb, resource_table, run_resources)
+    return f"PlaceIndex {index_table}: {_seed_summary(run_id, phones)}\nResources {resource_table}: {len(run_resources)} for Run {run_id}"
 
 
 def _seed_summary(run_id: str, phones: Sequence[tuple[str, str]]) -> str:
@@ -126,7 +136,7 @@ def _parse(argv: Sequence[str] | None) -> argparse.Namespace:
         metavar="DEVICE_ID#PLACE_ID",
         help="a demo phone's app device ID and Saved Place to index on the demo Segments (repeatable)",
     )
-    parser.add_argument("--no-seed", action="store_true", help="skip PlaceIndex seeding, e.g. when resuming a Run")
+    parser.add_argument("--no-seed", action="store_true", help="skip PlaceIndex and Resources seeding, e.g. when resuming a Run")
     parser.add_argument("--dry-run", action="store_true", help="print each tick's JSON instead of sending it")
     args = parser.parse_args(argv)
 
@@ -159,6 +169,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.dry_run:
         if seeding:
             print(f"dry run, would index {_seed_summary(args.run_id, args.demo_phone)}", file=sys.stderr)
+            print(f"dry run, would put {len(resources.for_run(args.run_id))} Resources for Run {args.run_id}", file=sys.stderr)
 
         def send(tick: ClockTick) -> None:
             print(tick.model_dump_json(), flush=True)
@@ -167,7 +178,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             try:
                 print(seed(args.run_id, args.demo_phone), file=sys.stderr, flush=True)
             except (place_index.SeedError, ClientError, BotoCoreError) as error:
-                print(f"PlaceIndex seeding failed, no ticks sent: {error}", file=sys.stderr)
+                print(f"seeding failed, no ticks sent: {error}", file=sys.stderr)
                 return 1
         bus_name = os.environ.get(BUS_NAME_ENV, DEFAULT_BUS)
         client = _aws_client("events")

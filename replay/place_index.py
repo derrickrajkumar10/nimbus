@@ -17,6 +17,8 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from typing import Any
 
+from dynamo import SeedError, batch_put  # noqa: F401  (SeedError: callers catch place_index.SeedError)
+
 PK = "run_id#segment_id"
 SK = "device_id#place_id"
 TABLE_PARAM = "/nimbus/tables/PlaceIndex"
@@ -26,12 +28,6 @@ DEMO_SEGMENTS = ("27480309-1", "27480309-4")  # Velachery Main Road: flooded and
 CROWD_SEGMENT = "27320162-0"
 CROWD_SIZE = 150
 CROWD_PLACE = "sim-place"
-
-BATCH_LIMIT = 25  # BatchWriteItem's maximum
-
-
-class SeedError(RuntimeError):
-    pass
 
 
 @dataclass(frozen=True)
@@ -81,14 +77,4 @@ def write(
     max_retries: int = 5,
     sleep: Callable[[float], None] = time.sleep,
 ) -> None:
-    """BatchWriteItem in chunks of 25, retrying unprocessed items with backoff."""
-    for start in range(0, len(rows), BATCH_LIMIT):
-        requests = {table: [{"PutRequest": {"Item": row.item()}} for row in rows[start : start + BATCH_LIMIT]]}
-        for attempt in range(max_retries + 1):
-            if attempt:
-                sleep(0.1 * 2**attempt)
-            requests = client.batch_write_item(RequestItems=requests).get("UnprocessedItems") or {}
-            if not requests:
-                break
-        else:
-            raise SeedError(f"DynamoDB left {len(requests.get(table, []))} PlaceIndex rows unwritten in {table}")
+    batch_put(client, table, [row.item() for row in rows], what="PlaceIndex rows", max_retries=max_retries, sleep=sleep)
