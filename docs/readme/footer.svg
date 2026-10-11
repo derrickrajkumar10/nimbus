@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="70" viewBox="0 0 900 70" role="img" aria-label=""><title></title><style>
+text{font-family:'Outfit','Segoe UI',Helvetica,Arial,sans-serif;fill:#ffffff}
+.ta{font-family:'Tamil','Outfit',sans-serif}
+.muted{fill:#a9c6db} .faint{fill:#6f93b3} .teal{fill:#4fd1d9}
+.up{opacity:0;animation:up .9s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important} .up{opacity:1}}
+.f1{animation:d 8s linear infinite}.f2{animation:d 5s linear infinite reverse}@keyframes d{to{transform:translateX(-150px)}}</style><path class="f1" d="M0 30 Q37.5 22 75 30 T150 30 Q187.5 22 225 30 T300 30 Q337.5 22 375 30 T450 30 Q487.5 22 525 30 T600 30 Q637.5 22 675 30 T750 30 Q787.5 22 825 30 T900 30 Q937.5 22 975 30 T1050 30 Q1087.5 22 1125 30 T1200 30 Q1237.5 22 1275 30 T1350 30 Q1387.5 22 1425 30 T1500 30 Q1537.5 22 1575 30 T1650 30 Q1687.5 22 1725 30 T1800 30 V70 H0 Z" fill="#4fd1d9" fill-opacity=".25"/><path class="f2" d="M0 40 Q37.5 34 75 40 T150 40 Q187.5 34 225 40 T300 40 Q337.5 34 375 40 T450 40 Q487.5 34 525 40 T600 40 Q637.5 34 675 40 T750 40 Q787.5 34 825 40 T900 40 Q937.5 34 975 40 T1050 40 Q1087.5 34 1125 40 T1200 40 Q1237.5 34 1275 40 T1350 40 Q1387.5 34 1425 40 T1500 40 Q1537.5 34 1575 40 T1650 40 Q1687.5 34 1725 40 T1800 40 V70 H0 Z" fill="#0d2650"/></svg>
