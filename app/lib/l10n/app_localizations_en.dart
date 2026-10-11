@@ -305,4 +305,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home => 'Home';
+
+  @override
+  String get yourReport => 'YOUR REPORT';
+
+  @override
+  String verifiedChip(int count, int percent) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Verified · $count reports merged · $percent% sure',
+      one: 'Verified · $percent% sure',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bike => 'Bike';
+
+  @override
+  String get car => 'Car';
+
+  @override
+  String get ambulance => 'Ambulance';
+
+  @override
+  String get hazardOpenManhole => 'Open manhole';
+
+  @override
+  String get hazardFallenTree => 'Fallen tree';
+
+  @override
+  String get hazardLiveWire => 'Live wire';
+
+  @override
+  String get hazardStrandedVehicle => 'Stranded vehicle';
+
+  @override
+  String hazardHere(String hazard, int metres) {
+    return '$hazard here. Routes keep $metres m clear.';
+  }
+
+  @override
+  String thresholdNow(String street, int mm, int from) {
+    return '$street now floods at $mm mm (was $from).';
+  }
+
+  @override
+  String get stillCheckingTitle => 'Still checking your photo';
+
+  @override
+  String get stillCheckingBody =>
+      'This can take a few minutes. We\'ll send you a push when it\'s done.';
+
+  @override
+  String get notVerifiedBody =>
+      'We couldn\'t read the water in this photo. Try one with something to measure against, like a tyre or a kerb.';
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../report/report_flow.dart';
 import 'screens/home_screen.dart';
 import 'screens/launch_gate.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/place_detail_screen.dart';
 import 'screens/place_edit_screen.dart';
 import 'screens/report_screen.dart';
+import 'screens/reveal_screen.dart';
 import 'screens/ward_map_screen.dart';
 import 'theme/tide_colors.dart';
 
@@ -38,6 +40,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       page = const HomeScreen();
     case Routes.map:
       page = const WardMapScreen();
+    case Routes.reveal:
+      final args = settings.arguments;
+      // Only reachable from a sent Report; anything else goes Home.
+      page = args is ReportSubmission ? RevealScreen(submission: args) : const HomeScreen();
     case Routes.report:
       page = ReportScreen(placeId: settings.arguments as String?);
     case Routes.placeEdit:

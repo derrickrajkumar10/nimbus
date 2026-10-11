@@ -150,5 +150,52 @@
   "reportFailed": "Couldn't send. Check your connection and try again.",
   "photoNotUploaded": "The photo didn't upload. Try again.",
   "tryAgain": "Try again",
-  "home": "Home"
+  "home": "Home",
+  "yourReport": "YOUR REPORT",
+  "verifiedChip": "{count, plural, =1{Verified · {percent}% sure} other{Verified · {count} reports merged · {percent}% sure}}",
+  "@verifiedChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "bike": "Bike",
+  "car": "Car",
+  "ambulance": "Ambulance",
+  "hazardOpenManhole": "Open manhole",
+  "hazardFallenTree": "Fallen tree",
+  "hazardLiveWire": "Live wire",
+  "hazardStrandedVehicle": "Stranded vehicle",
+  "hazardHere": "{hazard} here. Routes keep {metres} m clear.",
+  "@hazardHere": {
+    "placeholders": {
+      "hazard": {
+        "type": "String"
+      },
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
+  "thresholdNow": "{street} now floods at {mm} mm (was {from}).",
+  "@thresholdNow": {
+    "placeholders": {
+      "street": {
+        "type": "String"
+      },
+      "mm": {
+        "type": "int"
+      },
+      "from": {
+        "type": "int"
+      }
+    }
+  },
+  "stillCheckingTitle": "Still checking your photo",
+  "stillCheckingBody": "This can take a few minutes. We'll send you a push when it's done.",
+  "notVerifiedBody": "We couldn't read the water in this photo. Try one with something to measure against, like a tyre or a kerb."
 }

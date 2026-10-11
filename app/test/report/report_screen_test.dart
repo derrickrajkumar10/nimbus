@@ -6,6 +6,7 @@ import 'package:nimbus_app/contracts/nimbus.dart';
 import 'package:nimbus_app/data/api_exception.dart';
 import 'package:nimbus_app/domain/place_view.dart';
 import 'package:nimbus_app/ui/screens/report_screen.dart';
+import 'package:nimbus_app/ui/screens/reveal_screen.dart';
 import 'package:nimbus_app/ui/widgets/tide_map.dart';
 
 import '../support/fake_api.dart';
@@ -88,8 +89,8 @@ void main() {
     await pumpScreen(tester, const ReportScreen(), api: api, overrides: overrides);
     await photoAndSend(tester);
     expect((api.sentAt.single.lat, api.sentAt.single.lon), (12.981, 80.226));
-    expect(find.text('/reveal'), findsOneWidget);
-    // Nobody listens on the placeholder, so polling stops; let its last timers run out.
+    expect(find.byType(RevealScreen), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 5));
   });
 
@@ -97,7 +98,10 @@ void main() {
     final api = ReportApi(noReading: true);
     await pumpScreen(tester, const ReportScreen(), api: api, overrides: overrides);
     await photoAndSend(tester);
-    expect(find.text('/reveal'), findsOneWidget);
+    expect(find.byType(RevealScreen), findsOneWidget);
+    await tester.pump(const Duration(seconds: 4));
+    expect(api.polls, greaterThan(0), reason: 'the reveal keeps polling while open');
+    await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 3));
     final after = api.polls;
     await tester.pump(const Duration(seconds: 20));

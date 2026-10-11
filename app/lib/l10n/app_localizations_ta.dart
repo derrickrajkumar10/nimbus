@@ -309,4 +309,60 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get home => 'முகப்பு';
+
+  @override
+  String get yourReport => 'உங்கள் புகார்';
+
+  @override
+  String verifiedChip(int count, int percent) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'உறுதி செய்யப்பட்டது · $count புகார்கள் இணைந்தன · $percent% உறுதி',
+      one: 'உறுதி செய்யப்பட்டது · $percent% உறுதி',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bike => 'பைக்';
+
+  @override
+  String get car => 'கார்';
+
+  @override
+  String get ambulance => 'ஆம்புலன்ஸ்';
+
+  @override
+  String get hazardOpenManhole => 'திறந்த பாதாளச் சாக்கடை';
+
+  @override
+  String get hazardFallenTree => 'விழுந்த மரம்';
+
+  @override
+  String get hazardLiveWire => 'மின்சாரக் கம்பி';
+
+  @override
+  String get hazardStrandedVehicle => 'சிக்கிய வாகனம்';
+
+  @override
+  String hazardHere(String hazard, int metres) {
+    return 'இங்கே $hazard. வழிகள் $metres மீ விலகிச் செல்லும்.';
+  }
+
+  @override
+  String thresholdNow(String street, int mm, int from) {
+    return '$street இப்போது $mm மிமீ மழையில் வெள்ளமாகும் (முன்பு $from).';
+  }
+
+  @override
+  String get stillCheckingTitle => 'உங்கள் படம் இன்னும் சரிபார்க்கப்படுகிறது';
+
+  @override
+  String get stillCheckingBody =>
+      'இதற்குச் சில நிமிடங்கள் ஆகலாம். முடிந்ததும் அறிவிப்பு அனுப்புவோம்.';
+
+  @override
+  String get notVerifiedBody =>
+      'இந்தப் படத்தில் நீர் அளவைக் கணிக்க முடியவில்லை. டயர் அல்லது நடைபாதை ஓரம் போன்ற ஒன்றுடன் மீண்டும் எடுங்கள்.';
 }

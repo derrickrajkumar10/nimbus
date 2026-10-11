@@ -631,6 +631,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
+
+  /// No description provided for @yourReport.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR REPORT'**
+  String get yourReport;
+
+  /// No description provided for @verifiedChip.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Verified · {percent}% sure} other{Verified · {count} reports merged · {percent}% sure}}'**
+  String verifiedChip(int count, int percent);
+
+  /// No description provided for @bike.
+  ///
+  /// In en, this message translates to:
+  /// **'Bike'**
+  String get bike;
+
+  /// No description provided for @car.
+  ///
+  /// In en, this message translates to:
+  /// **'Car'**
+  String get car;
+
+  /// No description provided for @ambulance.
+  ///
+  /// In en, this message translates to:
+  /// **'Ambulance'**
+  String get ambulance;
+
+  /// No description provided for @hazardOpenManhole.
+  ///
+  /// In en, this message translates to:
+  /// **'Open manhole'**
+  String get hazardOpenManhole;
+
+  /// No description provided for @hazardFallenTree.
+  ///
+  /// In en, this message translates to:
+  /// **'Fallen tree'**
+  String get hazardFallenTree;
+
+  /// No description provided for @hazardLiveWire.
+  ///
+  /// In en, this message translates to:
+  /// **'Live wire'**
+  String get hazardLiveWire;
+
+  /// No description provided for @hazardStrandedVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stranded vehicle'**
+  String get hazardStrandedVehicle;
+
+  /// No description provided for @hazardHere.
+  ///
+  /// In en, this message translates to:
+  /// **'{hazard} here. Routes keep {metres} m clear.'**
+  String hazardHere(String hazard, int metres);
+
+  /// No description provided for @thresholdNow.
+  ///
+  /// In en, this message translates to:
+  /// **'{street} now floods at {mm} mm (was {from}).'**
+  String thresholdNow(String street, int mm, int from);
+
+  /// No description provided for @stillCheckingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Still checking your photo'**
+  String get stillCheckingTitle;
+
+  /// No description provided for @stillCheckingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This can take a few minutes. We\'ll send you a push when it\'s done.'**
+  String get stillCheckingBody;
+
+  /// No description provided for @notVerifiedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read the water in this photo. Try one with something to measure against, like a tyre or a kerb.'**
+  String get notVerifiedBody;
 }
 
 class _AppLocalizationsDelegate
