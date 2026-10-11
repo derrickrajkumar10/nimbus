@@ -973,6 +973,9 @@ final vehicleTypeValues = EnumValues({
 
 class RouteResponse {
     
+    ///Hazards (open manholes, live wires) the route keeps clear of.
+    List<String> avoidedHazardIds;
+    
     ///Segments the route keeps out of, flooded now or expected to flood before arrival.
     List<String> avoidedSegmentIds;
     double distanceM;
@@ -983,35 +986,44 @@ class RouteResponse {
     
     ///One line for the traveller, in English.
     String reason;
+    
+    ///The same line in Tamil, when the Pathfinder has one.
+    String reasonTa;
     String runId;
     RouteStatus status;
 
     RouteResponse({
+        required this.avoidedHazardIds,
         required this.avoidedSegmentIds,
         required this.distanceM,
         required this.durationS,
         required this.geometry,
         required this.reason,
+        required this.reasonTa,
         required this.runId,
         required this.status,
     });
 
     factory RouteResponse.fromJson(Map<String, dynamic> json) => RouteResponse(
+        avoidedHazardIds: List<String>.from(json["avoided_hazard_ids"].map((x) => x)),
         avoidedSegmentIds: List<String>.from(json["avoided_segment_ids"].map((x) => x)),
         distanceM: json["distance_m"]?.toDouble(),
         durationS: json["duration_s"],
         geometry: LineString.fromJson(json["geometry"]),
         reason: json["reason"],
+        reasonTa: json["reason_ta"],
         runId: json["run_id"],
         status: routeStatusValues.map[json["status"]]!,
     );
 
     Map<String, dynamic> toJson() => {
+        "avoided_hazard_ids": List<dynamic>.from(avoidedHazardIds.map((x) => x)),
         "avoided_segment_ids": List<dynamic>.from(avoidedSegmentIds.map((x) => x)),
         "distance_m": distanceM,
         "duration_s": durationS,
         "geometry": geometry.toJson(),
         "reason": reason,
+        "reason_ta": reasonTa,
         "run_id": runId,
         "status": routeStatusValues.reverse[status],
     };

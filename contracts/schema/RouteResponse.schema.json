@@ -104,6 +104,15 @@
       "title": "Avoided Segment Ids",
       "type": "array"
     },
+    "avoided_hazard_ids": {
+      "default": [],
+      "description": "Hazards (open manholes, live wires) the route keeps clear of.",
+      "items": {
+        "type": "string"
+      },
+      "title": "Avoided Hazard Ids",
+      "type": "array"
+    },
     "reason": {
       "description": "One line for the traveller, in English.",
       "examples": [
@@ -111,6 +120,19 @@
       ],
       "title": "Reason",
       "type": "string"
+    },
+    "reason_ta": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "The same line in Tamil, when the Pathfinder has one.",
+      "title": "Reason Ta"
     }
   },
   "required": [

@@ -219,6 +219,7 @@ def build_routes(segments):
             distance_m=round(metres, 1),
             duration_s=round(metres / two_wheeler_m_per_s),
             avoided_segment_ids=[flooded.segment_id],
+            avoided_hazard_ids=["hz-0001"],  # the open manhole in the flooded Segment
             reason=f"Avoids {flooded.street_name}, reported knee-deep.",
         ),
         RouteResponse(

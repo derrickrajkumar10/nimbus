@@ -268,9 +268,17 @@ export type DurationS = number | null;
  */
 export type AvoidedSegmentIds = string[];
 /**
+ * Hazards (open manholes, live wires) the route keeps clear of.
+ */
+export type AvoidedHazardIds = string[];
+/**
  * One line for the traveller, in English.
  */
 export type Reason3 = string;
+/**
+ * The same line in Tamil, when the Pathfinder has one.
+ */
+export type ReasonTa = string | null;
 export type PlaceId = string;
 export type DeviceId = string;
 export type Label1 = string;
@@ -737,7 +745,9 @@ export interface RouteResponse {
   distance_m?: DistanceM;
   duration_s?: DurationS;
   avoided_segment_ids?: AvoidedSegmentIds;
+  avoided_hazard_ids?: AvoidedHazardIds;
   reason: Reason3;
+  reason_ta?: ReasonTa;
 }
 /**
  * This interface was referenced by `Nimbus`'s JSON-Schema

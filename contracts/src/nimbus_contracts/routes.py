@@ -34,6 +34,9 @@ class RouteResponse(Contract):
     avoided_segment_ids: Annotated[
         list[SegmentId], Field(description="Segments the route keeps out of, flooded now or expected to flood before arrival.")
     ] = []
+    avoided_hazard_ids: Annotated[
+        list[str], Field(description="Hazards (open manholes, live wires) the route keeps clear of.")
+    ] = []
     reason: Annotated[
         str,
         Field(
@@ -41,6 +44,7 @@ class RouteResponse(Contract):
             examples=["Avoids 2 streets reported knee-deep."],
         ),
     ]
+    reason_ta: Annotated[str | None, Field(description="The same line in Tamil, when the Pathfinder has one.")] = None
 
     @model_validator(mode="after")
     def _status_matches_route(self) -> "RouteResponse":

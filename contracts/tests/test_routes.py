@@ -68,3 +68,13 @@ def test_run_id_and_vehicle_are_checked():
 def test_unknown_fields_are_rejected():
     with pytest.raises(ValidationError):
         RouteResponse.model_validate(response(violation=True))
+
+
+def test_optional_fields_default_to_empty():
+    r = RouteResponse.model_validate(response())
+    assert r.avoided_hazard_ids == [] and r.reason_ta is None
+
+
+def test_hazards_and_tamil_reason_round_trip():
+    body = response(avoided_hazard_ids=["hz-0001"], reason_ta="முழங்கால் அளவு தண்ணீர் உள்ள தெருக்களைத் தவிர்க்கிறது.")
+    assert RouteResponse.model_validate(body).model_dump(mode="json")["avoided_hazard_ids"] == ["hz-0001"]

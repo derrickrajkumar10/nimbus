@@ -60,7 +60,11 @@
     "avoided_segment_ids": [
       "27480309-1"
     ],
-    "reason": "Avoids Velachery Main Road, reported knee-deep."
+    "avoided_hazard_ids": [
+      "hz-0001"
+    ],
+    "reason": "Avoids Velachery Main Road, reported knee-deep.",
+    "reason_ta": null
   },
   {
     "run_id": "replay-michaung",
@@ -71,6 +75,8 @@
     "avoided_segment_ids": [
       "27480309-1"
     ],
-    "reason": "Every way to this point crosses water too deep for a car."
+    "avoided_hazard_ids": [],
+    "reason": "Every way to this point crosses water too deep for a car.",
+    "reason_ta": null
   }
 ]
