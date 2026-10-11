@@ -1,20 +1,41 @@
-"""The Flutter app's HTTP routes (issue #7, the M1 subset).
+"""The Flutter app's HTTP routes (issue #7).
 
 An install is identified by the `X-Install-Id` header until Cognito guest identities arrive with
-issue #19. Anyone can claim any id until then, so nothing here is private. Reports, SOS and routes
-come next (#7b).
+issue #19. Anyone can claim any id until then, so nothing here is private.
+
+Reports and SOS are written as events: the API stores a Report itself (the Verifier reads it) and
+emits `report.created`; a SOS is only emitted as `sos.created`, and the projector stores it.
 """
 
 import logging
 import re
+import uuid
+from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Annotated, Any, Literal
 
 from nimbus_contracts.common import GeoPoint, RunId
-from nimbus_contracts.entities import Reading, SavedPlace, SavedPlaceKind, Segment, SegmentRisk
+from nimbus_contracts.entities import (
+    Reading,
+    Report,
+    SavedPlace,
+    SavedPlaceKind,
+    Segment,
+    SegmentRisk,
+    Sos,
+    VulnerabilityFlags,
+)
+from nimbus_contracts.events import ReportCreated, SosCreated
+from nimbus_contracts.routes import RouteRequest, RouteResponse
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
+from citizen.clock import RunNotStarted, run_sim_time
 from citizen.geo import covered_segment_ids
+from citizen.ids import ULID_CHARS, new_id
+from citizen.pathfinder import Pathfinder, RoutingFailed, RoutingUnavailable
+from citizen.photos import CONTENT_TYPE, UPLOAD_SECONDS, Photos, photo_key
 from citizen.store import Store
+from console.bus import Bus
 from console.http import HttpError, Request, Router
 
 log = logging.getLogger(__name__)
@@ -23,6 +44,10 @@ INSTALL_ID = re.compile(r"^[A-Za-z0-9:_-]{8,80}$")  # Cognito identity ids conta
 PLACE_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 MAX_PLACES_PER_DEVICE = 20
 _RUN_ID = TypeAdapter(RunId)
+_NAMESPACE = uuid.UUID("5d2c9a14-7e0b-4b38-9c61-2f8a0d4e7b13")  # NIMBUS citizen API event IDs
+REPORT_ID = re.compile(rf"^rp-[{ULID_CHARS}]{{26}}$")
+SOS_ID = re.compile(rf"^sos-[{ULID_CHARS}]{{26}}$")
+MAX_PEOPLE = 50
 
 
 class DeviceRegistration(BaseModel):
@@ -49,9 +74,47 @@ class SavedPlaceRequest(BaseModel):
     ] = ["live"]
 
 
+class UploadUrlRequest(BaseModel):
+    """Body of POST /reports/upload-url."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: RunId
+
+
+class ReportRequest(BaseModel):
+    """Body of POST /reports. The photo must already be uploaded with the URL from /reports/upload-url."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    report_id: Annotated[str, Field(pattern=REPORT_ID.pattern)]
+    run_id: RunId
+    location: GeoPoint
+    note: Annotated[str | None, Field(max_length=280)] = None
+
+
+class SosRequest(BaseModel):
+    """Body of POST /sos."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    run_id: RunId
+    location: GeoPoint
+    people_count: Annotated[int, Field(ge=1, le=MAX_PEOPLE)]
+    flags: VulnerabilityFlags = VulnerabilityFlags()
+    sos_id: Annotated[str | None, Field(pattern=SOS_ID.pattern, description="Optional: send the same id to retry safely.")] = None
+
+
 class Citizen:
-    def __init__(self, store: Store) -> None:
-        self.store = store
+    def __init__(
+        self,
+        store: Store,
+        bus: Bus | None = None,
+        photos: Photos | None = None,
+        pathfinder: Pathfinder | None = None,
+        now: Callable[[], datetime] = lambda: datetime.now(UTC),
+    ) -> None:
+        self.store, self.bus, self.photos, self.pathfinder, self.now = store, bus, photos, pathfinder, now
         self._segments: list[dict[str, Any]] | None = None
         self.router = Router()
         self.router.add("GET", "/segments", self.segments)
@@ -61,6 +124,10 @@ class Citizen:
         self.router.add("GET", "/saved-places", self.list_places)
         self.router.add("PUT", "/saved-places/{place_id}", self.put_place)
         self.router.add("DELETE", "/saved-places/{place_id}", self.delete_place)
+        self.router.add("POST", "/reports/upload-url", self.report_upload_url)
+        self.router.add("POST", "/reports", self.create_report)
+        self.router.add("POST", "/sos", self.create_sos)
+        self.router.add("POST", "/routes", self.route)
 
     def handle(self, event: dict[str, Any]) -> dict[str, Any]:
         return self.router.handle(event)
@@ -154,7 +221,118 @@ class Citizen:
         self.store.delete("SavedPlaces", device_id, place_id)
         return {"deleted": place_id}
 
+    # --- reports, SOS and routes -----------------------------------------------
+
+    def report_upload_url(self, request: Request) -> dict[str, Any]:
+        """A fresh report id and a presigned PUT for its photo. The app uploads, then POSTs /reports."""
+        self.install_id(request)
+        body = self._body(UploadUrlRequest, request)
+        photos = self._need(self.photos, "photo_upload")
+        report_id = new_id("rp", self.now())
+        key = photo_key(body.run_id, report_id)
+        return {
+            "report_id": report_id,
+            "photo_key": key,
+            "upload_url": photos.upload_url(key),
+            "method": "PUT",
+            "headers": {"content-type": CONTENT_TYPE},
+            "expires_in": UPLOAD_SECONDS,
+        }
+
+    def create_report(self, request: Request) -> dict[str, Any]:
+        reporter_id = self.install_id(request)
+        body = self._body(ReportRequest, request)
+        photos, bus = self._need(self.photos, "photo_upload"), self._need(self.bus, "events")
+
+        existing = self.store.get("Reports", body.run_id, body.report_id)
+        if existing is None:
+            key = photo_key(body.run_id, body.report_id)
+            if not photos.exists(key):
+                raise HttpError(422, "photo_not_uploaded", "upload the photo to the URL from /reports/upload-url first")
+            report = Report(
+                report_id=body.report_id,
+                run_id=body.run_id,
+                reporter_id=reporter_id,
+                captured_at=self._run_time(body.run_id),
+                location=body.location,
+                photo_key=key,
+                note=body.note,
+            )
+            if not self.store.put("Reports", report.model_dump(mode="json"), only_if_absent=True):
+                existing = self.store.get("Reports", body.run_id, body.report_id)  # lost a race: look at who won
+        if existing is not None:
+            report = Report.model_validate(existing)
+            if report.reporter_id != reporter_id:
+                raise HttpError(409, "report_id_taken", "that report id belongs to another install")
+        # A retry re-sends the same event (same id), which the receivers drop.
+        bus.publish(
+            ReportCreated(
+                event_id=str(uuid.uuid5(_NAMESPACE, f"{report.run_id}|{report.report_id}|created")),
+                run_id=report.run_id,
+                sim_time=report.captured_at,
+                emitted_at=self.now(),
+                source="api",
+                detail=report,
+            )
+        )
+        return report.model_dump(mode="json")
+
+    def create_sos(self, request: Request) -> dict[str, Any]:
+        reporter_id = self.install_id(request)
+        body = self._body(SosRequest, request)
+        bus = self._need(self.bus, "events")
+        created_at = self._run_time(body.run_id)
+        sos = Sos(
+            sos_id=body.sos_id or new_id("sos", created_at),
+            run_id=body.run_id,
+            reporter_id=reporter_id,
+            created_at=created_at,
+            location=body.location,
+            people_count=body.people_count,
+            flags=body.flags,
+        )
+        bus.publish(
+            SosCreated(
+                event_id=str(uuid.uuid5(_NAMESPACE, f"{sos.run_id}|{sos.sos_id}|created")),
+                run_id=sos.run_id,
+                sim_time=created_at,
+                emitted_at=self.now(),
+                source="api",
+                detail=sos,
+            )
+        )
+        return sos.model_dump(mode="json")
+
+    def route(self, request: Request) -> dict[str, Any]:
+        """A safe route from the Pathfinder. `no_safe_route` is a normal answer, not an error."""
+        self.install_id(request)
+        body = self._body(RouteRequest, request)
+        pathfinder = self._need(self.pathfinder, "routing")
+        try:
+            answer = pathfinder.route(body.model_dump(mode="json"))
+            return RouteResponse.model_validate(answer).model_dump(mode="json")
+        except RoutingUnavailable as error:
+            raise HttpError(503, "routing_unavailable", "route planning isn't available yet") from error
+        except RoutingFailed as error:
+            log.error("pathfinder failed: %s", error)
+            raise HttpError(502, "routing_failed", "route planning failed; try again") from error
+        except ValidationError as error:
+            log.error("pathfinder answered outside the contract: %s", error)
+            raise HttpError(502, "bad_route_response", "route planning gave an unusable answer") from error
+
     # --- internals -------------------------------------------------------------
+
+    @staticmethod
+    def _need(dependency: Any, name: str) -> Any:
+        if dependency is None:
+            raise HttpError(503, f"{name}_unavailable", f"{name.replace('_', ' ')} isn't configured on this deployment")
+        return dependency
+
+    def _run_time(self, run_id: str) -> datetime:
+        try:
+            return run_sim_time(self.store, run_id, self.now)
+        except RunNotStarted as error:
+            raise HttpError(409, "run_not_started", f"{run_id} has no clock yet: start the Replay first") from error
 
     @staticmethod
     def _place_id(request: Request) -> str:
