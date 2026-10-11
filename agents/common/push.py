@@ -63,8 +63,22 @@ class PushSender(Protocol):
     def send(self, push: Push) -> PushResult: ...
 
 
+class RecordOnlySender:
+    """No push sender configured (#6 not deployed): nothing reaches a phone.
+
+    The Herald still records the alert (alert.sent, activity) and says "push not connected".
+    """
+
+    connected = False
+
+    def send(self, push: Push) -> PushResult:
+        return PushResult(sent=0, failed=0, removed_tokens=0)
+
+
 class MemoryPushSender:
     """A fake sender: pushes are recorded in `sent` instead of reaching phones."""
+
+    connected = True
 
     def __init__(self) -> None:
         self.sent: list[Push] = []
@@ -76,6 +90,8 @@ class MemoryPushSender:
 
 class LambdaPushSender:
     """Invokes the send-push Lambda synchronously. `client` is a boto3 "lambda" client."""
+
+    connected = True
 
     def __init__(self, function_name: str | None = None, client: Any = None) -> None:
         self.function_name = function_name or os.environ.get(SEND_PUSH_ENV)

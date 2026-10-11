@@ -234,9 +234,11 @@ class Herald:
                 proposal_id=proposal_id,
             ),
         )
-        ctx.activity(
-            saw=saw,
-            decided=f"Sent {'a Ward Alert' if scope == AlertScope.WARD else 'an alert'} to {result.sent} of {len(devices)} devices",
-            why=decision.reason,
-        )
+        kind = "a Ward Alert" if scope == AlertScope.WARD else "an alert"
+        devices_text = f"{len(devices)} device{'' if len(devices) == 1 else 's'}"
+        if getattr(self.sender, "connected", True):
+            decided = f"Sent {kind} to {result.sent} of {devices_text}"
+        else:
+            decided = f"Recorded {kind} for {devices_text} (push not connected)"
+        ctx.activity(saw=saw, decided=decided, why=decision.reason)
         return True
