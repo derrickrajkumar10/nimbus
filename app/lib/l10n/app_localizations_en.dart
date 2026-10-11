@@ -261,4 +261,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get findingYou => 'Finding where you are…';
+
+  @override
+  String get reportTitle => 'Report water';
+
+  @override
+  String get reportBody =>
+      'Photograph the water next to something we can measure: a tyre, a kerb, a step, a knee.';
+
+  @override
+  String get takePhoto => 'Take a photo';
+
+  @override
+  String get choosePhoto => 'Choose a photo';
+
+  @override
+  String get retake => 'Retake';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get sending => 'Sending…';
+
+  @override
+  String get reportPinHint => 'Move the map to where you took the photo';
+
+  @override
+  String get usingYourLocation => 'Sent with your current location';
+
+  @override
+  String get locationOff => 'Turn on location to send a Report.';
+
+  @override
+  String get reportFailed =>
+      'Couldn\'t send. Check your connection and try again.';
+
+  @override
+  String get photoNotUploaded => 'The photo didn\'t upload. Try again.';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get home => 'Home';
 }

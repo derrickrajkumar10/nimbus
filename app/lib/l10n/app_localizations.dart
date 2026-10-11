@@ -547,6 +547,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finding where you are…'**
   String get findingYou;
+
+  /// No description provided for @reportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report water'**
+  String get reportTitle;
+
+  /// No description provided for @reportBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Photograph the water next to something we can measure: a tyre, a kerb, a step, a knee.'**
+  String get reportBody;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get takePhoto;
+
+  /// No description provided for @choosePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a photo'**
+  String get choosePhoto;
+
+  /// No description provided for @retake.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get retake;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get sending;
+
+  /// No description provided for @reportPinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map to where you took the photo'**
+  String get reportPinHint;
+
+  /// No description provided for @usingYourLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent with your current location'**
+  String get usingYourLocation;
+
+  /// No description provided for @locationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on location to send a Report.'**
+  String get locationOff;
+
+  /// No description provided for @reportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t send. Check your connection and try again.'**
+  String get reportFailed;
+
+  /// No description provided for @photoNotUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'The photo didn\'t upload. Try again.'**
+  String get photoNotUploaded;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get home;
 }
 
 class _AppLocalizationsDelegate

@@ -136,5 +136,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "reportTitle": "Report water",
+  "reportBody": "Photograph the water next to something we can measure: a tyre, a kerb, a step, a knee.",
+  "takePhoto": "Take a photo",
+  "choosePhoto": "Choose a photo",
+  "retake": "Retake",
+  "send": "Send",
+  "sending": "Sending…",
+  "reportPinHint": "Move the map to where you took the photo",
+  "usingYourLocation": "Sent with your current location",
+  "locationOff": "Turn on location to send a Report.",
+  "reportFailed": "Couldn't send. Check your connection and try again.",
+  "photoNotUploaded": "The photo didn't upload. Try again.",
+  "tryAgain": "Try again",
+  "home": "Home"
 }

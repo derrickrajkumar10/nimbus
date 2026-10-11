@@ -264,4 +264,49 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get findingYou => 'நீங்கள் இருக்கும் இடத்தைக் கண்டறிகிறது…';
+
+  @override
+  String get reportTitle => 'நீரைப் புகாரளி';
+
+  @override
+  String get reportBody =>
+      'அளக்கக்கூடிய ஒன்றின் அருகே நீரைப் படம் எடுங்கள்: டயர், நடைபாதை ஓரம், படி, முழங்கால்.';
+
+  @override
+  String get takePhoto => 'படம் எடு';
+
+  @override
+  String get choosePhoto => 'படத்தைத் தேர்ந்தெடு';
+
+  @override
+  String get retake => 'மீண்டும் எடு';
+
+  @override
+  String get send => 'அனுப்பு';
+
+  @override
+  String get sending => 'அனுப்புகிறது…';
+
+  @override
+  String get reportPinHint => 'படம் எடுத்த இடத்திற்கு வரைபடத்தை நகர்த்துங்கள்';
+
+  @override
+  String get usingYourLocation =>
+      'உங்கள் தற்போதைய இருப்பிடத்துடன் அனுப்பப்படும்';
+
+  @override
+  String get locationOff => 'புகாரளிக்க இருப்பிடத்தை இயக்குங்கள்.';
+
+  @override
+  String get reportFailed =>
+      'அனுப்ப முடியவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலுங்கள்.';
+
+  @override
+  String get photoNotUploaded => 'படம் பதிவேறவில்லை. மீண்டும் முயலுங்கள்.';
+
+  @override
+  String get tryAgain => 'மீண்டும் முயல்';
+
+  @override
+  String get home => 'முகப்பு';
 }

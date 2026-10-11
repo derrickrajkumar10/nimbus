@@ -5,6 +5,7 @@ import 'screens/launch_gate.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/place_detail_screen.dart';
 import 'screens/place_edit_screen.dart';
+import 'screens/report_screen.dart';
 import 'screens/ward_map_screen.dart';
 import 'theme/tide_colors.dart';
 
@@ -37,6 +38,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       page = const HomeScreen();
     case Routes.map:
       page = const WardMapScreen();
+    case Routes.report:
+      page = ReportScreen(placeId: settings.arguments as String?);
     case Routes.placeEdit:
       page = PlaceEditScreen(placeId: settings.arguments as String?);
     case _ when name.startsWith('/place/'):
