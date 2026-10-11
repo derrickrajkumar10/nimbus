@@ -1,0 +1,24 @@
+[project]
+name = "nimbus-engines"
+version = "0.1.0"
+description = "NIMBUS deterministic engines (risk first). Standard library and nimbus_contracts only, no LLM."
+requires-python = ">=3.12"
+dependencies = [
+    "nimbus-contracts",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+# Not an installable package: the Sentinel Lambda bundles engines/risk/ as-is.
+package = false
+
+[tool.uv.sources]
+nimbus-contracts = { path = "../contracts", editable = true }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
