@@ -1,0 +1,40 @@
+.section {
+  padding-bottom: 8px;
+}
+
+.head {
+  padding: 18px 20px 6px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: rgba(79, 209, 217, 0.14);
+  color: var(--teal);
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.sos {
+  background: rgba(232, 67, 42, 0.16);
+  color: #ff8a75;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--faint);
+}

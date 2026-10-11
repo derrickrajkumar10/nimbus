@@ -1,0 +1,215 @@
+.card {
+  margin: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--raise);
+  padding: 14px 14px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.card:hover {
+  border-color: var(--line-2);
+}
+
+.selected,
+.selected:hover {
+  border-color: rgba(79, 209, 217, 0.55);
+}
+
+.kick {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--faint);
+}
+
+.kind {
+  color: var(--muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+}
+
+.held {
+  font-size: 11px;
+  color: var(--watch);
+  border: 1px solid rgba(242, 179, 74, 0.4);
+  padding: 1px 7px;
+  border-radius: 5px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin: 7px 0 5px;
+}
+
+.reason {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.45;
+  font-weight: 300;
+}
+
+.facts {
+  display: flex;
+  gap: 18px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line);
+}
+
+.facts div {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+
+.facts b {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 1px;
+}
+
+.draft {
+  margin-top: 10px;
+  border-left: 2px solid var(--line-2);
+  padding: 2px 0 2px 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ta {
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.acts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.approve {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: var(--radius-control);
+  background: var(--teal-btn);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+
+.approve:hover:not(:disabled) {
+  background: var(--teal-btn-hover);
+}
+
+.approve kbd {
+  font-size: 11px;
+  opacity: 0.7;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  padding: 0 5px;
+}
+
+.secondary,
+.danger {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font-size: 13.5px;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s;
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(169, 198, 219, 0.08);
+  color: var(--text);
+}
+
+.danger {
+  color: var(--likely);
+  border: 1px solid rgba(255, 122, 87, 0.4);
+}
+
+.danger:hover {
+  background: rgba(255, 122, 87, 0.1);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.confirm > span {
+  margin-right: auto;
+}
+
+.done {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--teal);
+}
+
+.conflict {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--watch);
+}
+
+.error {
+  margin-top: 8px;
+  font-size: 12.5px;
+  color: var(--likely);
+}
+
+.editor {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--faint);
+}
+
+.field select,
+.field textarea {
+  background: var(--deep);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-control);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--text);
+  resize: vertical;
+}
+
+.editor .acts {
+  margin-top: 0;
+}
