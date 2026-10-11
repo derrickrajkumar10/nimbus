@@ -15,6 +15,9 @@ TABLE_KEYS: dict[str, tuple[str, str | None]] = {
     "Segments": ("segment_id", None),
     "SegmentRisk": ("run_id", "segment_id"),
     "Readings": ("run_id", "reading_id"),
+    "Reports": ("run_id", "report_id"),
+    "Activity": ("run_id", "emitted_at#event_id"),
+    "Runs": ("run_id", None),
     "Devices": ("device_id", None),
     "SavedPlaces": ("device_id", "place_id"),
     "PlaceIndex": ("run_id#segment_id", "device_id#place_id"),
@@ -24,9 +27,11 @@ TABLE_ENV_PREFIX = "NIMBUS_TABLE_"
 
 class Store(Protocol):
     def scan(self, table: str) -> list[dict[str, Any]]: ...
-    def query(self, table: str, pk: str) -> list[dict[str, Any]]: ...
+    def query(self, table: str, pk: str, *, newest_first: bool = False, limit: int | None = None) -> list[dict[str, Any]]: ...
     def get(self, table: str, pk: str, sk: str | None = None) -> dict[str, Any] | None: ...
-    def put(self, table: str, item: dict[str, Any]) -> None: ...
+    def put(self, table: str, item: dict[str, Any], *, only_if_absent: bool = False) -> bool:
+        """Write `item`. With `only_if_absent`, False when a row with that key already exists."""
+        ...
     def delete(self, table: str, pk: str, sk: str | None = None) -> None: ...
 
 
@@ -41,17 +46,23 @@ class MemoryStore:
     def scan(self, table):
         return [dict(r) for r in self.tables[table].values()]
 
-    def query(self, table, pk):
+    def query(self, table, pk, *, newest_first=False, limit=None):
         rows = [r for (p, _), r in self.tables[table].items() if p == pk]
         sk = TABLE_KEYS[table][1]
-        return [dict(r) for r in sorted(rows, key=lambda r: r[sk])] if sk else [dict(r) for r in rows]
+        if sk:
+            rows = sorted(rows, key=lambda r: r[sk], reverse=newest_first)
+        return [dict(r) for r in (rows[:limit] if limit else rows)]
 
     def get(self, table, pk, sk=None):
         row = self.tables[table].get((pk, sk))
         return dict(row) if row else None
 
-    def put(self, table, item):
-        self.tables[table][self._key(table, item)] = dict(item)
+    def put(self, table, item, *, only_if_absent=False):
+        key = self._key(table, item)
+        if only_if_absent and key in self.tables[table]:
+            return False
+        self.tables[table][key] = dict(item)
+        return True
 
     def delete(self, table, pk, sk=None):
         self.tables[table].pop((pk, sk), None)
@@ -92,17 +103,36 @@ class DynamoStore:
     def scan(self, table):
         return self._all("scan", table)
 
-    def query(self, table, pk):
+    def query(self, table, pk, *, newest_first=False, limit=None):
         from boto3.dynamodb.conditions import Key
 
-        return self._all("query", table, KeyConditionExpression=Key(TABLE_KEYS[table][0]).eq(pk))
+        kwargs: dict[str, Any] = {
+            "KeyConditionExpression": Key(TABLE_KEYS[table][0]).eq(pk),
+            "ScanIndexForward": not newest_first,
+        }
+        if limit:
+            kwargs["Limit"] = limit
+            return [plain(i) for i in self._table(table).query(**kwargs).get("Items", [])]
+        return self._all("query", table, **kwargs)
 
     def get(self, table, pk, sk=None):
         item = self._table(table).get_item(Key=self._key(table, pk, sk)).get("Item")
         return plain(item) if item else None
 
-    def put(self, table, item):
-        self._table(table).put_item(Item=json.loads(json.dumps(item), parse_float=Decimal))
+    def put(self, table, item, *, only_if_absent=False):
+        from boto3.dynamodb.conditions import Attr
+        from botocore.exceptions import ClientError
+
+        kwargs: dict[str, Any] = {"Item": json.loads(json.dumps(item), parse_float=Decimal)}
+        if only_if_absent:
+            kwargs["ConditionExpression"] = Attr(TABLE_KEYS[table][0]).not_exists()
+        try:
+            self._table(table).put_item(**kwargs)
+            return True
+        except ClientError as error:
+            if error.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
+                return False
+            raise
 
     def delete(self, table, pk, sk=None):
         self._table(table).delete_item(Key=self._key(table, pk, sk))

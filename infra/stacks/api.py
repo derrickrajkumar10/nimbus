@@ -14,11 +14,12 @@ the Firebase Admin SDK is large. It reads `Devices`, removes stale tokens, and r
 
 from pathlib import Path
 
-from aws_cdk import BundlingOptions, CfnOutput, Duration, Stack
+from aws_cdk import ArnFormat, BundlingOptions, CfnOutput, Duration, Stack
 from aws_cdk import aws_apigatewayv2 as apigw
 from aws_cdk import aws_apigatewayv2_integrations as integrations
 from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import aws_sqs as sqs
@@ -72,10 +73,24 @@ CITIZEN_ROUTES = (
     ("GET", "/saved-places"),
     ("PUT", "/saved-places/{place_id}"),
     ("DELETE", "/saved-places/{place_id}"),
+    ("POST", "/reports/upload-url"),
+    ("POST", "/reports"),
+    ("POST", "/sos"),
+    ("POST", "/routes"),
 )
-CITIZEN_READ_TABLES = ("Segments", "SegmentRisk", "Readings")
-# Put and delete only, except SavedPlaces which is also read back. Devices is never read by the API.
-CITIZEN_WRITE_TABLES = ("Devices", "SavedPlaces", "PlaceIndex")
+# Activity and Runs give a Replay its storm clock; Reports is read back to make a retry safe.
+CITIZEN_READ_TABLES = ("Segments", "SegmentRisk", "Readings", "Activity", "Runs")
+# Put and delete only, except SavedPlaces (also read back) and Reports (put and get, never deleted).
+# Devices is never read by the API. A SOS isn't stored here: it's emitted, and the projector stores it.
+CITIZEN_WRITE_TABLES = ("Devices", "SavedPlaces", "PlaceIndex", "Reports")
+CITIZEN_WRITE_ACTIONS = {
+    "Devices": ["dynamodb:PutItem"],
+    "Reports": ["dynamodb:PutItem", "dynamodb:GetItem"],
+}
+# POST /routes calls the Pathfinder (#23). Override with `-c pathfinder_function=...`; until that
+# Lambda exists, the route answers 503 and the app shows "no route service".
+DEFAULT_PATHFINDER_FUNCTION = "nimbus-pathfinder"
+PHOTO_PREFIX = "reports/*"
 
 PUSH_FUNCTION_NAME = "nimbus-send-push"  # the name agents' stack defaults to (agents/common/push.py)
 FIREBASE_SECRET = "nimbus/firebase"
@@ -218,6 +233,7 @@ class NimbusApi(Stack):
         CfnOutput(self, "ConsoleApiUrl", value=self.console_api.api_endpoint)
 
     def _citizen(self, shared: NimbusShared, code: lambda_.Code) -> None:
+        pathfinder = self.node.try_get_context("pathfinder_function") or DEFAULT_PATHFINDER_FUNCTION
         self.citizen = lambda_.Function(
             self,
             "Citizen",
@@ -226,18 +242,38 @@ class NimbusApi(Stack):
             code=code,
             memory_size=256,
             timeout=Duration.seconds(15),
-            description="Citizen app HTTP API: devices, Saved Places, Segments, risk, Readings",
+            description="Citizen app HTTP API: devices, Saved Places, Segments, risk, Readings, Reports, SOS, routes",
             environment={
-                f"NIMBUS_TABLE_{name.upper()}": shared.tables[name].table_name
-                for name in (*CITIZEN_READ_TABLES, *CITIZEN_WRITE_TABLES)
+                "NIMBUS_EVENT_BUS": shared.bus.event_bus_name,
+                "NIMBUS_BUCKET_PHOTOS": shared.photos.bucket_name,
+                "NIMBUS_PATHFINDER_FUNCTION": pathfinder,
+                **{
+                    f"NIMBUS_TABLE_{name.upper()}": shared.tables[name].table_name
+                    for name in (*CITIZEN_READ_TABLES, *CITIZEN_WRITE_TABLES)
+                },
             },
         )
         for name in CITIZEN_READ_TABLES:
             shared.tables[name].grant_read_data(self.citizen)
         shared.tables["SavedPlaces"].grant_read_data(self.citizen)
         for name in CITIZEN_WRITE_TABLES:
-            actions = ["dynamodb:PutItem"] if name == "Devices" else ["dynamodb:PutItem", "dynamodb:DeleteItem"]
+            actions = CITIZEN_WRITE_ACTIONS.get(name, ["dynamodb:PutItem", "dynamodb:DeleteItem"])
             shared.tables[name].grant(self.citizen, *actions)
+
+        # Photos: the Lambda signs upload URLs and checks an upload exists, nothing else, only under reports/.
+        shared.photos.grant_put(self.citizen, PHOTO_PREFIX)
+        shared.photos.grant_read(self.citizen, PHOTO_PREFIX)
+        shared.bus.grant_put_events_to(self.citizen)  # report.created and sos.created
+        self.citizen.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[
+                    self.format_arn(
+                        service="lambda", resource="function", resource_name=pathfinder, arn_format=ArnFormat.COLON_RESOURCE_NAME
+                    )
+                ],
+            )
+        )
 
         self.citizen_api = apigw.HttpApi(
             self,

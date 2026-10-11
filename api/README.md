@@ -41,7 +41,7 @@ Repeating the same decision by the same officer returns 200 again. `decided_at` 
 
 Not built yet, blocked on the questions at the bottom of this file: `GET/POST /runs`, `GET /hit-rate`, `GET /after-action`.
 
-## Citizen API (#7, M1 subset)
+## Citizen API (#7)
 
 `api/citizen/`, one Lambda behind its own HTTP API (`nimbus-citizen`, stack `NimbusApi`). The base URL is the stack output `CitizenApiUrl` and the SSM parameter `/nimbus/api/citizen-url`.
 
@@ -56,12 +56,24 @@ An install identifies itself with the **`X-Install-Id`** header (8 to 80 charact
 | `GET /saved-places` | yes | | the install's `SavedPlace[]`, each plus `run_ids` |
 | `PUT /saved-places/{place_id}` | yes | `{"label", "kind", "location": {lat, lon}, "radius_m"?, "run_ids"?}` | the `SavedPlace` (with `segment_ids` worked out) plus `run_ids` |
 | `DELETE /saved-places/{place_id}` | yes | | `{"deleted": "<place_id>"}` |
+| `POST /reports/upload-url` | yes | `{"run_id"}` | `{report_id, photo_key, upload_url, method: "PUT", headers, expires_in}`. PUT the JPEG to `upload_url` with the returned `content-type` header within 5 minutes |
+| `POST /reports` | yes | `{"report_id", "run_id", "location": {lat, lon}, "note"?}` | the stored `Report`. Emits `report.created` |
+| `POST /sos` | yes | `{"run_id", "location", "people_count", "flags"?: {elderly, child, medical}, "sos_id"?}` | the `Sos`. Emits `sos.created`; the projector stores it |
+| `POST /routes` | yes | `RouteRequest` | `RouteResponse` (`ok` or `no_safe_route`) |
 
 **Saved Places.** The server works out `segment_ids`: every Segment whose line passes within `radius_m` (default 150, at most 1000) of the point, or the nearest Segment if none does and one is within 500 m. It writes the `PlaceIndex` rows the Herald reads, one per Run and Segment, and retires rows that no longer apply when a place moves or changes Runs. At most 20 places per install (409 `too_many_places`).
 
 **`run_ids`** says which Runs alert this place. The default is `["live"]`. The demo phones should send `["replay-michaung"]`, so a Replay's alerts reach them and live users never get Replay alerts.
 
-Not built yet (#7b): `POST /reports/upload-url`, `POST /reports`, `POST /sos`, `POST /routes`.
+**Reports.** Call `/reports/upload-url` for a `report_id` and a signed URL, upload the photo, then `POST /reports` with that `report_id`. The photo's key is `reports/{run_id}/{report_id}.jpg`, and `/reports` answers 422 `photo_not_uploaded` until it is there. `captured_at` is the **Run's storm time**, not the phone's clock. Sending the same `/reports` again is safe: one row, and the same event is re-sent. Another install can't claim your `report_id` (409).
+
+**SOS.** Send an optional `sos_id` (`sos-` plus 26 characters) to make a retry safe. Without one the server makes it. Nothing is stored by this route: the event goes to Triage and the projector writes the `Sos` row, so it appears in the console's `/sos` a moment later.
+
+**Routes.** The API calls the Pathfinder Lambda (name from `NIMBUS_PATHFINDER_FUNCTION`, default `nimbus-pathfinder`) and returns its answer if it fits the contract. 503 `routing_unavailable` until that Lambda exists, 502 if it fails. `no_safe_route` is a normal 200.
+
+**A Replay with no clock.** `/reports` and `/sos` answer 409 `run_not_started` for a Replay that has no storm time yet (no `Runs.sim_time` and no agent activity), because a record then has no time to carry. Start the Replay first. `live` always works.
+
+Not built: `GET/POST /runs`, `/hit-rate`, `/after-action` (the console routes), because the Replay Driver is a command-line script with nothing to call.
 
 ## FCM push sender (#6)
 

@@ -182,6 +182,44 @@ def test_both_apis_are_throttled_until_auth_exists(template):
     assert all(s["DefaultRouteSettings"] == {"ThrottlingBurstLimit": 50, "ThrottlingRateLimit": 25} for s in stages)
 
 
+def test_citizen_lambda_signs_uploads_only_under_reports(template):
+    s3 = [s for s in statements_for(template, "CitizenServiceRole") if any(a.startswith("s3:") for a in actions(s))]
+    assert s3, "the citizen API signs photo uploads"
+    for statement in s3:
+        assert "reports/*" in json.dumps(statement["Resource"]), "photo access is limited to the reports/ prefix"
+    allowed = {a for s in s3 for a in actions(s)}
+    assert "s3:PutObject" in allowed and "s3:GetObject*" in allowed
+    assert not any(a in allowed for a in ("s3:DeleteObject", "s3:DeleteObject*", "s3:*"))
+
+
+def test_citizen_lambda_publishes_events_and_may_invoke_only_the_pathfinder(template):
+    statements = statements_for(template, "CitizenServiceRole")
+    assert any("events:PutEvents" in actions(s) for s in statements)
+    invokes = [s for s in statements if "lambda:InvokeFunction" in actions(s)]
+    assert len(invokes) == 1 and "nimbus-pathfinder" in json.dumps(invokes[0]["Resource"])
+    template.has_resource_properties(
+        "AWS::Lambda::Function",
+        {
+            "Handler": "citizen.handler.handler",
+            "Environment": {
+                "Variables": assertions.Match.object_like(
+                    {
+                        "NIMBUS_EVENT_BUS": assertions.Match.any_value(),
+                        "NIMBUS_BUCKET_PHOTOS": assertions.Match.any_value(),
+                        "NIMBUS_PATHFINDER_FUNCTION": "nimbus-pathfinder",
+                        "NIMBUS_TABLE_REPORTS": assertions.Match.any_value(),
+                    }
+                )
+            },
+        },
+    )
+
+
+def test_reports_are_put_and_read_but_never_deleted(template):
+    reports = [s for s in dynamo_statements(template, "CitizenServiceRole") if "ReportsTable" in json.dumps(s["Resource"])]
+    assert sorted(a for s in reports for a in actions(s)) == ["dynamodb:GetItem", "dynamodb:PutItem"]
+
+
 def test_citizen_url_is_published(template):
     template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/api/citizen-url"})
 
