@@ -1,8 +1,10 @@
 """Herald Lambda: wakes on risk.changed and proposal.decided.
 
-Runs on practice Subscribers until PlaceIndex is wired up (#32), with an
-in-memory alert log and risk view. The send-push Lambda is looked up only when
-the first alert is sent, because its SSM name ships later with #6.
+Reads Subscribers from PlaceIndex and current risk from SegmentRisk when their
+table env vars are set (always, when deployed); otherwise practice Subscribers and
+an in-memory risk view, for local runs. The per-place alert log is still in memory
+(#42). The send-push Lambda is looked up only when the first alert is sent,
+because its name ships later with #6.
 """
 
 from functools import cache
@@ -13,9 +15,10 @@ from common.context import AgentContext
 from common.push import LambdaPushSender
 from common.runtime import make_handler
 from herald.core import Herald
-from herald.subscribers import practice_subscribers
+from herald.subscribers import DynamoSubscribers, practice_subscribers
 from sentinel.core import MemoryRiskStore
 from sentinel.fixtures import load_segments
+from sentinel.store import DynamoRiskStore
 
 
 class _LazyLambdaSender:
@@ -32,9 +35,9 @@ class _LazyLambdaSender:
 def _herald() -> Herald:
     return Herald(
         segments=load_segments(),
-        subscribers=practice_subscribers(),
+        subscribers=DynamoSubscribers.from_env() or practice_subscribers(),
         sender=_LazyLambdaSender(),
-        risks=MemoryRiskStore(),
+        risks=DynamoRiskStore.from_env() or MemoryRiskStore(),
     )
 
 

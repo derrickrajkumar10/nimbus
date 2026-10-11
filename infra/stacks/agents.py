@@ -151,6 +151,9 @@ class NimbusAgents(Stack):
         }
         if spec.sends_push and self.send_push_function:
             environment["NIMBUS_SEND_PUSH_FUNCTION"] = self.send_push_function
+        # agents/common/dynamo.py reads NIMBUS_TABLE_<NAME>; without it an agent falls back to memory.
+        for table in dict.fromkeys((*spec.reads, *spec.writes)):
+            environment[f"NIMBUS_TABLE_{table.upper()}"] = self._ssm(f"tables/{table}")
 
         fn = lambda_.Function(
             self,

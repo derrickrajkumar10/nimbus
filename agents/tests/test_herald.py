@@ -52,7 +52,7 @@ class World:
 
     def risk_changed(self, segment_id, before, after, at=T0, minutes=60):
         event = RiskChanged(
-            event_id=new_id("ev", at), run_id=self.run_id, sim_time=at, emitted_at=datetime.now(UTC), source="sentinel",
+            event_id=new_id("ev", at, seed=f"{segment_id}|{before}|{after}"), run_id=self.run_id, sim_time=at, emitted_at=datetime.now(UTC), source="sentinel",
             detail=RiskChangedDetail(
                 segment_id=segment_id, previous_band=before, band=after, score=80, minutes_to_flood=minutes,
                 reasons=[Reason(code="forecast_exceeds_threshold", text="49 mm forecast in 3 h against a 89 mm threshold")],

@@ -29,7 +29,6 @@ from nimbus_contracts.entities import (
 from nimbus_contracts.events import AlertSent, ProposalCreated, ProposalDecided, RiskChanged
 
 from common.context import AgentContext
-from common.ids import new_id
 from common.push import Push, PushSender
 from herald import messages
 from herald.subscribers import Subscriber, Subscribers
@@ -155,7 +154,7 @@ class Herald:
             # Ask Cedar first so the denial shows in the feed, then hold it as a Proposal.
             decision = ctx.cedar_check(
                 "SendAlert",
-                f'Alert::"{new_id("al", event.sim_time)}"',
+                f'Alert::"{ctx.new_id("al")}"',
                 resource_attrs={"scope": AlertScope.PLACE.value, "recipient_count": len(subs)},
             )
             if not decision.allowed:
@@ -168,7 +167,7 @@ class Herald:
     def _propose(self, ctx: AgentContext, run_id: str, message: messages.Message, recipients: int, saw: str, why: str) -> None:
         final = messages.for_run(message, run_id)
         proposal = Proposal(
-            proposal_id=new_id("pr", ctx.sim_time),
+            proposal_id=ctx.new_id("pr"),
             run_id=run_id,
             proposed_by=ctx.agent,
             created_at=ctx.sim_time,
@@ -201,7 +200,7 @@ class Herald:
     # --- sending -----------------------------------------------------------
 
     def _send(self, ctx, run_id, subs, message, segment_ids, scope, *, approved, proposal_id, band, saw) -> bool:
-        alert_id = new_id("al", ctx.sim_time)
+        alert_id = ctx.new_id("al")
         devices = tuple(dict.fromkeys(s.device_id for s in subs))
         decision = ctx.cedar_check(
             "SendAlert",

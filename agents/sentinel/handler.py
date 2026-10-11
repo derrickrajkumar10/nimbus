@@ -1,7 +1,8 @@
 """Sentinel Lambda: wakes on clock.tick.
 
-Runs on practice data until the risk engine (#4) and the SegmentRisk table (#32)
-are connected; swap the scorer and store in `_defaults` when they are.
+Scores practice data until the risk engine (#4) lands. Previous bands live in the
+SegmentRisk table when NIMBUS_TABLE_SEGMENTRISK is set (always, when deployed),
+so a cold start or a second copy doesn't re-flag every Segment (#42).
 """
 
 from functools import cache
@@ -13,6 +14,7 @@ from common.runtime import make_handler
 from sentinel.core import MemoryRiskStore, run_tick
 from sentinel.fixtures import FixtureScorer, load_segments
 from sentinel.reasons import ReasonWriter
+from sentinel.store import DynamoRiskStore
 
 
 @cache
@@ -21,7 +23,7 @@ def _defaults() -> dict:
     return {
         "segments": load_segments(),
         "scorer": FixtureScorer(),
-        "store": MemoryRiskStore(),
+        "store": DynamoRiskStore.from_env() or MemoryRiskStore(),
         "reasons": ReasonWriter(),
     }
 

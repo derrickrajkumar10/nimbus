@@ -125,6 +125,19 @@ def test_herald_gets_push_permission_only_once_the_sender_exists():
     assert herald_env["NIMBUS_SEND_PUSH_FUNCTION"] == "nimbus-send-push"
 
 
+def test_each_agent_gets_the_table_names_it_reads_or_writes(template):
+    """#42: without these env vars the agents would fall back to in-memory state."""
+    params = ssm_parameter_names(template)
+    env_by_fn = {
+        f["Properties"]["FunctionName"]: f["Properties"]["Environment"]["Variables"]
+        for f in resources(template, "AWS::Lambda::Function").values()
+    }
+    for spec in AGENTS:
+        env = env_by_fn[f"nimbus-agent-{spec.name}"]
+        tables = {k.removeprefix("NIMBUS_TABLE_"): {params.get(r) for r in refs(v)} for k, v in env.items() if k.startswith("NIMBUS_TABLE_")}
+        assert tables == {t.upper(): {f"/nimbus/tables/{t}"} for t in (*spec.reads, *spec.writes)}
+
+
 def test_logs_expire_after_a_week(template):
     for group in resources(template, "AWS::Logs::LogGroup").values():
         assert group["Properties"]["RetentionInDays"] == 7
