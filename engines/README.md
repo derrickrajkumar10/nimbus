@@ -14,3 +14,13 @@ Deterministic Python, no LLM. **Owner: Goutam.**
 ```bash
 uv run pytest -q
 ```
+
+## Dispatch solver (minimal)
+
+`dispatch.rank_work_orders(segments, risks, resources, readings=(), sos=(), *, run_id, sim_time)` is pure and returns ranked `Candidate` Work Orders, each with the numbers behind it and a one-sentence reason.
+
+- **Needs:** Segments in `flooded` or `likely`. Only `free` Resources. Pumps go to water; tree crews never do (fallen-tree Hazards aren't an input yet).
+- **impact** = (`buildings_nearby` + 10 per Reading + SOS weight) × band weight (`flooded` 2, `likely` 1). An SOS within 150 m of a Segment vertex weighs 5 per person, plus 10 if anyone is elderly, a child or needs medical help.
+- **travel_minutes** = haversine km from the Resource to the Segment's first coordinate ÷ `FLOOD_SPEED_KMH` (15) × 60.
+- **score** = impact ÷ (travel_minutes + 5).
+- **Greedy:** highest score first, each Resource once, each Segment at most one Resource. Ties break by `segment_id`, then `resource_id`.

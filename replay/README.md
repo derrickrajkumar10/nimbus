@@ -11,6 +11,8 @@ Before the first tick it seeds `PlaceIndex` (table name from SSM `/nimbus/tables
 - each `--demo-phone DEVICE_ID#PLACE_ID` (the real device ID from the app) on Velachery Main Road `27480309-1` and `27480309-4`;
 - 150 simulated Subscribers, `sim-001#sim-place` to `sim-150#sim-place` with `simulated = true`, on `27320162-0`. That's over Cedar's 100-recipient limit, so the Herald's alert there becomes a Ward Alert Proposal.
 
+It also puts the Run's `Resources` (table from SSM `/nimbus/tables/Resources`, or `NIMBUS_TABLE_RESOURCES`): `contracts/fixtures/resources.json` with `run_id` set to the Run, keyed by `run_id` and `resource_id`, so re-seeding resets them. `--no-seed` skips both.
+
 ```bash
 uv run python driver.py --dry-run --ticks 4 --speed 0                 # print ticks, no AWS
 uv run python driver.py --demo-phone <device_id>#<place_id>           # seed, then publish with your AWS credentials
