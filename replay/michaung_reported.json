@@ -1,0 +1,11 @@
+{
+  "note": "TODO: verify. Add an entry only after opening the source yourself and confirming the street or Locality, the time and the URL. Lock this list before reading HIT_RATE.md (#26).",
+  "entry_shape": {
+    "name": "Street or Locality as the source names it",
+    "segment_ids": ["Segment IDs that street or Locality covers"],
+    "reported_at": "ISO time with offset, e.g. 2023-12-04T09:30:00+05:30",
+    "source_url": "the article or post you opened"
+  },
+  "rule": "A report counts as predicted when at least 20% of its segment_ids reach likely (CONTEXT.md, Hit Rate).",
+  "reports": []
+}
