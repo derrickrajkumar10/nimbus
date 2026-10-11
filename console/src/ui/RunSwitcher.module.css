@@ -1,0 +1,70 @@
+.root {
+  position: relative;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  color: var(--muted);
+  transition: border-color 0.15s;
+}
+
+.button:hover {
+  border-color: var(--muted);
+}
+
+.name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.tagReplay,
+.tagLive {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tagReplay {
+  color: var(--watch);
+}
+
+.tagLive {
+  color: var(--teal);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  list-style: none;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  padding: 4px;
+  z-index: 20;
+  box-shadow: 0 12px 32px rgba(3, 12, 30, 0.5);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.option:hover,
+.option[aria-selected='true'] {
+  background: var(--raise);
+}
