@@ -86,6 +86,40 @@ def test_dry_run_writes_nothing_and_prints_counts(capsys):
     assert "nimbus-Segments: 21 rows (dry run)" in out and "nimbus-Proposals: 1 rows" in out
 
 
+class MissingTables:
+    def Table(self, name):  # noqa: N802
+        from botocore.exceptions import ClientError
+
+        class T:
+            def batch_writer(self_):
+                raise ClientError({"Error": {"Code": "ResourceNotFoundException", "Message": "x"}}, "BatchWriteItem")
+
+        return T()
+
+
+def test_a_missing_table_says_where_to_look_and_writes_nothing(capsys, monkeypatch):
+    monkeypatch.setattr(loader, "_where", lambda region: f"account 111122223333, {region}")
+    assert loader.main(["--run-id", "replay-michaung"], resource=MissingTables()) == 1
+    err = capsys.readouterr().err
+    assert "nimbus-Segments doesn't exist in account 111122223333, us-east-1" in err
+    assert "Deploy NimbusShared" in err and "Nothing was written" in err
+
+
+def test_other_aws_errors_are_not_hidden():
+    from botocore.exceptions import ClientError
+
+    class Denied:
+        def Table(self, name):  # noqa: N802
+            class T:
+                def batch_writer(self_):
+                    raise ClientError({"Error": {"Code": "AccessDeniedException", "Message": "x"}}, "BatchWriteItem")
+
+            return T()
+
+    with pytest.raises(ClientError):
+        loader.load(Denied(), {"Segments": [{"segment_id": "1-0"}]})
+
+
 def test_loading_into_live_needs_an_explicit_flag(capsys):
     with pytest.raises(SystemExit):
         loader.main(["--run-id", "live"])

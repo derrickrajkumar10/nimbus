@@ -53,18 +53,34 @@ def rows_for(run_id: str, fixtures: Path = FIXTURES) -> dict[str, list[dict[str,
     return out
 
 
+class MissingTable(RuntimeError):
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.name = name
+
+
 def load(resource: Any, rows: dict[str, list[dict[str, Any]]], prefix: str = TABLE_PREFIX) -> dict[str, int]:
-    """Write `rows` through a boto3 dynamodb resource. Returns how many rows went to each table."""
+    """Write `rows` through a boto3 dynamodb resource. Returns how many rows went to each table.
+
+    Raises MissingTable when a table doesn't exist, which means NimbusShared isn't deployed there.
+    """
+    from botocore.exceptions import ClientError
+
     written = {}
     for table, items in rows.items():
-        with resource.Table(prefix + table).batch_writer() as batch:
-            for item in items:
-                batch.put_item(Item=item)
+        try:
+            with resource.Table(prefix + table).batch_writer() as batch:
+                for item in items:
+                    batch.put_item(Item=item)
+        except ClientError as error:
+            if error.response.get("Error", {}).get("Code") == "ResourceNotFoundException":
+                raise MissingTable(prefix + table) from error
+            raise
         written[table] = len(items)
     return written
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Sequence[str] | None = None, resource: Any = None) -> int:
     parser = argparse.ArgumentParser(description="Load contracts/fixtures/ into the NimbusShared tables.")
     parser.add_argument("--run-id", default="replay-michaung", help="Run to load the scene into (default replay-michaung)")
     parser.add_argument("--prefix", default=TABLE_PREFIX, help=f"table name prefix (default {TABLE_PREFIX})")
@@ -87,10 +103,29 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     import boto3
 
-    written = load(boto3.resource("dynamodb", region_name=args.region), rows, args.prefix)
+    resource = resource or boto3.resource("dynamodb", region_name=args.region)
+    try:
+        written = load(resource, rows, args.prefix)
+    except MissingTable as missing:
+        print(
+            f"{missing.name} doesn't exist in {_where(args.region)}. Deploy NimbusShared there first "
+            "(infra/README.md), or point AWS_PROFILE at the account that has it. Nothing was written.",
+            file=sys.stderr,
+        )
+        return 1
     for table, count in written.items():
         print(f"{args.prefix}{table}: wrote {count} rows to run {args.run_id if table != 'Segments' else '(static)'}")
     return 0
+
+
+def _where(region: str) -> str:
+    """'account 1234, us-east-1' for the credentials in use, so the message says where it looked."""
+    try:
+        import boto3
+
+        return f"account {boto3.client('sts', region_name=region).get_caller_identity()['Account']}, {region}"
+    except Exception:  # no credentials, no network: still say the region
+        return f"the account your credentials point to, {region}"
 
 
 if __name__ == "__main__":
