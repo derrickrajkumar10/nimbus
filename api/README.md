@@ -41,6 +41,28 @@ Repeating the same decision by the same officer returns 200 again. `decided_at` 
 
 Not built yet, blocked on the questions at the bottom of this file: `GET/POST /runs`, `GET /hit-rate`, `GET /after-action`.
 
+## Citizen API (#7, M1 subset)
+
+`api/citizen/`, one Lambda behind its own HTTP API (`nimbus-citizen`, stack `NimbusApi`). The base URL is the stack output `CitizenApiUrl` and the SSM parameter `/nimbus/api/citizen-url`.
+
+An install identifies itself with the **`X-Install-Id`** header (8 to 80 characters: letters, digits, `:`, `_`, `-`). It becomes `device_id` and `reporter_id`. **There's no real auth yet** (issue #19, which swaps this for the Cognito guest identity id), so anyone can claim any id. The read routes need no header. Like the console API it is throttled to 25 requests per second per route (burst 50).
+
+| Route | Needs install id | Body or query | Returns |
+|---|---|---|---|
+| `GET /segments` | no | | `Segment[]`. Static, so the app can cache it |
+| `GET /risk?run_id=` | no | | `SegmentRisk[]` |
+| `GET /readings?run_id=&report_id=` | no | `report_id` optional: only Readings merged from that Report | `Reading[]` |
+| `POST /devices` | yes | `{"fcm_token": "...", "language": "en" \| "ta"}` | `{device_id, language}`. Registering again replaces the token |
+| `GET /saved-places` | yes | | the install's `SavedPlace[]`, each plus `run_ids` |
+| `PUT /saved-places/{place_id}` | yes | `{"label", "kind", "location": {lat, lon}, "radius_m"?, "run_ids"?}` | the `SavedPlace` (with `segment_ids` worked out) plus `run_ids` |
+| `DELETE /saved-places/{place_id}` | yes | | `{"deleted": "<place_id>"}` |
+
+**Saved Places.** The server works out `segment_ids`: every Segment whose line passes within `radius_m` (default 150, at most 1000) of the point, or the nearest Segment if none does and one is within 500 m. It writes the `PlaceIndex` rows the Herald reads, one per Run and Segment, and retires rows that no longer apply when a place moves or changes Runs. At most 20 places per install (409 `too_many_places`).
+
+**`run_ids`** says which Runs alert this place. The default is `["live"]`. The demo phones should send `["replay-michaung"]`, so a Replay's alerts reach them and live users never get Replay alerts.
+
+Not built yet (#7b): `POST /reports/upload-url`, `POST /reports`, `POST /sos`, `POST /routes`.
+
 ## Event persistence
 
 Agents and engines publish events to the bus. The console and app read DynamoDB. Nothing used to copy events into the tables, so `GET /activity`, `GET /proposals` and the rest would have read empty tables. The projector (`api/projector/`, built in #40) closes that gap.

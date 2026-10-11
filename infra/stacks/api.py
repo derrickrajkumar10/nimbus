@@ -1,10 +1,11 @@
-"""NimbusApi: the event projector and the console HTTP API. The citizen API and FCM sender come with #7 and #6.
+"""NimbusApi: the event projector, the console HTTP API and the citizen HTTP API. The FCM sender comes with #6.
 
 The projector (api/projector/) copies bus events into the tables the console and app read.
 It may write only the tables below. Every other table has its own writer (api/README.md).
 
 The console API (api/console/) reads those tables and updates one thing: a Proposal's decision.
-Both Lambdas share one bundle.
+The citizen API (api/citizen/) serves the Flutter app: devices, Saved Places (and the PlaceIndex that
+follows them), Segments, risk and Readings. All three Lambdas share one bundle.
 """
 
 from pathlib import Path
@@ -57,6 +58,20 @@ CONSOLE_UPDATED_TABLE = "Proposals"
 THROTTLE_RATE_LIMIT = 25
 THROTTLE_BURST_LIMIT = 50
 
+# Keep in step with Citizen.router.table and TABLE_KEYS in api/citizen. api/tests/test_citizen.py checks it.
+CITIZEN_ROUTES = (
+    ("GET", "/segments"),
+    ("GET", "/risk"),
+    ("GET", "/readings"),
+    ("POST", "/devices"),
+    ("GET", "/saved-places"),
+    ("PUT", "/saved-places/{place_id}"),
+    ("DELETE", "/saved-places/{place_id}"),
+)
+CITIZEN_READ_TABLES = ("Segments", "SegmentRisk", "Readings")
+# Put and delete only, except SavedPlaces which is also read back. Devices is never read by the API.
+CITIZEN_WRITE_TABLES = ("Devices", "SavedPlaces", "PlaceIndex")
+
 # Everything the bundle doesn't need, so the asset hash only moves when api/ or contracts/ do.
 _EXCLUDE = [
     ".git", ".github", "agents", "app", "console", "docs", "engines", "infra", "replay",
@@ -75,7 +90,7 @@ def _api_code() -> lambda_.Code:
             command=[
                 "bash",
                 "-c",
-                "pip install --no-cache-dir ./contracts -t /asset-output && cp -r api/projector api/console /asset-output/",
+                "pip install --no-cache-dir ./contracts -t /asset-output && cp -r api/projector api/console api/citizen /asset-output/",
             ],
             # Same options as stacks/agents.py. Rootless Podman maps the host user to root, and
             # SELinux (Fedora) needs label=disable for the mounts. Harmless under Docker.
@@ -93,6 +108,7 @@ class NimbusApi(Stack):
         code = _api_code()
         self._projector(shared, code)
         self._console(shared, code)
+        self._citizen(shared, code)
 
     def _projector(self, shared: NimbusShared, code: lambda_.Code) -> None:
         self.projector_dlq = sqs.Queue(self, "ProjectorDlq", retention_period=Duration.days(14))
@@ -171,3 +187,60 @@ class NimbusApi(Stack):
             self, "ParamApiConsoleUrl", parameter_name="/nimbus/api/console-url", string_value=self.console_api.api_endpoint
         )
         CfnOutput(self, "ConsoleApiUrl", value=self.console_api.api_endpoint)
+
+    def _citizen(self, shared: NimbusShared, code: lambda_.Code) -> None:
+        self.citizen = lambda_.Function(
+            self,
+            "Citizen",
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            handler="citizen.handler.handler",
+            code=code,
+            memory_size=256,
+            timeout=Duration.seconds(15),
+            description="Citizen app HTTP API: devices, Saved Places, Segments, risk, Readings",
+            environment={
+                f"NIMBUS_TABLE_{name.upper()}": shared.tables[name].table_name
+                for name in (*CITIZEN_READ_TABLES, *CITIZEN_WRITE_TABLES)
+            },
+        )
+        for name in CITIZEN_READ_TABLES:
+            shared.tables[name].grant_read_data(self.citizen)
+        shared.tables["SavedPlaces"].grant_read_data(self.citizen)
+        for name in CITIZEN_WRITE_TABLES:
+            actions = ["dynamodb:PutItem"] if name == "Devices" else ["dynamodb:PutItem", "dynamodb:DeleteItem"]
+            shared.tables[name].grant(self.citizen, *actions)
+
+        self.citizen_api = apigw.HttpApi(
+            self,
+            "CitizenApi",
+            api_name="nimbus-citizen",
+            create_default_stage=False,
+            description="NIMBUS citizen app API (issue #7). Identified by X-Install-Id until issue #19.",
+            cors_preflight=apigw.CorsPreflightOptions(
+                allow_origins=["*"],
+                allow_methods=[
+                    apigw.CorsHttpMethod.GET,
+                    apigw.CorsHttpMethod.POST,
+                    apigw.CorsHttpMethod.PUT,
+                    apigw.CorsHttpMethod.DELETE,
+                    apigw.CorsHttpMethod.OPTIONS,
+                ],
+                allow_headers=["content-type", "x-install-id"],
+                max_age=Duration.hours(1),
+            ),
+        )
+        apigw.HttpStage(
+            self,
+            "CitizenStage",
+            http_api=self.citizen_api,
+            auto_deploy=True,
+            throttle=apigw.ThrottleSettings(rate_limit=THROTTLE_RATE_LIMIT, burst_limit=THROTTLE_BURST_LIMIT),
+        )
+        integration = integrations.HttpLambdaIntegration("CitizenIntegration", self.citizen)
+        for method, path in CITIZEN_ROUTES:
+            self.citizen_api.add_routes(path=path, methods=[apigw.HttpMethod(method)], integration=integration)
+
+        ssm.StringParameter(
+            self, "ParamApiCitizenUrl", parameter_name="/nimbus/api/citizen-url", string_value=self.citizen_api.api_endpoint
+        )
+        CfnOutput(self, "CitizenApiUrl", value=self.citizen_api.api_endpoint)
