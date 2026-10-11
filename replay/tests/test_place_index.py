@@ -134,7 +134,7 @@ def test_driver_seeds_place_index_before_the_first_tick(monkeypatch, capsys):
     assert calls == ["GetParameter"] + ["BatchWriteItem"] * 7 + ["GetParameter", "BatchWriteItem", "PutEvents"]
     err = capsys.readouterr().err
     assert "PlaceIndex pi: 1 demo phone(s)" in err
-    assert "Resources res: 3 for Run replay-michaung" in err
+    assert "Resources res: 5 for Run replay-michaung" in err
 
 
 def test_driver_sends_no_ticks_when_seeding_fails(monkeypatch, capsys):

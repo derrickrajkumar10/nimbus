@@ -91,4 +91,12 @@ def test_dry_run_reports_resources_without_aws(monkeypatch, capsys):
 
     assert driver.main(["--dry-run", "--ticks", "1", "--speed", "0"]) == 0
 
-    assert "would put 3 Resources for Run replay-michaung" in capsys.readouterr().err
+    assert "would put 5 Resources for Run replay-michaung" in capsys.readouterr().err
+
+
+def test_a_replay_run_is_seeded_with_two_extra_free_pumps():
+    run = resources.seeded("replay-michaung-2")
+
+    assert [r.resource_id for r in run] == ["rs-pump-1", "rs-pump-2", "rs-tree-1", "rs-pump-3", "rs-pump-4"]
+    assert {r.run_id for r in run} == {"replay-michaung-2"}
+    assert [r.status for r in run if r.resource_id in ("rs-pump-3", "rs-pump-4")] == ["free", "free"]

@@ -110,7 +110,7 @@ def seed(run_id: str, phones: Sequence[tuple[str, str]]) -> str:
     rows = place_index.demo_rows(run_id, phones) + place_index.crowd_rows(run_id)
     index_table = place_index.table_name(ssm)
     place_index.write(dynamodb, index_table, rows)
-    run_resources = resources.for_run(run_id)
+    run_resources = resources.seeded(run_id)
     resource_table = resources.table_name(ssm)
     resources.write(dynamodb, resource_table, run_resources)
     return f"PlaceIndex {index_table}: {_seed_summary(run_id, phones)}\nResources {resource_table}: {len(run_resources)} for Run {run_id}"
@@ -169,7 +169,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.dry_run:
         if seeding:
             print(f"dry run, would index {_seed_summary(args.run_id, args.demo_phone)}", file=sys.stderr)
-            print(f"dry run, would put {len(resources.for_run(args.run_id))} Resources for Run {args.run_id}", file=sys.stderr)
+            print(f"dry run, would put {len(resources.seeded(args.run_id))} Resources for Run {args.run_id}", file=sys.stderr)
 
         def send(tick: ClockTick) -> None:
             print(tick.model_dump_json(), flush=True)

@@ -31,6 +31,23 @@ def for_run(run_id: str, fixture: Path = FIXTURE) -> list[Resource]:
     ]
 
 
+# Two more free pumps for the demo, so the Dispatcher builds a queue of Work Orders as the
+# storm spreads instead of stopping at Pump 2. Replay-only: the shared fixture keeps its three.
+DEMO_PUMPS = (
+    {"resource_id": "rs-pump-3", "kind": "pump", "label": "Pump 3", "status": "free", "location": {"lat": 12.9722, "lon": 80.2152}},  # near Ram Nagar
+    {"resource_id": "rs-pump-4", "kind": "pump", "label": "Pump 4", "status": "free", "location": {"lat": 12.9741, "lon": 80.2232}},  # near Sarathy Nagar
+)
+
+
+def demo_pumps(run_id: str) -> list[Resource]:
+    return [Resource.model_validate({**row, "run_id": run_id}) for row in DEMO_PUMPS]
+
+
+def seeded(run_id: str) -> list[Resource]:
+    """Everything a Replay Run starts with: the fixture Resources plus the demo pumps."""
+    return for_run(run_id) + demo_pumps(run_id)
+
+
 def item(resource: Resource) -> dict[str, Any]:
     """The Resource as a DynamoDB item. Floats become Decimals, which DynamoDB requires."""
     plain = json.loads(json.dumps(resource.model_dump(mode="json")), parse_float=Decimal)
