@@ -13,7 +13,10 @@ from pathlib import Path
 
 from nimbus_contracts.entities import Segment, SegmentRisk
 
-FIXTURES = Path(__file__).resolve().parents[2] / "contracts" / "fixtures"
+_HERE = Path(__file__).resolve()
+# In the Lambda bundle the fixtures sit next to the agent packages; in the repo, under ../contracts.
+_CANDIDATES = (_HERE.parents[1] / "contracts" / "fixtures", _HERE.parents[2] / "contracts" / "fixtures")
+FIXTURES = next((p for p in _CANDIDATES if p.is_dir()), _CANDIDATES[-1])
 
 
 @cache
