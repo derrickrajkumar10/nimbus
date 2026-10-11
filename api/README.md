@@ -34,7 +34,7 @@ A table is written either by the **projector** (below), or by the **lane that ow
 - Parses `detail` with `nimbus_contracts.events.Event`, so a malformed event is rejected before anything is written. Table names come from the `/nimbus/tables/*` SSM parameters.
 - Every key leads with the event's `run_id` (ADR 0001). A Replay's events can't land in `live`.
 - Idempotent, because EventBridge delivers at least once: puts use deterministic keys, and `proposal.created` uses `attribute_not_exists` so a redelivery can't overwrite a Proposal an officer has already decided.
-- `Activity`'s sort key is `emitted_at` in UTC with a `Z` suffix, then `#event_id`, so the feed sorts in time order (`contracts/storage.md`).
+- `Activity`'s sort key is built from `emitted_at` parsed and re-formatted as `%Y-%m-%dT%H:%M:%S.%fZ` (UTC, fixed width), then `#event_id`. Never use the event's JSON string: it drops a zero fraction, so `07:00:00Z` would sort after `07:00:00.500000Z`. `agents/common/keys.py` (`utc_key`, on `vishwa/32-utc-sort-keys`) does the same for agents.
 - Floats are stored as `Decimal` (boto3's DynamoDB resource rejects `float`).
 
 ### Proposal decisions
