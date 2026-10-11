@@ -147,3 +147,14 @@ def test_model_ids_come_from_context():
     t = synth(nova_lite_id="amazon.nova-lite-v1:0")
     env = next(iter(resources(t, "AWS::Lambda::Function").values()))["Properties"]["Environment"]["Variables"]
     assert env["NIMBUS_NOVA_LITE_ID"] == "amazon.nova-lite-v1:0"
+
+
+def test_bundle_includes_the_risk_engine():
+    """The Sentinel imports `risk` (engines/risk, #4) for Michaung Replays."""
+    from stacks.agents import NimbusAgents  # noqa: F401
+    import inspect
+    import stacks.agents as agents
+
+    source = inspect.getsource(agents.NimbusAgents._bundle)
+    assert "cp -r /asset-input/engines/risk /asset-output/risk" in source
+    assert "!engines/risk/**" in source

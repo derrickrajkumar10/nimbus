@@ -161,11 +161,46 @@ def test_lambda_handler_end_to_end(monkeypatch):
     monkeypatch.setattr(sh.ReasonWriter, "_nova_rewrite", lambda self, text: f"PLAIN: {text}")
     sh._defaults.cache_clear()
     bus = MemoryBus()
-    payload = {"detail-type": "clock.tick", "source": "nimbus.replay-driver", "detail": tick().model_dump(mode="json")}
+    live = tick().model_copy(update={"run_id": "live"})  # not a Michaung Replay: practice fixtures
+    payload = {"detail-type": "clock.tick", "source": "nimbus.replay-driver", "detail": live.model_dump(mode="json")}
     make_handler(Agent.SENTINEL, sh.handle, bus=bus)(payload)
     assert len(bus.of_type("risk.changed")) == len(not_low_in_fixtures())
-    assert len(bus.of_type("agent.activity")) == 1
+    [activity] = bus.of_type("agent.activity")
+    assert "practice data" in activity.detail.saw
     sh._defaults.cache_clear()
+
+
+def _replay_ticks(monkeypatch, *ticks):
+    import sentinel.handler as sh
+
+    monkeypatch.setattr(sh.ReasonWriter, "_nova_rewrite", lambda self, text: text)
+    sh._defaults.cache_clear()
+    bus = MemoryBus()
+    handler = make_handler(Agent.SENTINEL, sh.handle, bus=bus)
+    for t in ticks:
+        handler({"detail-type": "clock.tick", "source": "nimbus.replay-driver", "detail": t.model_dump(mode="json")})
+    sh._defaults.cache_clear()
+    return bus
+
+
+def test_michaung_replay_is_scored_by_the_risk_engine(monkeypatch):
+    # 4 Dec 07:45 IST is the storm's peak in the archived rain: every fixture Segment is likely.
+    peak = tick(8, minutes_later=5 * 60 + 45)
+    bus = _replay_ticks(monkeypatch, peak)
+    [activity] = bus.of_type("agent.activity")
+    assert "Michaung rain, Open-Meteo archive" in activity.detail.saw
+    changes = bus.of_type("risk.changed")
+    assert len(changes) == 21 and all(c.detail.band == RiskBand.LIKELY for c in changes)
+
+
+def test_tick_outside_the_rain_data_is_skipped_not_retried(monkeypatch):
+    from datetime import datetime as dt
+
+    too_early = tick().model_copy(update={"sim_time": dt(2023, 11, 28, 0, 0, tzinfo=IST)})
+    bus = _replay_ticks(monkeypatch, too_early)  # must not raise, or EventBridge would retry it
+    assert bus.of_type("risk.changed") == []
+    [activity] = bus.of_type("agent.activity")
+    assert activity.detail.decided == "Skipped this tick" and "rain covers" in activity.detail.why
 
 
 def test_nova_rewrite_request_uses_sentinel_settings_and_a_fresh_agent():

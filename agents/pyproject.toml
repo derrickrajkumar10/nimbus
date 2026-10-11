@@ -23,5 +23,5 @@ package = false
 nimbus-contracts = { path = "../contracts", editable = true }
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "../engines"]  # engines/risk is bundled beside the agents in the Lambda
 testpaths = ["tests"]
