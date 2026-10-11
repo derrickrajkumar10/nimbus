@@ -1,6 +1,9 @@
 import { useCallback, useState } from 'react'
 import s from './App.module.css'
+import { useConfig } from './data/queries'
 import type { FeedItem } from './domain/activity'
+import { isReplay } from './domain/runs'
+import { ReplayBar } from './ui/ReplayBar'
 import { ActivityPanel } from './ui/ActivityPanel'
 import { AskCommander } from './ui/AskCommander'
 import { DecisionsPanel } from './ui/DecisionsPanel'
@@ -10,6 +13,7 @@ import { SosSection } from './ui/SosSection'
 import { TopBar } from './ui/TopBar'
 
 export default function App() {
+  const { runId } = useConfig()
   const [asked, setAsked] = useState<FeedItem[]>([])
   const upsert = useCallback(
     (item: FeedItem) =>
@@ -32,6 +36,7 @@ export default function App() {
       </aside>
       <main className={s.stage} aria-label="Map">
         <MapView />
+        {isReplay(runId) && <ReplayBar />}
       </main>
       <aside className={`${s.panel} ${s.right}`} aria-label="Activity">
         <ActivityPanel extra={asked} footer={<AskCommander onItem={upsert} />} />
