@@ -19,12 +19,12 @@ def fake_events_client():
     return boto3.client("events", region_name="us-east-1", aws_access_key_id="fake", aws_secret_access_key="fake")
 
 
-def no_aws():
-    raise AssertionError("the dry run must not create an AWS client")
+def no_aws(service):
+    raise AssertionError(f"the dry run must not create an AWS client, asked for {service}")
 
 
 def dry_run(monkeypatch, capsys, *args: str) -> list[ClockTick]:
-    monkeypatch.setattr(driver, "_events_client", no_aws)
+    monkeypatch.setattr(driver, "_aws_client", no_aws)
     assert driver.main(["--dry-run", "--speed", "0", *args]) == 0
     return [ClockTick.model_validate_json(line) for line in capsys.readouterr().out.splitlines()]
 
@@ -57,8 +57,16 @@ def test_run_id_and_start_are_flags(monkeypatch, capsys):
 
 
 def test_bad_flags_are_rejected(monkeypatch):
-    monkeypatch.setattr(driver, "_events_client", no_aws)
-    for bad in (["--start", "2023-12-03T18:00:00"], ["--start", "yesterday"], ["--ticks", "0"], ["--speed", "-1"]):
+    monkeypatch.setattr(driver, "_aws_client", no_aws)
+    for bad in (
+        ["--start", "2023-12-03T18:00:00"],
+        ["--start", "yesterday"],
+        ["--ticks", "0"],
+        ["--speed", "-1"],
+        ["--run-id", "live"],
+        ["--demo-phone", "no-place-id"],
+        ["--demo-phone", "sim-007#home"],
+    ):
         with pytest.raises(SystemExit):
             driver.main(["--dry-run", *bad])
 
@@ -104,14 +112,14 @@ def test_publish_raises_when_eventbridge_rejects_the_entry():
 
 def test_main_sends_to_the_bus_from_the_environment_and_stops_on_rejection(monkeypatch, capsys):
     client = fake_events_client()
-    monkeypatch.setattr(driver, "_events_client", lambda: client)
+    monkeypatch.setattr(driver, "_aws_client", lambda service: client)
     monkeypatch.setenv(driver.BUS_NAME_ENV, "nimbus-test")
     ok = {"FailedEntryCount": 0, "Entries": [{"EventId": "aws-1"}]}
     rejected = {"FailedEntryCount": 1, "Entries": [{"ErrorCode": "AccessDenied", "ErrorMessage": "no"}]}
     with Stubber(client) as stub:
         stub.add_response("put_events", ok)
         stub.add_response("put_events", rejected)
-        assert driver.main(["--ticks", "5", "--speed", "0"]) == 1
+        assert driver.main(["--ticks", "5", "--speed", "0", "--no-seed"]) == 1
         stub.assert_no_pending_responses()
     err = capsys.readouterr().err
     assert "-> nimbus-test" in err
