@@ -38,6 +38,12 @@ class AgentContext:
             "source": self.agent.value,
         }
 
+    def publish(self, event_type: type, detail: Any) -> Any:
+        """Build `event_type` with this context's run_id, sim_time and source, publish it, and return it."""
+        event = event_type(**self._envelope(), detail=detail)
+        self.bus.publish(event)
+        return event
+
     def cedar_check(
         self,
         action: str,
@@ -50,25 +56,18 @@ class AgentContext:
         decision = evaluate(
             agent_uid(self.agent), action, resource, resource_attrs=resource_attrs, context=context
         )
-        self.bus.publish(
-            PolicyDecided(
-                **self._envelope(),
-                detail=PolicyDecidedDetail(
-                    principal=self.agent,
-                    action=action,
-                    resource=resource,
-                    allowed=decision.allowed,
-                    reason=decision.reason,
-                ),
-            )
+        self.publish(
+            PolicyDecided,
+            PolicyDecidedDetail(
+                principal=self.agent,
+                action=action,
+                resource=resource,
+                allowed=decision.allowed,
+                reason=decision.reason,
+            ),
         )
         return decision
 
     def activity(self, saw: str, decided: str, why: str) -> None:
         """Emit one `agent.activity` line for the console feed."""
-        self.bus.publish(
-            AgentActivity(
-                **self._envelope(),
-                detail=AgentActivityDetail(agent=self.agent, saw=saw, decided=decided, why=why),
-            )
-        )
+        self.publish(AgentActivity, AgentActivityDetail(agent=self.agent, saw=saw, decided=decided, why=why))
