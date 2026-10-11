@@ -21,7 +21,7 @@ Every mutable table puts `run_id` first in its partition key ([ADR 0001](../docs
 | `SavedPlaces` | `device_id` | `place_id` | `SavedPlace` | App |
 | `PlaceIndex` | `run_id#segment_id` | `device_id#place_id` | Who to alert when a Segment changes | Herald |
 
-Key attributes are strings. A composite key such as `run_id#segment_id` is one attribute with that literal name, holding values like `live#27320162-0`. Sort keys that hold a time (`Ledger.sim_time`, the `emitted_at` in `Activity`) sort as text, so write them in UTC with a `Z` suffix, never with an offset like `+05:30`.
+Key attributes are strings. A composite key such as `run_id#segment_id` is one attribute with that literal name, holding values like `live#27320162-0`. Sort keys that hold a time (`Ledger.sim_time`, the `emitted_at` in `Activity`) sort as text, so write them in UTC with a `Z` suffix, never with an offset like `+05:30`, and at a fixed width: format them `%Y-%m-%dT%H:%M:%S.%fZ`. An event's JSON drops a zero fraction (`07:00:00Z` against `07:00:00.500000Z`), and as text the later one then sorts first.
 
 `PlaceIndex` is written per Run. Live Saved Places index under `live`. A Replay indexes only the demo devices that subscribed to it, so live users never get Replay alerts.
 

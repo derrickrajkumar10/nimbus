@@ -28,7 +28,7 @@ Table notes:
 - Tables are on-demand, named `nimbus-<Table>`, every key attribute a string.
 - A composite key such as `run_id#segment_id` is **one attribute with that literal name**, holding values like `live#27320162-0`.
 - `Segments` and the `data` bucket are kept if the stack is deleted. The rest are not.
-- Sort keys that hold times (`Ledger.sim_time`, `Activity.emitted_at#event_id`) sort as text, so write them all in UTC (`...Z`), never with a `+05:30` offset.
+- Sort keys that hold times (`Ledger.sim_time`, `Activity.emitted_at#event_id`) sort as text, so write them all in UTC at a fixed width, `%Y-%m-%dT%H:%M:%S.%fZ`, never with a `+05:30` offset and never the event's JSON string (it drops a zero fraction, so `07:00:00Z` would sort after `07:00:00.500000Z`).
 - The bus archives every `nimbus.*` event for 7 days, for debugging.
 
 ## Deploy
