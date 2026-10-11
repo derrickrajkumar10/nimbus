@@ -25,6 +25,7 @@ class Request:
     query: dict[str, str] = field(default_factory=dict)
     params: dict[str, str] = field(default_factory=dict)
     raw_body: str = ""
+    headers: dict[str, str] = field(default_factory=dict)  # names lower-cased, as API Gateway sends them
 
     def json(self) -> Any:
         try:
@@ -59,12 +60,13 @@ class Router:
         if event.get("isBase64Encoded"):
             body = base64.b64decode(body).decode()
         query = {k: v for k, v in (event.get("queryStringParameters") or {}).items() if v is not None}
+        headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
         try:
-            return self._dispatch(method, path, query, body)
+            return self._dispatch(method, path, query, body, headers)
         except HttpError as error:
             return respond(error.status, {"error": error.code, "message": error.message, **error.extra})
 
-    def _dispatch(self, method: str, path: str, query: dict[str, str], body: str) -> dict[str, Any]:
+    def _dispatch(self, method: str, path: str, query: dict[str, str], body: str, headers: dict[str, str]) -> dict[str, Any]:
         path_matched = False
         for route_method, _, pattern, handler in self._routes:
             match = pattern.match(path)
@@ -72,7 +74,7 @@ class Router:
                 continue
             path_matched = True
             if route_method == method:
-                request = Request(method, path, query, match.groupdict(), body)
+                request = Request(method, path, query, match.groupdict(), body, headers)
                 return respond(200, handler(request))
         if path_matched:
             raise HttpError(405, "method_not_allowed", f"{method} is not allowed on {path}")

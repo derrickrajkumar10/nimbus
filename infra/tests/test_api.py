@@ -7,9 +7,15 @@ import pytest
 from aws_cdk import assertions
 
 from stacks.api import (
+    CITIZEN_READ_TABLES,
+    CITIZEN_ROUTES,
+    CITIZEN_WRITE_TABLES,
     CONSOLE_READ_TABLES,
     CONSOLE_ROUTES,
     CONSOLE_UPDATED_TABLE,
+    FIREBASE_SECRET,
+    PUSH_FUNCTION_NAME,
+    PUSH_TABLE,
     PROJECTED_EVENT_TYPES,
     WRITTEN_TABLES,
     NimbusApi,
@@ -87,7 +93,11 @@ def test_projected_tables_are_run_scoped_tables():
 
 
 def test_console_api_exposes_exactly_the_routes(template):
-    keys = {r["Properties"]["RouteKey"] for r in template.find_resources("AWS::ApiGatewayV2::Route").values()}
+    keys = {
+        r["Properties"]["RouteKey"]
+        for r in template.find_resources("AWS::ApiGatewayV2::Route").values()
+        if "Console" in json.dumps(r["Properties"]["Target"])
+    }
     assert keys == {f"{method} {path}" for method, path in CONSOLE_ROUTES}
     template.has_resource_properties("AWS::ApiGatewayV2::Api", {"ProtocolType": "HTTP", "Name": "nimbus-console"})
 
@@ -128,3 +138,82 @@ def test_console_api_is_throttled(template):
 
 def test_console_url_is_published(template):
     template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/api/console-url"})
+
+
+# --- citizen API -----------------------------------------------------------
+
+
+def test_citizen_api_exposes_exactly_the_routes(template):
+    names = {
+        r["Properties"]["RouteKey"]
+        for r in template.find_resources("AWS::ApiGatewayV2::Route").values()
+        if "Citizen" in json.dumps(r["Properties"]["Target"])
+    }
+    assert names == {f"{method} {path}" for method, path in CITIZEN_ROUTES}
+    template.has_resource_properties("AWS::ApiGatewayV2::Api", {"ProtocolType": "HTTP", "Name": "nimbus-citizen"})
+
+
+def test_citizen_lambda_touches_only_its_tables(template):
+    dynamo = dynamo_statements(template, "CitizenServiceRole")
+    granted = json.dumps(dynamo)
+    mine = {*CITIZEN_READ_TABLES, *CITIZEN_WRITE_TABLES}
+    for name in mine:
+        assert f"{name}Table" in granted, name
+    for table in TABLES:
+        if table.name not in mine:
+            assert f"{table.name}Table" not in granted, f"citizen API must not touch {table.name}"
+
+
+def test_citizen_lambda_cannot_write_what_it_only_reads_or_read_devices(template):
+    dynamo = dynamo_statements(template, "CitizenServiceRole")
+    for statement in dynamo:
+        writes = {"dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:UpdateItem", "dynamodb:BatchWriteItem"} & set(actions(statement))
+        reads = {"dynamodb:GetItem", "dynamodb:Query", "dynamodb:Scan"} & set(actions(statement))
+        resource = json.dumps(statement["Resource"])
+        if writes:
+            assert not any(f"{name}Table" in resource for name in CITIZEN_READ_TABLES), "Segments, risk and Readings are read-only"
+        if reads:
+            assert "DevicesTable" not in resource, "device tokens are never read back through the API"
+
+
+def test_both_apis_are_throttled_until_auth_exists(template):
+    stages = [r["Properties"] for r in template.find_resources("AWS::ApiGatewayV2::Stage").values()]
+    assert len(stages) == 2  # console and citizen
+    assert all(s["DefaultRouteSettings"] == {"ThrottlingBurstLimit": 50, "ThrottlingRateLimit": 25} for s in stages)
+
+
+def test_citizen_url_is_published(template):
+    template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/api/citizen-url"})
+
+
+# --- push sender -----------------------------------------------------------
+
+
+def test_the_push_lambda_has_the_name_the_agents_expect(template):
+    template.has_resource_properties(
+        "AWS::Lambda::Function",
+        {"FunctionName": PUSH_FUNCTION_NAME, "Handler": "push.handler.handler", "Runtime": "python3.12"},
+    )
+    template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/lambdas/send-push"})
+    assert PUSH_FUNCTION_NAME == "nimbus-send-push"
+
+
+def test_the_push_lambda_only_reads_and_deletes_devices(template):
+    dynamo = dynamo_statements(template, "PushServiceRole")
+    assert len(dynamo) == 1
+    assert sorted(actions(dynamo[0])) == ["dynamodb:BatchGetItem", "dynamodb:DeleteItem"]
+    assert f"{PUSH_TABLE}Table" in json.dumps(dynamo[0]["Resource"])
+    for table in TABLES:
+        if table.name != PUSH_TABLE:
+            assert f"{table.name}Table" not in json.dumps(dynamo), table.name
+
+
+def test_the_push_lambda_reads_the_firebase_secret_and_nothing_else_secret(template):
+    secret_statements = [s for s in statements_for(template, "PushServiceRole") if any(a.startswith("secretsmanager:") for a in actions(s))]
+    assert len(secret_statements) == 1
+    assert set(actions(secret_statements[0])) == {"secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"}
+    assert FIREBASE_SECRET.split("/")[1] in json.dumps(secret_statements[0]["Resource"])
+    template.has_resource_properties(
+        "AWS::Lambda::Function",
+        {"Handler": "push.handler.handler", "Environment": {"Variables": {"NIMBUS_TABLE_DEVICES": assertions.Match.any_value(), "NIMBUS_FIREBASE_SECRET": FIREBASE_SECRET}}},
+    )
