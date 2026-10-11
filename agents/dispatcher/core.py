@@ -60,6 +60,8 @@ class Dispatcher:
         current = self.risks.latest(run_id)
         if not any(r.band in NEEDS for r in current.values()):
             return  # nothing to send anyone to: stay out of the feed
+        if any(r.sim_time > event.sim_time for r in current.values()):
+            return  # a newer tick is already scored; cold starts can deliver ticks out of order
 
         mine = self.proposals.by_agent(run_id, ctx.agent.value)
         decided = {(p.action.resource_id, p.action.segment_id) for p in mine}
@@ -76,7 +78,11 @@ class Dispatcher:
 
         proposed = []
         for rank, pick in enumerate(picks, start=1):
-            proposal_id = new_id("pr", ctx.sim_time, seed=f"{run_id}|dispatcher|{pick.resource_id}|{pick.segment_id}")
+            # One ID per Resource and round: two copies running at once propose the same row, which the
+            # projector writes once. Its time part is the storm day, so IDs still sort by date.
+            round_ = sum(1 for p in mine if p.action.resource_id == pick.resource_id and p.status == ProposalStatus.REJECTED)
+            day = ctx.sim_time.replace(hour=0, minute=0, second=0, microsecond=0)
+            proposal_id = new_id("pr", day, seed=f"{run_id}|dispatcher|{pick.resource_id}|{round_}")
             decision = ctx.cedar_check(
                 "ProposeWorkOrder",
                 f'WorkOrder::"{proposal_id}"',

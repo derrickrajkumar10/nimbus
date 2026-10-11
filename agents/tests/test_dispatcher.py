@@ -214,3 +214,28 @@ def test_dynamo_stores_query_the_run_and_update_only_existing_resources():
         assert resources.for_run(w.run_id) == [pump]
         assert resources.set_status(w.run_id, PUMP_2, ResourceStatus.EN_ROUTE) is True
         assert resources.set_status(w.run_id, "rs-nope", ResourceStatus.EN_ROUTE) is False
+
+
+def test_a_stale_tick_proposes_nothing():
+    # Cold starts can deliver an older tick after a newer one has been scored.
+    w = World()
+    w.sentinel_tick(project=False)
+    old_line = w.bus.of_type("agent.activity")[0]
+    later = [r.model_copy(update={"sim_time": r.sim_time.replace(hour=r.sim_time.hour + 1)}) for r in w.risks.latest(w.run_id).values()]
+    w.risks.save(later)
+    fresh = Dispatcher(segments=load_segments(), risks=w.risks, resources=w.resources, proposals=MemoryProposals(), solver=rank_work_orders)
+    before = len(w.bus.events)
+    fresh.on_sentinel_tick(AgentContext.for_event(Agent.DISPATCHER, old_line, w.bus), old_line)
+    assert w.bus.events[before:] == []
+
+
+def test_two_copies_at_once_propose_the_same_row():
+    # Two Lambda copies that can't see each other's Proposal yet give it the same ID.
+    w = World()
+    other = Dispatcher(segments=load_segments(), risks=w.risks, resources=w.resources, proposals=MemoryProposals(), solver=rank_work_orders)
+    [first] = of_type(w.sentinel_tick(project=False), "proposal.created")
+    line = w.bus.of_type("agent.activity")[-2]  # the Sentinel's line for that tick
+    before = len(w.bus.events)
+    other.on_sentinel_tick(AgentContext.for_event(Agent.DISPATCHER, line, w.bus), line)
+    [second] = of_type(w.bus.events[before:], "proposal.created")
+    assert second.detail.proposal_id == first.detail.proposal_id
