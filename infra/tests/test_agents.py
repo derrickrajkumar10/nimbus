@@ -89,7 +89,7 @@ def test_each_agent_writes_only_the_table_it_owns(template):
     for _, actions, resource in statements(template):
         if any(a == "dynamodb:PutItem" for a in actions):
             written |= {params.get(r) for r in refs(resource)}
-    assert written == {"/nimbus/tables/SegmentRisk"}  # Sentinel (#9); later agents add theirs
+    assert written == {"/nimbus/tables/SegmentRisk", "/nimbus/tables/Resources"}  # Sentinel (#9), Dispatcher (#18)
 
 
 def test_lambdas_run_python_312_with_the_bus_name_from_ssm(template):
@@ -149,15 +149,16 @@ def test_model_ids_come_from_context():
     assert env["NIMBUS_NOVA_LITE_ID"] == "amazon.nova-lite-v1:0"
 
 
-def test_bundle_includes_the_risk_engine():
-    """The Sentinel imports `risk` (engines/risk, #4) for Michaung Replays."""
-    from stacks.agents import NimbusAgents  # noqa: F401
+def test_bundle_includes_the_engines():
+    """The Sentinel imports `risk` (engines/risk, #4) for Michaung Replays; the Dispatcher imports `dispatch` (#16)."""
     import inspect
+
     import stacks.agents as agents
 
+    assert set(agents.ENGINE_PACKAGES) == {"risk", "dispatch"}
     source = inspect.getsource(agents.NimbusAgents._bundle)
-    assert "cp -r /asset-input/engines/risk /asset-output/risk" in source
-    assert "!engines/risk/**" in source
+    assert 'cp -r /asset-input/engines/{p} /asset-output/{p}" for p in ENGINE_PACKAGES' in source
+    assert '*(f"!engines/{p}/**" for p in ENGINE_PACKAGES)' in source
 
 
 def test_each_agent_can_read_every_table_it_writes(template):
@@ -174,3 +175,13 @@ def test_each_agent_can_read_every_table_it_writes(template):
             entry["write"] |= tables
     assert by_role and all(e["write"] <= e["read"] for e in by_role.values())
     assert any("/nimbus/tables/SegmentRisk" in e["write"] and "/nimbus/tables/SegmentRisk" in e["read"] for e in by_role.values())
+
+
+def test_dispatcher_wakes_only_on_the_sentinels_activity_line(template):
+    # Waking on any agent.activity would include its own lines: an endless loop.
+    activity_rules = [
+        r["Properties"]["EventPattern"]
+        for r in resources(template, "AWS::Events::Rule").values()
+        if r["Properties"]["EventPattern"]["detail-type"] == ["agent.activity"]
+    ]
+    assert activity_rules == [{"detail-type": ["agent.activity"], "source": ["nimbus.sentinel"]}]

@@ -2,8 +2,9 @@
 
 Names come from NimbusShared's SSM parameters under /nimbus/, resolved at deploy
 time, never hard-coded. Every agent Lambda shares one code bundle: agents/ plus
-the contracts package, the risk engine (engines/risk, bundled as `risk`) and the
-fixtures (the Sentinel's fallback outside a Michaung Replay).
+the contracts package, the risk engine (engines/risk, bundled as `risk`), the dispatch
+solver (engines/dispatch, as `dispatch`) and the fixtures (the Sentinel's fallback
+outside a Michaung Replay).
 
 Context values (cdk.json or `-c key=value`):
   nova_lite_id, nova_pro_id   Bedrock inference-profile IDs from issue #1
@@ -32,7 +33,8 @@ SSM_PREFIX = "/nimbus"
 
 # Pinned to the versions agents/uv.lock was tested with.
 RUNTIME_PACKAGES = ("cedarpy==4.12.1", "strands-agents==1.59.0", "boto3==1.43.111", "pydantic==2.14.0")
-AGENT_PACKAGES = ("common", "policies", "sentinel", "herald")
+AGENT_PACKAGES = ("common", "policies", "sentinel", "herald", "dispatcher")
+ENGINE_PACKAGES = ("risk", "dispatch")
 
 DEFAULT_NOVA_LITE_ID = "us.amazon.nova-lite-v1:0"
 DEFAULT_NOVA_PRO_ID = "us.amazon.nova-pro-v1:0"
@@ -46,6 +48,9 @@ class AgentSpec:
     name: str
     handler: str
     wakes_on: tuple[str, ...]
+    # (event type, source agent) pairs that only that agent's events may trigger, e.g. the
+    # Dispatcher wakes on the Sentinel's activity line but never on its own.
+    only_from: tuple[tuple[str, str], ...] = ()
     reads: tuple[str, ...] = ()
     writes: tuple[str, ...] = ()
     uses_nova_lite: bool = False
@@ -69,6 +74,14 @@ AGENTS: tuple[AgentSpec, ...] = (
         wakes_on=("risk.changed", "proposal.decided"),
         reads=("PlaceIndex", "SegmentRisk"),
         sends_push=True,
+    ),
+    AgentSpec(
+        "dispatcher",
+        "dispatcher.handler.handler",
+        wakes_on=("agent.activity", "proposal.decided"),
+        only_from=(("agent.activity", "sentinel"),),  # after each Sentinel tick, SegmentRisk is settled
+        reads=("SegmentRisk", "Proposals"),  # Proposals: its own, so it never proposes twice
+        writes=("Resources",),  # en_route on an approved Work Order (api/README.md)
     ),
 )
 
@@ -114,8 +127,8 @@ class NimbusAgents(Stack):
         command = (
             f"pip install --no-cache-dir --quiet --target /asset-output {install}"
             f" && cp -r {copy} /asset-output/"
-            " && cp -r /asset-input/engines/risk /asset-output/risk"
-            " && mkdir -p /asset-output/contracts && cp -r /asset-input/contracts/fixtures /asset-output/contracts/"
+            + "".join(f" && cp -r /asset-input/engines/{p} /asset-output/{p}" for p in ENGINE_PACKAGES)
+            + " && mkdir -p /asset-output/contracts && cp -r /asset-input/contracts/fixtures /asset-output/contracts/"
             " && find /asset-output -name __pycache__ -prune -exec rm -rf {} +"
         )
         return lambda_.Code.from_asset(
@@ -126,8 +139,8 @@ class NimbusAgents(Stack):
                 *(f"!agents/{p}" for p in AGENT_PACKAGES),
                 *(f"!agents/{p}/**" for p in AGENT_PACKAGES),
                 "!engines",
-                "!engines/risk",
-                "!engines/risk/**",
+                *(f"!engines/{p}" for p in ENGINE_PACKAGES),
+                *(f"!engines/{p}/**" for p in ENGINE_PACKAGES),
                 "!contracts",
                 "!contracts/pyproject.toml",
                 "!contracts/README.md",
@@ -198,13 +211,15 @@ class NimbusAgents(Stack):
                 )
             )
 
+        only_from = dict(spec.only_from)
         for event_type in spec.wakes_on:
+            source = events.Match.exact_string(f"nimbus.{only_from[event_type]}") if event_type in only_from else events.Match.prefix("nimbus.")
             rule = events.Rule(
                 self,
                 f"{name}On{''.join(p.title() for p in event_type.split('.'))}",
                 event_bus=self.bus,
                 description=f"Wake the {spec.name} on {event_type}",
-                event_pattern=events.EventPattern(detail_type=[event_type], source=events.Match.prefix("nimbus.")),
+                event_pattern=events.EventPattern(detail_type=[event_type], source=source),
             )
             # Replays run on a fast clock: a stale tick isn't worth retrying for a day.
             rule.add_target(targets.LambdaFunction(fn, retry_attempts=2, max_event_age=Duration.hours(1)))
