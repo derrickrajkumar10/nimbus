@@ -78,7 +78,7 @@ The chosen mockup is "2 · Deep tide" in `.superpowers/brainstorm/` (local only,
 
 ## Calls made without Derrick (check these)
 
-- The Android package is `com.nimbus.chennai` (as requested from Varun on #1).
+- The Android package is `in.nimbus.app`, as registered in Firebase by Varun. `google-services.json` goes in `app/android/app/` and is never committed.
 - The manual "flag a hazard" option is cut, because no contract or route exists for it. Hazards come from photos via the Verifier.
 - The SOS photo is cut (see screen 10).
 - The action line comes from the last alert, not from logic copied into the app.
