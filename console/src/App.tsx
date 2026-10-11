@@ -1,4 +1,5 @@
 import s from './App.module.css'
+import { ActivityPanel } from './ui/ActivityPanel'
 import { DecisionsPanel } from './ui/DecisionsPanel'
 import { ResourcesSection } from './ui/ResourcesSection'
 import { SosSection } from './ui/SosSection'
@@ -16,7 +17,9 @@ export default function App() {
         </div>
       </aside>
       <main className={s.stage} aria-label="Map" />
-      <aside className={`${s.panel} ${s.right}`} aria-label="Activity" />
+      <aside className={`${s.panel} ${s.right}`} aria-label="Activity">
+        <ActivityPanel />
+      </aside>
     </div>
   )
 }
