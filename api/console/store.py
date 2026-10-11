@@ -25,8 +25,13 @@ TABLE_ENV_PREFIX = "NIMBUS_TABLE_"
 
 
 class Store(Protocol):
-    def query(self, table: str, run_id: str, *, after: str | None = None, limit: int | None = None) -> list[dict[str, Any]]:
-        """Rows of `run_id` in sort-key order. `after` is an exclusive lower bound on the sort key."""
+    def query(
+        self, table: str, run_id: str, *, after: str | None = None, limit: int | None = None, newest_first: bool = False
+    ) -> list[dict[str, Any]]:
+        """Rows of `run_id` in sort-key order (descending with `newest_first`).
+
+        `after` is an exclusive lower bound on the sort key.
+        """
         ...
 
     def get(self, table: str, run_id: str, sort: str | None = None) -> dict[str, Any] | None: ...
@@ -55,11 +60,11 @@ class MemoryStore:
         pk, sk = TABLE_KEYS[table]
         self.tables[table][(row[pk], row[sk] if sk else None)] = dict(row)
 
-    def query(self, table, run_id, *, after=None, limit=None):
+    def query(self, table, run_id, *, after=None, limit=None, newest_first=False):
         _, sk = TABLE_KEYS[table]
         rows = [row for (pk, _), row in self.tables[table].items() if pk == run_id]
         if sk:
-            rows.sort(key=lambda r: r[sk])
+            rows.sort(key=lambda r: r[sk], reverse=newest_first)
             if after is not None:
                 rows = [r for r in rows if r[sk] > after]
         return [dict(r) for r in (rows[:limit] if limit else rows)]
@@ -95,14 +100,14 @@ class DynamoStore:
         name = self._names[table] if self._names else os.environ[TABLE_ENV_PREFIX + table.upper()]
         return self.resource.Table(name)
 
-    def query(self, table, run_id, *, after=None, limit=None):
+    def query(self, table, run_id, *, after=None, limit=None, newest_first=False):
         from boto3.dynamodb.conditions import Key
 
         pk, sk = TABLE_KEYS[table]
         condition = Key(pk).eq(run_id)
         if sk and after is not None:
             condition = condition & Key(sk).gt(after)
-        kwargs: dict[str, Any] = {"KeyConditionExpression": condition}
+        kwargs: dict[str, Any] = {"KeyConditionExpression": condition, "ScanIndexForward": not newest_first}
         rows: list[dict[str, Any]] = []
         while True:
             if limit:

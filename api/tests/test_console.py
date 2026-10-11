@@ -146,6 +146,23 @@ def test_without_a_run_clock_the_proposals_own_time_stands_in():
     assert datetime.fromisoformat(body["decided_at"]) == datetime.fromisoformat(created)
 
 
+def test_without_a_runs_row_the_newest_activity_gives_the_storm_time():
+    console, store, _ = seeded()
+    for i, sim in enumerate(["2023-12-04T02:30:00+05:30", "2023-12-04T03:45:00+05:30", "2023-12-04T03:00:00+05:30"]):
+        at = f"2026-10-11T07:00:0{i}.000000Z"
+        store.put("Activity", {"run_id": RUN, "emitted_at#event_id": f"{at}#ev-{i}", "sim_time": sim})
+    _, body = call(console, "POST", "/proposals/pr-0001/decision", body=decision())
+    assert datetime.fromisoformat(body["decided_at"]) == datetime.fromisoformat("2023-12-04T03:45:00+05:30")
+
+
+def test_the_runs_row_wins_over_activity():
+    console, store, _ = seeded()
+    store.put("Activity", {"run_id": RUN, "emitted_at#event_id": "2026-10-11T07:00:00.000000Z#ev", "sim_time": "2023-12-04T05:00:00+05:30"})
+    store.put("Runs", {"run_id": RUN, "sim_time": "2023-12-04T04:00:00+05:30"})
+    _, body = call(console, "POST", "/proposals/pr-0001/decision", body=decision())
+    assert datetime.fromisoformat(body["decided_at"]) == datetime.fromisoformat("2023-12-04T04:00:00+05:30")
+
+
 def test_live_runs_use_the_wall_clock():
     console, store, _ = seeded()
     live = fixture("proposals.json")[0] | {"run_id": "live", "created_at": "2026-10-11T06:00:00+00:00"}
@@ -406,6 +423,12 @@ def test_dynamo_store_follows_pagination_and_converts_decimals():
     rows = store.query("SegmentRisk", "live")
     assert [r["score"] for r in rows] == [7, 9] and rows[0]["ratio"] == 0.5
     assert table.calls[1][1]["ExclusiveStartKey"] == {"k": 1}
+
+
+def test_dynamo_store_can_read_newest_first():
+    table = FakeTable([{"Items": []}])
+    DynamoStore(FakeResource(table), {name: name for name in TABLE_KEYS}).query("Activity", "live", limit=20, newest_first=True)
+    assert table.calls[0][1]["ScanIndexForward"] is False
 
 
 def test_dynamo_store_activity_query_is_exclusive_and_limited():

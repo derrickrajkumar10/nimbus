@@ -37,7 +37,7 @@ Every route needs `run_id` (`live` or `replay-<name>`). A request can't see anot
 | 422 | invalid body, missing `action` on an edit, an `action` on an approval, or a changed `kind` |
 | 502 `event_not_sent` | the decision **was saved** but the event wasn't sent. Retry the same request: it re-sends the same event (the id derives from the Proposal), so nothing is decided twice |
 
-Repeating the same decision by the same officer returns 200 again. `decided_at` is the Run's storm time: `Runs.sim_time` for a Replay, the wall clock for `live`, and the Proposal's own `created_at` while a Replay has no `Runs` row yet. It's never earlier than the Proposal.
+Repeating the same decision by the same officer returns 200 again. `decided_at` is the Run's storm time: the wall clock for `live`; for a Replay, `Runs.sim_time`, else the newest `sim_time` in the Run's agent activity (the Replay Driver doesn't write `Runs` yet), else the Proposal's own `created_at`. It's never earlier than the Proposal.
 
 Not built yet, blocked on the questions at the bottom of this file: `GET/POST /runs`, `GET /hit-rate`, `GET /after-action`.
 

@@ -36,6 +36,7 @@ _NAMESPACE = uuid.UUID("0b8e5d3a-6c1f-4f7e-8a52-3d9c1e7b4a60")  # NIMBUS console
 _CURSOR = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{6}Z#.+$")
 RANKED_FIELDS = ("rank", "danger_score", "reasons", "merged_sos_ids")
 ACTIVITY_DEFAULT_LIMIT, ACTIVITY_MAX_LIMIT = 100, 500
+RECENT_ACTIVITY = 20  # newest rows read to find the Run's storm time
 
 
 class DecisionRequest(BaseModel):
@@ -224,8 +225,9 @@ class Console:
         """The Run's storm time. Domain records use sim_time, never the wall clock.
 
         `live` runs on the wall clock. A Replay's clock is `Runs.sim_time`, written by the Replay
-        Driver; with no Run row yet (fixtures) the Proposal's own creation time stands in. Never earlier
-        than the Proposal was created.
+        Driver. The driver doesn't write that row yet, so the newest agent activity stands in: every
+        event carries the storm time it was handled at. With neither (fixtures) the Proposal's own
+        creation time is used. Never earlier than the Proposal was created.
         """
         clock = None
         if run_id == "live":
@@ -234,6 +236,10 @@ class Console:
             row = self.store.get("Runs", run_id)
             if row and row.get("sim_time"):
                 clock = datetime.fromisoformat(str(row["sim_time"]))
+            else:
+                recent = self.store.query("Activity", run_id, limit=RECENT_ACTIVITY, newest_first=True)
+                times = [datetime.fromisoformat(str(r["sim_time"])) for r in recent if r.get("sim_time")]
+                clock = max(times) if times else None
         return max(clock, proposal.created_at) if clock else proposal.created_at
 
     def _emit(self, proposal: Proposal) -> None:
