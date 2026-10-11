@@ -1,0 +1,201 @@
+{
+  "@@locale": "en",
+  "appTagline": "Know before the water does",
+  "yourPlaces": "Your places",
+  "placesNeedYou": "{count, plural, =1{1 of your places needs you now} other{{count} of your places need you now}}",
+  "@placesNeedYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "allClear": "All your places are clear",
+  "bandLow": "Low",
+  "bandWatch": "Watch",
+  "bandLikely": "Likely",
+  "bandFlooded": "Flooded",
+  "durationHm": "{h}h {m}m",
+  "@durationHm": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "durationM": "{m}m",
+  "@durationM": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "report": "Report",
+  "route": "Route",
+  "map": "Map",
+  "sos": "SOS",
+  "help": "Help",
+  "verifying": "Verifying…",
+  "dry": "Dry",
+  "ankleDeep": "Ankle-deep",
+  "kneeDeep": "Knee-deep",
+  "waistDeep": "Waist-deep",
+  "aboveWaist": "Above the waist",
+  "taughtTheMap": "You taught the map.",
+  "confirmedPrediction": "Your photo confirmed the prediction.",
+  "noSafeRoute": "No safe route",
+  "replayNotStarted": "The Replay hasn't started yet. Start it, then try again.",
+  "routingUnavailable": "Routing is coming online. Try again in a minute.",
+  "offlineUpdated": "Offline · updated {time}",
+  "@offlineUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "noStreetsNearby": "No streets nearby",
+  "noDataYet": "No data yet",
+  "moveToHigherGround": "Move your vehicle to higher ground",
+  "skip": "Skip",
+  "continueLabel": "Continue",
+  "chooseLanguage": "Choose your language",
+  "allowAlertsTitle": "Get alerts for your streets",
+  "allowAlertsBody": "We'll tell you before water reaches the places you care about.",
+  "allowAlerts": "Allow alerts",
+  "notNow": "Not now",
+  "addFirstPlaceTitle": "Add a place you care about",
+  "addFirstPlaceBody": "Home, office, school, or where your bike is parked.",
+  "addPlace": "Add a place",
+  "replayTag": "Replay",
+  "runLineReplay": "Replay · Cyclone Michaung · {time}",
+  "runLineReplayNoTime": "Replay · Cyclone Michaung",
+  "runLineLive": "Live · {time}",
+  "runLineLiveNoTime": "Live",
+  "language": "த",
+  "addAnotherPlace": "Add a place",
+  "@runLineReplay": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@runLineLive": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@language": {
+    "description": "The language switch label: shows the other language."
+  },
+  "showMeTheWay": "Show me the way",
+  "edit": "Edit",
+  "whatToDo": "What to do",
+  "whyLabel": "Why",
+  "floodsIn": "Floods in about {time}",
+  "wardMapTitle": "Velachery ward",
+  "legendObserved": "Water seen",
+  "legendHazard": "Hazard · keep out",
+  "placeGone": "This place was removed.",
+  "back": "Back",
+  "@floodsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "addPlaceTitle": "Add a place",
+  "editPlaceTitle": "Edit place",
+  "kindHome": "Home",
+  "kindOffice": "Office",
+  "kindSchool": "School",
+  "kindParking": "Parking",
+  "placeLabelHint": "Name this place",
+  "pinHint": "Move the map to put the pin on the place",
+  "radiusLabel": "Watch streets within {metres} m",
+  "save": "Save",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "removePlaceTitle": "Remove this place?",
+  "removePlaceBody": "You'll stop getting alerts for it.",
+  "tooManyPlaces": "You can save up to 20 places. Remove one to add another.",
+  "saveFailed": "Couldn't save. Check your connection and try again.",
+  "findingYou": "Finding where you are…",
+  "@radiusLabel": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
+  "reportTitle": "Report water",
+  "reportBody": "Photograph the water next to something we can measure: a tyre, a kerb, a step, a knee.",
+  "takePhoto": "Take a photo",
+  "choosePhoto": "Choose a photo",
+  "retake": "Retake",
+  "send": "Send",
+  "sending": "Sending…",
+  "reportPinHint": "Move the map to where you took the photo",
+  "usingYourLocation": "Sent with your current location",
+  "locationOff": "Turn on location to send a Report.",
+  "reportFailed": "Couldn't send. Check your connection and try again.",
+  "photoNotUploaded": "The photo didn't upload. Try again.",
+  "tryAgain": "Try again",
+  "home": "Home",
+  "yourReport": "YOUR REPORT",
+  "verifiedChip": "{count, plural, =1{Verified · {percent}% sure} other{Verified · {count} reports merged · {percent}% sure}}",
+  "@verifiedChip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "bike": "Bike",
+  "car": "Car",
+  "ambulance": "Ambulance",
+  "hazardOpenManhole": "Open manhole",
+  "hazardFallenTree": "Fallen tree",
+  "hazardLiveWire": "Live wire",
+  "hazardStrandedVehicle": "Stranded vehicle",
+  "hazardHere": "{hazard} here. Routes keep {metres} m clear.",
+  "@hazardHere": {
+    "placeholders": {
+      "hazard": {
+        "type": "String"
+      },
+      "metres": {
+        "type": "int"
+      }
+    }
+  },
+  "thresholdNow": "{street} now floods at {mm} mm (was {from}).",
+  "@thresholdNow": {
+    "placeholders": {
+      "street": {
+        "type": "String"
+      },
+      "mm": {
+        "type": "int"
+      },
+      "from": {
+        "type": "int"
+      }
+    }
+  },
+  "stillCheckingTitle": "Still checking your photo",
+  "stillCheckingBody": "This can take a few minutes. We'll send you a push when it's done.",
+  "notVerifiedBody": "We couldn't read the water in this photo. Try one with something to measure against, like a tyre or a kerb."
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "run_id": "replay-michaung",
+    "origin": {
+      "lat": 12.9730212,
+      "lon": 80.2164186
+    },
+    "destination": {
+      "lat": 12.9747602,
+      "lon": 80.2164319
+    },
+    "vehicle": "two_wheeler"
+  },
+  {
+    "run_id": "replay-michaung",
+    "origin": {
+      "lat": 12.9730212,
+      "lon": 80.2164186
+    },
+    "destination": {
+      "lat": 12.9777428,
+      "lon": 80.2212061
+    },
+    "vehicle": "car"
+  }
+]

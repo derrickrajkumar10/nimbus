@@ -1,0 +1,35 @@
+[
+  {
+    "resource_id": "rs-pump-1",
+    "run_id": "replay-michaung",
+    "kind": "pump",
+    "label": "Pump 1",
+    "status": "working",
+    "location": {
+      "lat": 12.9747602,
+      "lon": 80.2164319
+    }
+  },
+  {
+    "resource_id": "rs-pump-2",
+    "run_id": "replay-michaung",
+    "kind": "pump",
+    "label": "Pump 2",
+    "status": "free",
+    "location": {
+      "lat": 12.9775075,
+      "lon": 80.2213705
+    }
+  },
+  {
+    "resource_id": "rs-tree-1",
+    "run_id": "replay-michaung",
+    "kind": "tree_crew",
+    "label": "Tree crew 1",
+    "status": "free",
+    "location": {
+      "lat": 12.9775311,
+      "lon": 80.2219893
+    }
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "run_id": "replay-michaung",
+    "status": "ok",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2161626,
+          12.9711221
+        ],
+        [
+          80.216274,
+          12.9715826
+        ],
+        [
+          80.2163499,
+          12.9721079
+        ],
+        [
+          80.2163977,
+          12.9725623
+        ],
+        [
+          80.2164019,
+          12.9726539
+        ],
+        [
+          80.2164186,
+          12.9730212
+        ],
+        [
+          80.2164253,
+          12.9731675
+        ],
+        [
+          80.216417,
+          12.9735621
+        ],
+        [
+          80.2164206,
+          12.9736468
+        ],
+        [
+          80.2164666,
+          12.9742305
+        ],
+        [
+          80.2164666,
+          12.9742305
+        ],
+        [
+          80.2164319,
+          12.9747602
+        ]
+      ]
+    },
+    "distance_m": 407.2,
+    "duration_s": 59,
+    "avoided_segment_ids": [
+      "27480309-1"
+    ],
+    "avoided_hazard_ids": [
+      "hz-0001"
+    ],
+    "reason": "Avoids Velachery Main Road, reported knee-deep.",
+    "reason_ta": null
+  },
+  {
+    "run_id": "replay-michaung",
+    "status": "no_safe_route",
+    "geometry": null,
+    "distance_m": null,
+    "duration_s": null,
+    "avoided_segment_ids": [
+      "27480309-1"
+    ],
+    "avoided_hazard_ids": [],
+    "reason": "Every way to this point crosses water too deep for a car.",
+    "reason_ta": null
+  }
+]
