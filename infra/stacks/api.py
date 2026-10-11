@@ -1,11 +1,15 @@
-"""NimbusApi: the event projector, the console HTTP API and the citizen HTTP API. The FCM sender comes with #6.
+"""NimbusApi: the event projector, the console and citizen HTTP APIs, and the FCM push sender (#6).
 
 The projector (api/projector/) copies bus events into the tables the console and app read.
 It may write only the tables below. Every other table has its own writer (api/README.md).
 
 The console API (api/console/) reads those tables and updates one thing: a Proposal's decision.
 The citizen API (api/citizen/) serves the Flutter app: devices, Saved Places (and the PlaceIndex that
-follows them), Segments, risk and Readings. All three Lambdas share one bundle.
+follows them), Segments, risk and Readings. Those three Lambdas share one bundle.
+
+The push sender (api/push/) is `nimbus-send-push`, which the Herald invokes. It has its own bundle, because
+the Firebase Admin SDK is large. It reads `Devices`, removes stale tokens, and reads the secret `nimbus/firebase`
+(the Firebase service account, created by hand, never in git).
 """
 
 from pathlib import Path
@@ -16,6 +20,7 @@ from aws_cdk import aws_apigatewayv2_integrations as integrations
 from aws_cdk import aws_events as events
 from aws_cdk import aws_events_targets as targets
 from aws_cdk import aws_lambda as lambda_
+from aws_cdk import aws_secretsmanager as secretsmanager
 from aws_cdk import aws_sqs as sqs
 from aws_cdk import aws_ssm as ssm
 from constructs import Construct
@@ -72,6 +77,11 @@ CITIZEN_READ_TABLES = ("Segments", "SegmentRisk", "Readings")
 # Put and delete only, except SavedPlaces which is also read back. Devices is never read by the API.
 CITIZEN_WRITE_TABLES = ("Devices", "SavedPlaces", "PlaceIndex")
 
+PUSH_FUNCTION_NAME = "nimbus-send-push"  # the name agents' stack defaults to (agents/common/push.py)
+FIREBASE_SECRET = "nimbus/firebase"
+FIREBASE_ADMIN = "firebase-admin==6.5.0"
+PUSH_TABLE = "Devices"
+
 # Everything the bundle doesn't need, so the asset hash only moves when api/ or contracts/ do.
 _EXCLUDE = [
     ".git", ".github", "agents", "app", "console", "docs", "engines", "infra", "replay",
@@ -101,6 +111,24 @@ def _api_code() -> lambda_.Code:
     )
 
 
+def _push_code() -> lambda_.Code:
+    return lambda_.Code.from_asset(
+        str(REPO),
+        exclude=_EXCLUDE,
+        bundling=BundlingOptions(
+            image=lambda_.Runtime.PYTHON_3_12.bundling_image,
+            command=[
+                "bash",
+                "-c",
+                f"pip install --no-cache-dir ./contracts {FIREBASE_ADMIN} -t /asset-output && cp -r api/push /asset-output/",
+            ],
+            user="root",
+            security_opt="label=disable",
+            environment={"PIP_CACHE_DIR": "/tmp/pip", "HOME": "/tmp"},
+        ),
+    )
+
+
 class NimbusApi(Stack):
     def __init__(self, scope: Construct, construct_id: str, *, shared: NimbusShared, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
@@ -109,6 +137,7 @@ class NimbusApi(Stack):
         self._projector(shared, code)
         self._console(shared, code)
         self._citizen(shared, code)
+        self._push(shared)
 
     def _projector(self, shared: NimbusShared, code: lambda_.Code) -> None:
         self.projector_dlq = sqs.Queue(self, "ProjectorDlq", retention_period=Duration.days(14))
@@ -244,3 +273,27 @@ class NimbusApi(Stack):
             self, "ParamApiCitizenUrl", parameter_name="/nimbus/api/citizen-url", string_value=self.citizen_api.api_endpoint
         )
         CfnOutput(self, "CitizenApiUrl", value=self.citizen_api.api_endpoint)
+
+    def _push(self, shared: NimbusShared) -> None:
+        self.push = lambda_.Function(
+            self,
+            "Push",
+            function_name=PUSH_FUNCTION_NAME,
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            handler="push.handler.handler",
+            code=_push_code(),
+            memory_size=512,
+            timeout=Duration.seconds(60),
+            description="Sends an alert to citizens' phones through FCM; removes stale device tokens",
+            environment={
+                f"NIMBUS_TABLE_{PUSH_TABLE.upper()}": shared.tables[PUSH_TABLE].table_name,
+                "NIMBUS_FIREBASE_SECRET": FIREBASE_SECRET,
+            },
+        )
+        # Read the tokens, and delete a row whose token FCM says is stale. Nothing else.
+        shared.tables[PUSH_TABLE].grant(self.push, "dynamodb:BatchGetItem", "dynamodb:DeleteItem")
+        secretsmanager.Secret.from_secret_name_v2(self, "FirebaseSecret", FIREBASE_SECRET).grant_read(self.push)
+
+        ssm.StringParameter(
+            self, "ParamLambdaSendPush", parameter_name="/nimbus/lambdas/send-push", string_value=self.push.function_name
+        )

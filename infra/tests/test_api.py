@@ -13,6 +13,9 @@ from stacks.api import (
     CONSOLE_READ_TABLES,
     CONSOLE_ROUTES,
     CONSOLE_UPDATED_TABLE,
+    FIREBASE_SECRET,
+    PUSH_FUNCTION_NAME,
+    PUSH_TABLE,
     PROJECTED_EVENT_TYPES,
     WRITTEN_TABLES,
     NimbusApi,
@@ -181,3 +184,36 @@ def test_both_apis_are_throttled_until_auth_exists(template):
 
 def test_citizen_url_is_published(template):
     template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/api/citizen-url"})
+
+
+# --- push sender -----------------------------------------------------------
+
+
+def test_the_push_lambda_has_the_name_the_agents_expect(template):
+    template.has_resource_properties(
+        "AWS::Lambda::Function",
+        {"FunctionName": PUSH_FUNCTION_NAME, "Handler": "push.handler.handler", "Runtime": "python3.12"},
+    )
+    template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/lambdas/send-push"})
+    assert PUSH_FUNCTION_NAME == "nimbus-send-push"
+
+
+def test_the_push_lambda_only_reads_and_deletes_devices(template):
+    dynamo = dynamo_statements(template, "PushServiceRole")
+    assert len(dynamo) == 1
+    assert sorted(actions(dynamo[0])) == ["dynamodb:BatchGetItem", "dynamodb:DeleteItem"]
+    assert f"{PUSH_TABLE}Table" in json.dumps(dynamo[0]["Resource"])
+    for table in TABLES:
+        if table.name != PUSH_TABLE:
+            assert f"{table.name}Table" not in json.dumps(dynamo), table.name
+
+
+def test_the_push_lambda_reads_the_firebase_secret_and_nothing_else_secret(template):
+    secret_statements = [s for s in statements_for(template, "PushServiceRole") if any(a.startswith("secretsmanager:") for a in actions(s))]
+    assert len(secret_statements) == 1
+    assert set(actions(secret_statements[0])) == {"secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"}
+    assert FIREBASE_SECRET.split("/")[1] in json.dumps(secret_statements[0]["Resource"])
+    template.has_resource_properties(
+        "AWS::Lambda::Function",
+        {"Handler": "push.handler.handler", "Environment": {"Variables": {"NIMBUS_TABLE_DEVICES": assertions.Match.any_value(), "NIMBUS_FIREBASE_SECRET": FIREBASE_SECRET}}},
+    )

@@ -63,6 +63,17 @@ An install identifies itself with the **`X-Install-Id`** header (8 to 80 charact
 
 Not built yet (#7b): `POST /reports/upload-url`, `POST /reports`, `POST /sos`, `POST /routes`.
 
+## FCM push sender (#6)
+
+`api/push/`, the Lambda **`nimbus-send-push`** (name in SSM `/nimbus/lambdas/send-push`). The Herald invokes it synchronously through `agents/common/push.py`. It has its own bundle, because the Firebase Admin SDK is large.
+
+Input: `{"run_id", "device_ids": [...], "title": {"en", "ta"}, "body": {"en", "ta"}, "data": {"k": "v"}}`. Both languages are required, `data` values must be strings, and a malformed request raises (the caller sees a `FunctionError`). Output is exactly `{"sent": n, "failed": n, "removed_tokens": n}`.
+
+- Each device gets the text in its own `Devices.language` (English if unset). The Herald adds the `[REPLAY]` prefix; the sender sends text as given.
+- A device with no `Devices` row counts as `failed`. A device whose token FCM reports as unregistered (or from another sender) is removed from `Devices`, but only if the stored token is still that one, so a refreshed token survives. Other failures never delete anything.
+- Messages go out at high priority. Credentials are the Firebase service account JSON in Secrets Manager as **`nimbus/firebase`**, created by hand (issue #1), never in git. The function can read that one secret and nothing else.
+- It reads and deletes `Devices` rows only.
+
 ## Event persistence
 
 Agents and engines publish events to the bus. The console and app read DynamoDB. Nothing used to copy events into the tables, so `GET /activity`, `GET /proposals` and the rest would have read empty tables. The projector (`api/projector/`, built in #40) closes that gap.
