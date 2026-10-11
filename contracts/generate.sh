@@ -15,6 +15,6 @@ defs=()
 for m in Segment SegmentRisk Report Reading Hazard Sos RankedSos SavedPlace Resource Proposal Alert RouteRequest RouteResponse; do
   defs+=("schema/nimbus.schema.json#/\$defs/$m")
 done
-npx -y quicktype@23 -s schema -l dart --null-safety --required-props -o generated/dart/nimbus.dart "${defs[@]}"
+npx -y quicktype@23 -s schema -l dart --null-safety -o generated/dart/nimbus.dart "${defs[@]}"
 
 uv run pytest -q

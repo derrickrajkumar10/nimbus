@@ -14,7 +14,6 @@
 //     final routeRequest = routeRequestFromJson(jsonString);
 //     final routeResponse = routeResponseFromJson(jsonString);
 
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 Segment segmentFromJson(String str) => Segment.fromJson(json.decode(str));
@@ -82,7 +81,7 @@ class Segment {
     double lengthM;
     int osmWayId;
     String segmentId;
-    String streetName;
+    String? streetName;
     TerrainFactors terrain;
     String ward;
 
@@ -127,11 +126,11 @@ class Segment {
 ///GeoJSON LineString geometry. Coordinates are [lon, lat].
 class LineString {
     List<List<double>> coordinates;
-    String type;
+    String? type;
 
     LineString({
         required this.coordinates,
-        required this.type,
+        this.type,
     });
 
     factory LineString.fromJson(Map<String, dynamic> json) => LineString(
@@ -178,7 +177,7 @@ class SegmentRisk {
     double floodThresholdMm;
     
     ///None when flooding isn't expected within the forecast horizon.
-    int minutesToFlood;
+    int? minutesToFlood;
     List<Reason> reasons;
     String runId;
     int score;
@@ -256,7 +255,7 @@ class Reason {
 class Report {
     DateTime capturedAt;
     GeoPoint location;
-    String note;
+    String? note;
     
     ///S3 object key of the photo.
     String photoKey;
@@ -265,17 +264,17 @@ class Report {
     ///Anonymous app-install identity.
     String reporterId;
     String runId;
-    ReportSource source;
+    ReportSource? source;
 
     Report({
         required this.capturedAt,
         required this.location,
-        required this.note,
+        this.note,
         required this.photoKey,
         required this.reportId,
         required this.reporterId,
         required this.runId,
-        required this.source,
+        this.source,
     });
 
     factory Report.fromJson(Map<String, dynamic> json) => Report(
@@ -286,7 +285,7 @@ class Report {
         reportId: json["report_id"],
         reporterId: json["reporter_id"],
         runId: json["run_id"],
-        source: reportSourceValues.map[json["source"]]!,
+        source: reportSourceValues.map[json["source"]],
     );
 
     Map<String, dynamic> toJson() => {
@@ -334,11 +333,11 @@ final reportSourceValues = EnumValues({
 class Reading {
     double confidence;
     DepthBand depth;
-    List<HazardClass> hazardsSeen;
+    List<HazardClass>? hazardsSeen;
     DateTime observedAt;
     Passability passable;
     String readingId;
-    String referenceObject;
+    String? referenceObject;
     
     ///Reports merged into this Reading.
     List<String> reportIds;
@@ -348,7 +347,7 @@ class Reading {
     Reading({
         required this.confidence,
         required this.depth,
-        required this.hazardsSeen,
+        this.hazardsSeen,
         required this.observedAt,
         required this.passable,
         required this.readingId,
@@ -361,7 +360,7 @@ class Reading {
     factory Reading.fromJson(Map<String, dynamic> json) => Reading(
         confidence: json["confidence"]?.toDouble(),
         depth: depthBandValues.map[json["depth"]]!,
-        hazardsSeen: List<HazardClass>.from(json["hazards_seen"].map((x) => hazardClassValues.map[x]!)),
+        hazardsSeen: json["hazards_seen"] == null ? [] : List<HazardClass>.from(json["hazards_seen"]!.map((x) => hazardClassValues.map[x]!)),
         observedAt: DateTime.parse(json["observed_at"]),
         passable: Passability.fromJson(json["passable"]),
         readingId: json["reading_id"],
@@ -374,7 +373,7 @@ class Reading {
     Map<String, dynamic> toJson() => {
         "confidence": confidence,
         "depth": depthBandValues.reverse[depth],
-        "hazards_seen": List<dynamic>.from(hazardsSeen.map((x) => hazardClassValues.reverse[x])),
+        "hazards_seen": hazardsSeen == null ? [] : List<dynamic>.from(hazardsSeen!.map((x) => hazardClassValues.reverse[x])),
         "observed_at": observedAt.toIso8601String(),
         "passable": passable.toJson(),
         "reading_id": readingId,
@@ -444,10 +443,10 @@ class Hazard {
     HazardClass hazardClass;
     String hazardId;
     GeoPoint location;
-    double noGoRadiusM;
+    double? noGoRadiusM;
     HazardOwner owner;
     String runId;
-    String sourceReportId;
+    String? sourceReportId;
     HazardStatus status;
 
     Hazard({
@@ -455,10 +454,10 @@ class Hazard {
         required this.hazardClass,
         required this.hazardId,
         required this.location,
-        required this.noGoRadiusM,
+        this.noGoRadiusM,
         required this.owner,
         required this.runId,
-        required this.sourceReportId,
+        this.sourceReportId,
         required this.status,
     });
 
@@ -514,7 +513,7 @@ class Sos {
     VulnerabilityFlags flags;
     GeoPoint location;
     int peopleCount;
-    String photoKey;
+    String? photoKey;
     String reporterId;
     String runId;
     String sosId;
@@ -524,7 +523,7 @@ class Sos {
         required this.flags,
         required this.location,
         required this.peopleCount,
-        required this.photoKey,
+        this.photoKey,
         required this.reporterId,
         required this.runId,
         required this.sosId,
@@ -554,14 +553,14 @@ class Sos {
 }
 
 class VulnerabilityFlags {
-    bool child;
-    bool elderly;
-    bool medical;
+    bool? child;
+    bool? elderly;
+    bool? medical;
 
     VulnerabilityFlags({
-        required this.child,
-        required this.elderly,
-        required this.medical,
+        this.child,
+        this.elderly,
+        this.medical,
     });
 
     factory VulnerabilityFlags.fromJson(Map<String, dynamic> json) => VulnerabilityFlags(
@@ -579,14 +578,14 @@ class VulnerabilityFlags {
 
 class RankedSos {
     int dangerScore;
-    List<String> mergedSosIds;
+    List<String>? mergedSosIds;
     int rank;
     List<Reason> reasons;
     String sosId;
 
     RankedSos({
         required this.dangerScore,
-        required this.mergedSosIds,
+        this.mergedSosIds,
         required this.rank,
         required this.reasons,
         required this.sosId,
@@ -594,7 +593,7 @@ class RankedSos {
 
     factory RankedSos.fromJson(Map<String, dynamic> json) => RankedSos(
         dangerScore: json["danger_score"],
-        mergedSosIds: List<String>.from(json["merged_sos_ids"].map((x) => x)),
+        mergedSosIds: json["merged_sos_ids"] == null ? [] : List<String>.from(json["merged_sos_ids"]!.map((x) => x)),
         rank: json["rank"],
         reasons: List<Reason>.from(json["reasons"].map((x) => Reason.fromJson(x))),
         sosId: json["sos_id"],
@@ -602,7 +601,7 @@ class RankedSos {
 
     Map<String, dynamic> toJson() => {
         "danger_score": dangerScore,
-        "merged_sos_ids": List<dynamic>.from(mergedSosIds.map((x) => x)),
+        "merged_sos_ids": mergedSosIds == null ? [] : List<dynamic>.from(mergedSosIds!.map((x) => x)),
         "rank": rank,
         "reasons": List<dynamic>.from(reasons.map((x) => x.toJson())),
         "sos_id": sosId,
@@ -615,7 +614,7 @@ class SavedPlace {
     String label;
     GeoPoint location;
     String placeId;
-    double radiusM;
+    double? radiusM;
     List<String> segmentIds;
 
     SavedPlace({
@@ -624,7 +623,7 @@ class SavedPlace {
         required this.label,
         required this.location,
         required this.placeId,
-        required this.radiusM,
+        this.radiusM,
         required this.segmentIds,
     });
 
@@ -728,45 +727,45 @@ final resourceStatusValues = EnumValues({
 class Proposal {
     Action action;
     DateTime createdAt;
-    DateTime decidedAt;
-    String decidedBy;
+    DateTime? decidedAt;
+    String? decidedBy;
     String proposalId;
     Agent proposedBy;
     int rank;
     String reason;
     String runId;
-    ProposalStatus status;
+    ProposalStatus? status;
 
     Proposal({
         required this.action,
         required this.createdAt,
-        required this.decidedAt,
-        required this.decidedBy,
+        this.decidedAt,
+        this.decidedBy,
         required this.proposalId,
         required this.proposedBy,
         required this.rank,
         required this.reason,
         required this.runId,
-        required this.status,
+        this.status,
     });
 
     factory Proposal.fromJson(Map<String, dynamic> json) => Proposal(
         action: Action.fromJson(json["action"]),
         createdAt: DateTime.parse(json["created_at"]),
-        decidedAt: DateTime.parse(json["decided_at"]),
+        decidedAt: json["decided_at"] == null ? null : DateTime.parse(json["decided_at"]),
         decidedBy: json["decided_by"],
         proposalId: json["proposal_id"],
         proposedBy: agentValues.map[json["proposed_by"]]!,
         rank: json["rank"],
         reason: json["reason"],
         runId: json["run_id"],
-        status: proposalStatusValues.map[json["status"]]!,
+        status: proposalStatusValues.map[json["status"]],
     );
 
     Map<String, dynamic> toJson() => {
         "action": action.toJson(),
         "created_at": createdAt.toIso8601String(),
-        "decided_at": decidedAt.toIso8601String(),
+        "decided_at": decidedAt?.toIso8601String(),
         "decided_by": decidedBy,
         "proposal_id": proposalId,
         "proposed_by": agentValues.reverse[proposedBy],
@@ -778,35 +777,35 @@ class Proposal {
 }
 
 class Action {
-    int buildingsAffected;
-    Kind kind;
-    List<String> readingIds;
-    String resourceId;
-    String segmentId;
-    List<String> sosIds;
-    String messageEn;
-    String messageTa;
-    int recipientCount;
+    int? buildingsAffected;
+    Kind? kind;
+    List<String>? readingIds;
+    String? resourceId;
+    String? segmentId;
+    List<String>? sosIds;
+    String? messageEn;
+    String? messageTa;
+    int? recipientCount;
 
     Action({
-        required this.buildingsAffected,
-        required this.kind,
-        required this.readingIds,
-        required this.resourceId,
-        required this.segmentId,
-        required this.sosIds,
-        required this.messageEn,
-        required this.messageTa,
-        required this.recipientCount,
+        this.buildingsAffected,
+        this.kind,
+        this.readingIds,
+        this.resourceId,
+        this.segmentId,
+        this.sosIds,
+        this.messageEn,
+        this.messageTa,
+        this.recipientCount,
     });
 
     factory Action.fromJson(Map<String, dynamic> json) => Action(
         buildingsAffected: json["buildings_affected"],
-        kind: kindValues.map[json["kind"]]!,
-        readingIds: List<String>.from(json["reading_ids"].map((x) => x)),
+        kind: kindValues.map[json["kind"]],
+        readingIds: json["reading_ids"] == null ? [] : List<String>.from(json["reading_ids"]!.map((x) => x)),
         resourceId: json["resource_id"],
         segmentId: json["segment_id"],
-        sosIds: List<String>.from(json["sos_ids"].map((x) => x)),
+        sosIds: json["sos_ids"] == null ? [] : List<String>.from(json["sos_ids"]!.map((x) => x)),
         messageEn: json["message_en"],
         messageTa: json["message_ta"],
         recipientCount: json["recipient_count"],
@@ -815,10 +814,10 @@ class Action {
     Map<String, dynamic> toJson() => {
         "buildings_affected": buildingsAffected,
         "kind": kindValues.reverse[kind],
-        "reading_ids": List<dynamic>.from(readingIds.map((x) => x)),
+        "reading_ids": readingIds == null ? [] : List<dynamic>.from(readingIds!.map((x) => x)),
         "resource_id": resourceId,
         "segment_id": segmentId,
-        "sos_ids": List<dynamic>.from(sosIds.map((x) => x)),
+        "sos_ids": sosIds == null ? [] : List<dynamic>.from(sosIds!.map((x) => x)),
         "message_en": messageEn,
         "message_ta": messageTa,
         "recipient_count": recipientCount,
@@ -877,7 +876,7 @@ class Alert {
     String messageTa;
     
     ///Set for Ward Alerts, which go out only via an approved Proposal.
-    String proposalId;
+    String? proposalId;
     int recipientCount;
     String runId;
     AlertScope scope;
@@ -888,7 +887,7 @@ class Alert {
         required this.alertId,
         required this.messageEn,
         required this.messageTa,
-        required this.proposalId,
+        this.proposalId,
         required this.recipientCount,
         required this.runId,
         required this.scope,
@@ -974,42 +973,42 @@ final vehicleTypeValues = EnumValues({
 class RouteResponse {
     
     ///Hazards (open manholes, live wires) the route keeps clear of.
-    List<String> avoidedHazardIds;
+    List<String>? avoidedHazardIds;
     
     ///Segments the route keeps out of, flooded now or expected to flood before arrival.
-    List<String> avoidedSegmentIds;
-    double distanceM;
-    int durationS;
+    List<String>? avoidedSegmentIds;
+    double? distanceM;
+    int? durationS;
     
     ///The route. None when status is no_safe_route.
-    LineString geometry;
+    LineString? geometry;
     
     ///One line for the traveller, in English.
     String reason;
     
     ///The same line in Tamil, when the Pathfinder has one.
-    String reasonTa;
+    String? reasonTa;
     String runId;
     RouteStatus status;
 
     RouteResponse({
-        required this.avoidedHazardIds,
-        required this.avoidedSegmentIds,
-        required this.distanceM,
-        required this.durationS,
-        required this.geometry,
+        this.avoidedHazardIds,
+        this.avoidedSegmentIds,
+        this.distanceM,
+        this.durationS,
+        this.geometry,
         required this.reason,
-        required this.reasonTa,
+        this.reasonTa,
         required this.runId,
         required this.status,
     });
 
     factory RouteResponse.fromJson(Map<String, dynamic> json) => RouteResponse(
-        avoidedHazardIds: List<String>.from(json["avoided_hazard_ids"].map((x) => x)),
-        avoidedSegmentIds: List<String>.from(json["avoided_segment_ids"].map((x) => x)),
+        avoidedHazardIds: json["avoided_hazard_ids"] == null ? [] : List<String>.from(json["avoided_hazard_ids"]!.map((x) => x)),
+        avoidedSegmentIds: json["avoided_segment_ids"] == null ? [] : List<String>.from(json["avoided_segment_ids"]!.map((x) => x)),
         distanceM: json["distance_m"]?.toDouble(),
         durationS: json["duration_s"],
-        geometry: LineString.fromJson(json["geometry"]),
+        geometry: json["geometry"] == null ? null : LineString.fromJson(json["geometry"]),
         reason: json["reason"],
         reasonTa: json["reason_ta"],
         runId: json["run_id"],
@@ -1017,11 +1016,11 @@ class RouteResponse {
     );
 
     Map<String, dynamic> toJson() => {
-        "avoided_hazard_ids": List<dynamic>.from(avoidedHazardIds.map((x) => x)),
-        "avoided_segment_ids": List<dynamic>.from(avoidedSegmentIds.map((x) => x)),
+        "avoided_hazard_ids": avoidedHazardIds == null ? [] : List<dynamic>.from(avoidedHazardIds!.map((x) => x)),
+        "avoided_segment_ids": avoidedSegmentIds == null ? [] : List<dynamic>.from(avoidedSegmentIds!.map((x) => x)),
         "distance_m": distanceM,
         "duration_s": durationS,
-        "geometry": geometry.toJson(),
+        "geometry": geometry?.toJson(),
         "reason": reason,
         "reason_ta": reasonTa,
         "run_id": runId,
