@@ -1,0 +1,25 @@
+[project]
+name = "nimbus-replay"
+version = "0.1.0"
+description = "NIMBUS Storm Replay: the Replay Driver that plays a past storm's clock."
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.111",
+    "nimbus-contracts",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+# Not an installable package: the driver is run as a script from this folder.
+package = false
+
+[tool.uv.sources]
+nimbus-contracts = { path = "../contracts", editable = true }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
