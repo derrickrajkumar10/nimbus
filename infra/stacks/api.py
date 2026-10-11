@@ -51,6 +51,12 @@ CONSOLE_ROUTES = (
 CONSOLE_READ_TABLES = ("SegmentRisk", "Readings", "Hazards", "Resources", "Sos", "Proposals", "Activity", "Runs")
 CONSOLE_UPDATED_TABLE = "Proposals"
 
+# Both HTTP APIs are open until issue #19 adds auth, so each gets a ceiling: a runaway client or a
+# stranger who finds the URL can't run up Lambda and DynamoDB charges. Per route, requests per second.
+# A console polling /activity every 2 s uses 0.5 rps, so this leaves plenty of headroom.
+THROTTLE_RATE_LIMIT = 25
+THROTTLE_BURST_LIMIT = 50
+
 # Everything the bundle doesn't need, so the asset hash only moves when api/ or contracts/ do.
 _EXCLUDE = [
     ".git", ".github", "agents", "app", "console", "docs", "engines", "infra", "replay",
@@ -141,6 +147,7 @@ class NimbusApi(Stack):
             self,
             "ConsoleApi",
             api_name="nimbus-console",
+            create_default_stage=False,
             description="NIMBUS ward console API (issue #8). No authorizer until issue #19.",
             cors_preflight=apigw.CorsPreflightOptions(
                 allow_origins=["*"],  # tighten to the Amplify domain with #29
@@ -148,6 +155,13 @@ class NimbusApi(Stack):
                 allow_headers=["content-type"],
                 max_age=Duration.hours(1),
             ),
+        )
+        apigw.HttpStage(
+            self,
+            "ConsoleStage",
+            http_api=self.console_api,
+            auto_deploy=True,
+            throttle=apigw.ThrottleSettings(rate_limit=THROTTLE_RATE_LIMIT, burst_limit=THROTTLE_BURST_LIMIT),
         )
         integration = integrations.HttpLambdaIntegration("ConsoleIntegration", self.console)
         for method, path in CONSOLE_ROUTES:

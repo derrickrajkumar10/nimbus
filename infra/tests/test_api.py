@@ -118,5 +118,13 @@ def test_console_lambda_publishes_events_and_knows_the_bus(template):
     )
 
 
+def test_console_api_is_throttled(template):
+    stages = [r["Properties"] for r in template.find_resources("AWS::ApiGatewayV2::Stage").values()]
+    assert stages and all(s["StageName"] == "$default" and s["AutoDeploy"] is True for s in stages)
+    assert all(
+        s["DefaultRouteSettings"] == {"ThrottlingBurstLimit": 50, "ThrottlingRateLimit": 25} for s in stages
+    ), "an open API needs a rate ceiling until #19 adds auth"
+
+
 def test_console_url_is_published(template):
     template.has_resource_properties("AWS::SSM::Parameter", {"Name": "/nimbus/api/console-url"})

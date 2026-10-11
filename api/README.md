@@ -4,7 +4,7 @@ HTTP API: API Gateway HTTP API plus Python Lambdas, typed with `nimbus_contracts
 
 ## Console API (#8)
 
-`api/console/`, one Lambda behind an API Gateway HTTP API (`nimbus-console`, stack `NimbusApi`). The base URL is the stack output `ConsoleApiUrl` and the SSM parameter `/nimbus/api/console-url`. **There is no login yet** (issue #19), so treat it as open.
+`api/console/`, one Lambda behind an API Gateway HTTP API (`nimbus-console`, stack `NimbusApi`). The base URL is the stack output `ConsoleApiUrl` and the SSM parameter `/nimbus/api/console-url`. **There is no login yet** (issue #19), so treat it as open. It is throttled to 25 requests per second per route (burst 50), so a runaway client can't run up the bill. A console polling `/activity` every 2 s uses 0.5.
 
 Every route needs `run_id` (`live` or `replay-<name>`). A request can't see another Run's rows (ADR 0001). Errors are `{"error": "<code>", "message": "..."}`.
 
