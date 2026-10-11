@@ -8,7 +8,7 @@ Agents and engines publish events to the bus. The console and app read DynamoDB.
 
 ### Rule: one writer per table
 
-A table is written either by the **projector** (below), or by the **lane that owns the data**, never both.
+A table is written either by the **projector** (below), or by the **lane that owns the data**, never both. Agents only publish contract events through `EventBridgeBus`; they don't write the projector's tables.
 
 | Table | Written by | From |
 |---|---|---|
@@ -19,11 +19,14 @@ A table is written either by the **projector** (below), or by the **lane that ow
 | `Readings` | projector | `report.verified` |
 | `Sos` | projector (`sos.created`), then fills the ranked fields from `sos.ranked` | events |
 | `Reports` | API (`POST /reports`) | request, then it emits `report.created` |
-| `SegmentRisk` | **risk engine (Goutam)** | not derivable from `risk.changed` (see below) |
-| `Runs` | **Replay Driver (Goutam)** and `POST /runs` | `clock.tick` is not projected |
-| `Resources`, `Reporters`, `Ledger`, `PlaceIndex` | owning lane, or open (see below) | |
+| `SegmentRisk` | **Sentinel** (#9), the single writer; the risk engine is a pure function and doesn't write it | `score_segments` output |
+| `Runs` | **Replay Driver** (#14) creates and updates; `POST /runs` only asks it to start or pause | `clock.tick` is not projected |
+| `Resources` | **Dispatcher** (#18) sets `en_route` on an approved `proposal.decided`; initial rows seeded per Run by the Replay Driver (proposed) | no event carries a Resource status change |
+| `Ledger` | **Chronicler** (#25) | |
+| `Reporters` | **Verifier** (#17) | |
+| `PlaceIndex` | **API**, on `PUT /saved-places` (#7); a Replay's demo devices are indexed when they subscribe to the Run (owner open, see below) | |
 | `Devices`, `SavedPlaces` | API | requests |
-| `Segments` | F1 (Goutam) | offline job |
+| `Segments` | F1 (Goutam, #13) | offline job |
 
 ### The projector
 
@@ -38,12 +41,19 @@ A table is written either by the **projector** (below), or by the **lane that ow
 
 `POST /proposals/{id}/decision` updates the row itself with a conditional write (`status = pending`), then emits `proposal.decided`. That makes a double approval fail cleanly, and the console sees the new status on its next 2 s poll without waiting for the projector.
 
-### Gaps this plan found
+### Settled by the issues
 
-1. **`risk.changed` can't produce a `SegmentRisk` row.** It carries `segment_id`, `previous_band`, `band`, `score`, `minutes_to_flood` and `reasons`, but not `flood_threshold_mm`, and it fires only when a Segment crosses a band, while the table holds the latest score. So the risk engine must write `SegmentRisk` itself.
-2. **`Runs` has no named writer** for run status, speed and current `sim_time`. Proposed: the Replay Driver, with `POST /runs` only asking it to start or pause.
-3. **`Ledger`, `Reporters`, `Resources` and `PlaceIndex` have no event that obviously feeds them.** Who writes a Resource's status change after a Work Order is approved? Who writes `Ledger` entries? Not decided here.
-4. **`GET /hit-rate` and `GET /after-action`** serve "stored results", but `storage.md` has no table or S3 key for them.
+- `risk.changed` can't produce a `SegmentRisk` row (it has no `flood_threshold_mm` and fires only on band crossings), so the Sentinel writes the row with what the risk engine returns. Flood Threshold nudges are applied by the risk engine from `Readings` when it scores, and land in `SegmentRisk.flood_threshold_mm`.
+- Agents' events carry `emitted_at` in UTC with a `Z` suffix and `source` set to the agent name. `EventBridgeBus` sends `Source = nimbus.<source>`, `DetailType = type` and `Detail` = the whole event.
+
+### Still open
+
+1. **`GET /after-action` and `GET /hit-rate`:** #25 and #26 both say "store the result". Proposed: one JSON object each in the `data` bucket, `results/{run_id}/after-action.json` and `results/{run_id}/hit-rate.json`, written by the Chronicler and by Goutam's Hit Rate job.
+2. **`POST /runs`:** how it starts and pauses the Replay Driver (#14 suggests Step Functions). The API needs the state machine ARN from SSM and an input shape.
+3. **Herald to FCM sender (#6, #10):** proposed a synchronous Lambda invoke of the function named at `/nimbus/lambdas/send-push`, with `{run_id, device_ids, title: {en, ta}, body: {en, ta}, data}`; the sender picks the text by `Devices.language`.
+4. **Replay `PlaceIndex`:** who indexes the demo phones' Saved Places under a Replay Run (#14)? Proposed: the Replay Driver, using the API's `PlaceIndex` write helper.
+5. **`POST /routes` to the Pathfinder (#23):** no route request/response type exists in `contracts/`, and the Pathfinder's function name isn't published.
+6. **`Ledger` sort key:** the Chronicler must write `sim_time` in UTC with `Z`; fixtures use IST (`+05:30`), which would not sort in time order.
 
 ### Not decided here
 
