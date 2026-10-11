@@ -1,0 +1,689 @@
+[
+  {
+    "segment_id": "27480309-1",
+    "osm_way_id": 27480309,
+    "street_name": "Velachery Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.221206,
+          12.9775302
+        ],
+        [
+          80.2212061,
+          12.9777428
+        ]
+      ]
+    },
+    "length_m": 23.6,
+    "baseline_threshold_mm": 67.5,
+    "terrain": {
+      "depression_depth_m": 0.48,
+      "catchment_area_m2": 152219.0,
+      "distance_to_water_m": 80.0
+    },
+    "buildings_nearby": 17
+  },
+  {
+    "segment_id": "27480309-2",
+    "osm_way_id": 27480309,
+    "street_name": "Velachery Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2212061,
+          12.9777428
+        ],
+        [
+          80.2212061,
+          12.9777947
+        ]
+      ]
+    },
+    "length_m": 5.8,
+    "baseline_threshold_mm": 57.4,
+    "terrain": {
+      "depression_depth_m": 0.66,
+      "catchment_area_m2": 74165.0,
+      "distance_to_water_m": 1480.0
+    },
+    "buildings_nearby": 16
+  },
+  {
+    "segment_id": "27480309-3",
+    "osm_way_id": 27480309,
+    "street_name": "Velachery Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2212061,
+          12.9777947
+        ],
+        [
+          80.2212006,
+          12.9778953
+        ],
+        [
+          80.2211832,
+          12.9782163
+        ]
+      ]
+    },
+    "length_m": 46.9,
+    "baseline_threshold_mm": 89.0,
+    "terrain": {
+      "depression_depth_m": 1.4,
+      "catchment_area_m2": 211955.0,
+      "distance_to_water_m": 1415.0
+    },
+    "buildings_nearby": 13
+  },
+  {
+    "segment_id": "27480309-4",
+    "osm_way_id": 27480309,
+    "street_name": "Velachery Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2211832,
+          12.9782163
+        ],
+        [
+          80.2211808,
+          12.9782556
+        ],
+        [
+          80.2211783,
+          12.9782956
+        ],
+        [
+          80.2211625,
+          12.978553
+        ],
+        [
+          80.2211596,
+          12.97858
+        ],
+        [
+          80.221155,
+          12.9786104
+        ]
+      ]
+    },
+    "length_m": 43.9,
+    "baseline_threshold_mm": 89.3,
+    "terrain": {
+      "depression_depth_m": 0.61,
+      "catchment_area_m2": 8872.0,
+      "distance_to_water_m": 487.0
+    },
+    "buildings_nearby": 9
+  },
+  {
+    "segment_id": "27320162-0",
+    "osm_way_id": 27320162,
+    "street_name": "Ram Nagar Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2161626,
+          12.9711221
+        ],
+        [
+          80.216274,
+          12.9715826
+        ],
+        [
+          80.2163499,
+          12.9721079
+        ],
+        [
+          80.2163977,
+          12.9725623
+        ],
+        [
+          80.2164019,
+          12.9726539
+        ],
+        [
+          80.2164186,
+          12.9730212
+        ],
+        [
+          80.2164253,
+          12.9731675
+        ],
+        [
+          80.216417,
+          12.9735621
+        ],
+        [
+          80.2164206,
+          12.9736468
+        ],
+        [
+          80.2164666,
+          12.9742305
+        ]
+      ]
+    },
+    "length_m": 348.2,
+    "baseline_threshold_mm": 49.3,
+    "terrain": {
+      "depression_depth_m": 0.9,
+      "catchment_area_m2": 247871.0,
+      "distance_to_water_m": 1046.0
+    },
+    "buildings_nearby": 0
+  },
+  {
+    "segment_id": "27320162-1",
+    "osm_way_id": 27320162,
+    "street_name": "Ram Nagar Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2164666,
+          12.9742305
+        ],
+        [
+          80.2164319,
+          12.9747602
+        ]
+      ]
+    },
+    "length_m": 59.0,
+    "baseline_threshold_mm": 82.7,
+    "terrain": {
+      "depression_depth_m": 0.65,
+      "catchment_area_m2": 59828.0,
+      "distance_to_water_m": 847.0
+    },
+    "buildings_nearby": 23
+  },
+  {
+    "segment_id": "27320162-2",
+    "osm_way_id": 27320162,
+    "street_name": "Ram Nagar Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2164319,
+          12.9747602
+        ],
+        [
+          80.216449,
+          12.9752769
+        ]
+      ]
+    },
+    "length_m": 57.5,
+    "baseline_threshold_mm": 74.9,
+    "terrain": {
+      "depression_depth_m": 1.23,
+      "catchment_area_m2": 330666.0,
+      "distance_to_water_m": 521.0
+    },
+    "buildings_nearby": 32
+  },
+  {
+    "segment_id": "27320166-0",
+    "osm_way_id": 27320166,
+    "street_name": "Vijayanagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2171068,
+          12.9757663
+        ],
+        [
+          80.2184046,
+          12.9758552
+        ]
+      ]
+    },
+    "length_m": 141.0,
+    "baseline_threshold_mm": 32.7,
+    "terrain": {
+      "depression_depth_m": 0.49,
+      "catchment_area_m2": 62604.0,
+      "distance_to_water_m": 1194.0
+    },
+    "buildings_nearby": 47
+  },
+  {
+    "segment_id": "27320166-1",
+    "osm_way_id": 27320166,
+    "street_name": "Vijayanagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2184046,
+          12.9758552
+        ],
+        [
+          80.2186878,
+          12.9758716
+        ]
+      ]
+    },
+    "length_m": 30.7,
+    "baseline_threshold_mm": 62.0,
+    "terrain": {
+      "depression_depth_m": 1.08,
+      "catchment_area_m2": 379362.0,
+      "distance_to_water_m": 590.0
+    },
+    "buildings_nearby": 44
+  },
+  {
+    "segment_id": "27320166-2",
+    "osm_way_id": 27320166,
+    "street_name": "Vijayanagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2186878,
+          12.9758716
+        ],
+        [
+          80.2189812,
+          12.9758898
+        ]
+      ]
+    },
+    "length_m": 31.9,
+    "baseline_threshold_mm": 58.0,
+    "terrain": {
+      "depression_depth_m": 0.43,
+      "catchment_area_m2": 294814.0,
+      "distance_to_water_m": 624.0
+    },
+    "buildings_nearby": 39
+  },
+  {
+    "segment_id": "27320166-3",
+    "osm_way_id": 27320166,
+    "street_name": "Vijayanagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2189812,
+          12.9758898
+        ],
+        [
+          80.219042,
+          12.9759093
+        ],
+        [
+          80.2194643,
+          12.9758451
+        ],
+        [
+          80.2201188,
+          12.9755981
+        ]
+      ]
+    },
+    "length_m": 129.3,
+    "baseline_threshold_mm": 60.7,
+    "terrain": {
+      "depression_depth_m": 0.15,
+      "catchment_area_m2": 15459.0,
+      "distance_to_water_m": 190.0
+    },
+    "buildings_nearby": 22
+  },
+  {
+    "segment_id": "30604295-0",
+    "osm_way_id": 30604295,
+    "street_name": "Sarathy Nagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2218849,
+          12.9747717
+        ],
+        [
+          80.2218997,
+          12.974951
+        ],
+        [
+          80.2219008,
+          12.9749637
+        ]
+      ]
+    },
+    "length_m": 21.4,
+    "baseline_threshold_mm": 87.4,
+    "terrain": {
+      "depression_depth_m": 0.87,
+      "catchment_area_m2": 45026.0,
+      "distance_to_water_m": 414.0
+    },
+    "buildings_nearby": 42
+  },
+  {
+    "segment_id": "30604295-1",
+    "osm_way_id": 30604295,
+    "street_name": "Sarathy Nagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2219008,
+          12.9749637
+        ],
+        [
+          80.2219211,
+          12.9751715
+        ]
+      ]
+    },
+    "length_m": 23.2,
+    "baseline_threshold_mm": 64.6,
+    "terrain": {
+      "depression_depth_m": 1.21,
+      "catchment_area_m2": 249048.0,
+      "distance_to_water_m": 415.0
+    },
+    "buildings_nearby": 41
+  },
+  {
+    "segment_id": "30604295-2",
+    "osm_way_id": 30604295,
+    "street_name": "Sarathy Nagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2219211,
+          12.9751715
+        ],
+        [
+          80.2219329,
+          12.9752918
+        ],
+        [
+          80.221937,
+          12.975391
+        ]
+      ]
+    },
+    "length_m": 24.5,
+    "baseline_threshold_mm": 36.2,
+    "terrain": {
+      "depression_depth_m": 0.26,
+      "catchment_area_m2": 379736.0,
+      "distance_to_water_m": 1191.0
+    },
+    "buildings_nearby": 43
+  },
+  {
+    "segment_id": "30604295-3",
+    "osm_way_id": 30604295,
+    "street_name": "Sarathy Nagar 1st Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.221937,
+          12.975391
+        ],
+        [
+          80.2219517,
+          12.9757501
+        ]
+      ]
+    },
+    "length_m": 40.0,
+    "baseline_threshold_mm": 53.1,
+    "terrain": {
+      "depression_depth_m": 0.94,
+      "catchment_area_m2": 143603.0,
+      "distance_to_water_m": 114.0
+    },
+    "buildings_nearby": 41
+  },
+  {
+    "segment_id": "428734761-0",
+    "osm_way_id": 428734761,
+    "street_name": "Tansi Nagar 1st Street",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2226964,
+          12.977566
+        ],
+        [
+          80.2226906,
+          12.9780648
+        ]
+      ]
+    },
+    "length_m": 55.5,
+    "baseline_threshold_mm": 34.7,
+    "terrain": {
+      "depression_depth_m": 0.36,
+      "catchment_area_m2": 262631.0,
+      "distance_to_water_m": 1362.0
+    },
+    "buildings_nearby": 48
+  },
+  {
+    "segment_id": "428734761-1",
+    "osm_way_id": 428734761,
+    "street_name": "Tansi Nagar 1st Street",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2226906,
+          12.9780648
+        ],
+        [
+          80.2226769,
+          12.9784353
+        ],
+        [
+          80.2226737,
+          12.9784508
+        ],
+        [
+          80.2226644,
+          12.9784646
+        ],
+        [
+          80.2226523,
+          12.9784704
+        ],
+        [
+          80.222636,
+          12.9784732
+        ],
+        [
+          80.2221733,
+          12.9784418
+        ],
+        [
+          80.2221499,
+          12.9784457
+        ],
+        [
+          80.2221343,
+          12.9784603
+        ],
+        [
+          80.2221244,
+          12.9784791
+        ],
+        [
+          80.2221243,
+          12.9784992
+        ],
+        [
+          80.2221383,
+          12.978722
+        ],
+        [
+          80.2221441,
+          12.9789186
+        ],
+        [
+          80.2220314,
+          12.9789132
+        ]
+      ]
+    },
+    "length_m": 166.7,
+    "baseline_threshold_mm": 54.9,
+    "terrain": {
+      "depression_depth_m": 0.27,
+      "catchment_area_m2": 396376.0,
+      "distance_to_water_m": 478.0
+    },
+    "buildings_nearby": 36
+  },
+  {
+    "segment_id": "30605099-0",
+    "osm_way_id": 30605099,
+    "street_name": "LIC Colony Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2226964,
+          12.977566
+        ],
+        [
+          80.2224838,
+          12.9775548
+        ]
+      ]
+    },
+    "length_m": 23.1,
+    "baseline_threshold_mm": 77.4,
+    "terrain": {
+      "depression_depth_m": 0.89,
+      "catchment_area_m2": 286856.0,
+      "distance_to_water_m": 448.0
+    },
+    "buildings_nearby": 45
+  },
+  {
+    "segment_id": "30605099-1",
+    "osm_way_id": 30605099,
+    "street_name": "LIC Colony Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2224838,
+          12.9775548
+        ],
+        [
+          80.2222232,
+          12.977541
+        ]
+      ]
+    },
+    "length_m": 28.3,
+    "baseline_threshold_mm": 62.4,
+    "terrain": {
+      "depression_depth_m": 0.54,
+      "catchment_area_m2": 329088.0,
+      "distance_to_water_m": 403.0
+    },
+    "buildings_nearby": 45
+  },
+  {
+    "segment_id": "30605099-2",
+    "osm_way_id": 30605099,
+    "street_name": "LIC Colony Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2222232,
+          12.977541
+        ],
+        [
+          80.2219893,
+          12.9775311
+        ],
+        [
+          80.2219607,
+          12.9775298
+        ]
+      ]
+    },
+    "length_m": 28.5,
+    "baseline_threshold_mm": 66.3,
+    "terrain": {
+      "depression_depth_m": 0.32,
+      "catchment_area_m2": 300303.0,
+      "distance_to_water_m": 580.0
+    },
+    "buildings_nearby": 38
+  },
+  {
+    "segment_id": "30605099-3",
+    "osm_way_id": 30605099,
+    "street_name": "LIC Colony Main Road",
+    "ward": "velachery",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          80.2219607,
+          12.9775298
+        ],
+        [
+          80.2213705,
+          12.9775075
+        ]
+      ]
+    },
+    "length_m": 64.0,
+    "baseline_threshold_mm": 62.4,
+    "terrain": {
+      "depression_depth_m": 0.12,
+      "catchment_area_m2": 166467.0,
+      "distance_to_water_m": 456.0
+    },
+    "buildings_nearby": 22
+  }
+]

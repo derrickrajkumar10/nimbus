@@ -1,0 +1,16 @@
+[
+  {
+    "hazard_id": "hz-0001",
+    "run_id": "replay-michaung",
+    "hazard_class": "open_manhole",
+    "location": {
+      "lat": 12.9777428,
+      "lon": 80.2212061
+    },
+    "owner": "corporation",
+    "status": "open",
+    "detected_at": "2023-12-04T01:50:00+05:30",
+    "no_go_radius_m": 30.0,
+    "source_report_id": "rp-0002"
+  }
+]
