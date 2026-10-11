@@ -1,12 +1,12 @@
 // The console HTTP API, exactly as documented in api/README.md (#8).
 import type { Proposal } from '@contracts/generated/ts/nimbus'
 import type { Config } from '../config'
+import { createFixtureCommander } from './fixtureCommander'
 import { MICHAUNG_RAIN } from './fixtureScene'
 import { FIXTURE_RUN, FIXTURE_SEGMENTS, createLocalReplay } from './fixtureSource'
 import {
   DecisionError,
   type ActivityPage,
-  type CommanderClient,
   type DecisionErrorCode,
   type NimbusSource,
 } from './source'
@@ -16,12 +16,6 @@ const DECISION_ERRORS: Record<number, DecisionErrorCode> = {
   409: 'already_decided',
   422: 'invalid',
   502: 'event_not_sent',
-}
-
-const unconfigured: CommanderClient = {
-  ask() {
-    throw new Error('commander not configured')
-  },
 }
 
 export function createHttpSource(cfg: Config, fetchFn: typeof fetch = fetch): NimbusSource {
@@ -80,6 +74,7 @@ export function createHttpSource(cfg: Config, fetchFn: typeof fetch = fetch): Ni
     // No rain or Run endpoints yet (design.md, issues for other lanes).
     rain: async (runId) => (runId === FIXTURE_RUN ? structuredClone(MICHAUNG_RAIN) : []),
     replay: createLocalReplay(),
-    commander: unconfigured,
+    // No Commander endpoint yet (#29): answer from the console's own data.
+    commander: createFixtureCommander(),
   }
 }

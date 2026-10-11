@@ -1,0 +1,52 @@
+.ask {
+  border-top: 1px solid var(--line);
+  padding: 14px 16px 16px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 8px 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--deep);
+  transition: border-color 0.15s;
+}
+
+.field:focus-within {
+  border-color: var(--teal);
+}
+
+.field input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: 0;
+  outline: 0;
+  font-size: 13.5px;
+}
+
+.field input::placeholder {
+  color: var(--faint);
+}
+
+.field input:disabled {
+  opacity: 0.6;
+}
+
+.field kbd {
+  font-size: 11px;
+  color: var(--faint);
+  border: 1px solid var(--line-2);
+  border-radius: 4px;
+  padding: 1px 6px;
+}

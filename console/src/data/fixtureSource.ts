@@ -13,6 +13,7 @@ import type {
   Segment,
   SegmentRisk,
 } from '@contracts/generated/ts/nimbus'
+import { createFixtureCommander } from './fixtureCommander'
 import { MICHAUNG_RAIN, SCENE_EVENTS, SCENE_WARD_ALERT } from './fixtureScene'
 import {
   DecisionError,
@@ -39,15 +40,11 @@ export function createLocalReplay(): ReplayControl {
   }
 }
 
-const unconfigured: CommanderClient = {
-  ask() {
-    throw new Error('commander not configured')
-  },
-}
-
 const clone = <T>(v: T): T => structuredClone(v)
 
-export function createFixtureSource(opts: { decidedBy?: Record<string, string> } = {}): NimbusSource {
+export function createFixtureSource(
+  opts: { decidedBy?: Record<string, string>; commander?: CommanderClient } = {},
+): NimbusSource {
   const proposals = new Map<string, Proposal>()
   for (const p of [...(proposalsJson as unknown as Proposal[]), SCENE_WARD_ALERT]) {
     const by = opts.decidedBy?.[p.proposal_id]
@@ -105,6 +102,6 @@ export function createFixtureSource(opts: { decidedBy?: Record<string, string> }
     },
 
     replay: createLocalReplay(),
-    commander: unconfigured,
+    commander: opts.commander ?? createFixtureCommander(),
   }
 }
