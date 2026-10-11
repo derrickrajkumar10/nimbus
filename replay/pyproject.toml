@@ -21,5 +21,5 @@ package = false
 nimbus-contracts = { path = "../contracts", editable = true }
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "../engines"]  # hit_rate.py uses engines/risk
 testpaths = ["tests"]
