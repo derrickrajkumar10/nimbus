@@ -218,11 +218,11 @@ def test_all_clear_only_to_places_that_were_alerted():
     assert len(w.sender.sent) == 1  # no second all-clear
 
 
-def test_no_subscribers_means_no_alert_but_a_feed_line():
+def test_no_subscribers_means_no_alert_and_no_feed_line():
     w = World(subscribers=MemorySubscribers())
     w.risk_changed(LIKELY_VMR, RiskBand.WATCH, RiskBand.LIKELY)
     assert w.sender.sent == []
-    assert w.bus.of_type("agent.activity")[-1].detail.decided == "No alert"
+    assert w.bus.events == []  # the feed shows only real alerts, not every unsubscribed street
 
 
 def test_failed_push_is_not_recorded_as_sent():
@@ -284,7 +284,7 @@ def test_without_a_push_sender_alerts_are_recorded_and_labelled():
     assert len(sent) == 2  # the console still gets the alerts, with their Tamil text
     assert all(e.detail.message_ta.startswith("[REPLAY] ") for e in sent)
     lines = [e.detail.decided for e in w.bus.of_type("agent.activity") if e.detail.agent == "herald"]
-    sends = [line for line in lines if line != "No alert"]
+    sends = lines
     assert sends == ["Recorded an alert for 2 devices (push not connected)", "Recorded an alert for 1 device (push not connected)"]
 
 

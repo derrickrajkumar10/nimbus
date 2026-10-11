@@ -248,3 +248,33 @@ def test_nova_rewrite_request_uses_sentinel_settings_and_a_fresh_agent():
     assert a.text == b.text == "Heavy rain is likely to waterlog this street."
     assert len(seen) == 2 and seen[0] is not seen[1]  # a fresh agent per rewrite, no growing history
     assert all(len(agent.messages) == 2 for agent in seen)  # one question, one answer each
+
+
+def test_a_permanent_bedrock_refusal_stops_further_rewrites():
+    calls = []
+
+    def refused(text):
+        calls.append(text)
+        raise RuntimeError("ValidationException: An error occurred (ValidationException) when calling the Converse operation: Operation not allowed")
+
+    h = Harness(rewrite=refused)
+    changes = h.run(tick(8))
+    h.run(tick(9, minutes_later=15))
+    assert len(calls) == 1  # asked once, then stopped asking
+    assert h.reasons.disabled
+    assert len(changes) == len(not_low_in_fixtures())  # alerts still flow with the original text
+
+
+def test_a_transient_failure_is_retried_next_time():
+    calls = []
+
+    def flaky(text):
+        calls.append(text)
+        if len(calls) == 1:
+            raise RuntimeError("ThrottlingException: Rate exceeded")
+        return f"PLAIN: {text}"
+
+    h = Harness(rewrite=flaky)
+    h.run(tick(8))
+    assert not h.reasons.disabled
+    assert len(calls) > 1
