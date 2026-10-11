@@ -19,10 +19,10 @@ REGION = "us-east-1"
 app = cdk.App()
 env = cdk.Environment(account=os.environ.get("CDK_DEFAULT_ACCOUNT"), region=REGION)
 
-NimbusShared(app, "NimbusShared", env=env)
+shared = NimbusShared(app, "NimbusShared", env=env)
 NimbusEngines(app, "NimbusEngines", env=env)  # Goutam
 NimbusAgents(app, "NimbusAgents", env=env)  # Vishwa
-NimbusApi(app, "NimbusApi", env=env)  # Varun
+NimbusApi(app, "NimbusApi", shared=shared, env=env)  # Varun
 NimbusConsole(app, "NimbusConsole", env=env)  # Varun, hosting Derrick's build
 
 app.synth()
