@@ -40,5 +40,11 @@
   "addFirstPlaceTitle": "உங்களுக்கு முக்கியமான ஓர் இடத்தைச் சேருங்கள்",
   "addFirstPlaceBody": "வீடு, அலுவலகம், பள்ளி, அல்லது உங்கள் பைக் நிறுத்தும் இடம்.",
   "addPlace": "இடத்தைச் சேர்",
-  "replayTag": "மறுஇயக்கம்"
+  "replayTag": "மறுஇயக்கம்",
+  "runLineReplay": "மறுஇயக்கம் · மிக்ஜாம் புயல் · {time}",
+  "runLineReplayNoTime": "மறுஇயக்கம் · மிக்ஜாம் புயல்",
+  "runLineLive": "நேரலை · {time}",
+  "runLineLiveNoTime": "நேரலை",
+  "language": "En",
+  "addAnotherPlace": "இடத்தைச் சேர்"
 }

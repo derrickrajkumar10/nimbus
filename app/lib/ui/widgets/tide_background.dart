@@ -8,6 +8,20 @@ import '../theme/tide_colors.dart';
 /// 580 px phone, 66 px apart).
 const homeLayerTops = [0.32, 0.434, 0.548, 0.662, 0.776, 0.89];
 
+/// [n] wave colours from the lightest to the deepest Deep tide shade.
+List<Color> tideShades(int n) {
+  const w = TideColors.waves;
+  if (n <= 1) return [w.first];
+  return [
+    for (var i = 0; i < n; i++)
+      () {
+        final t = i / (n - 1) * (w.length - 1);
+        final lo = t.floor().clamp(0, w.length - 2);
+        return Color.lerp(w[lo], w[lo + 1], t - lo)!;
+      }(),
+  ];
+}
+
 /// The Deep tide sea: a storm-sky gradient, thin rain, and layered waves that
 /// drift slowly. Screens lay their content on the layers via [layerRects].
 class TideBackground extends StatefulWidget {

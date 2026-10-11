@@ -3,16 +3,37 @@
   "appTagline": "Know before the water does",
   "yourPlaces": "Your places",
   "placesNeedYou": "{count, plural, =1{1 of your places needs you now} other{{count} of your places need you now}}",
-  "@placesNeedYou": {"placeholders": {"count": {"type": "int"}}},
+  "@placesNeedYou": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "allClear": "All your places are clear",
   "bandLow": "Low",
   "bandWatch": "Watch",
   "bandLikely": "Likely",
   "bandFlooded": "Flooded",
   "durationHm": "{h}h {m}m",
-  "@durationHm": {"placeholders": {"h": {"type": "int"}, "m": {"type": "int"}}},
+  "@durationHm": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
   "durationM": "{m}m",
-  "@durationM": {"placeholders": {"m": {"type": "int"}}},
+  "@durationM": {
+    "placeholders": {
+      "m": {
+        "type": "int"
+      }
+    }
+  },
   "report": "Report",
   "route": "Route",
   "map": "Map",
@@ -30,7 +51,13 @@
   "replayNotStarted": "The Replay hasn't started yet. Start it, then try again.",
   "routingUnavailable": "Routing is coming online. Try again in a minute.",
   "offlineUpdated": "Offline · updated {time}",
-  "@offlineUpdated": {"placeholders": {"time": {"type": "String"}}},
+  "@offlineUpdated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "noStreetsNearby": "No streets nearby",
   "noDataYet": "No data yet",
   "moveToHigherGround": "Move your vehicle to higher ground",
@@ -44,5 +71,28 @@
   "addFirstPlaceTitle": "Add a place you care about",
   "addFirstPlaceBody": "Home, office, school, or where your bike is parked.",
   "addPlace": "Add a place",
-  "replayTag": "Replay"
+  "replayTag": "Replay",
+  "runLineReplay": "Replay · Cyclone Michaung · {time}",
+  "runLineReplayNoTime": "Replay · Cyclone Michaung",
+  "runLineLive": "Live · {time}",
+  "runLineLiveNoTime": "Live",
+  "language": "த",
+  "addAnotherPlace": "Add a place",
+  "@runLineReplay": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@runLineLive": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@language": {
+    "description": "The language switch label: shows the other language."
+  }
 }

@@ -152,4 +152,26 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get replayTag => 'மறுஇயக்கம்';
+
+  @override
+  String runLineReplay(String time) {
+    return 'மறுஇயக்கம் · மிக்ஜாம் புயல் · $time';
+  }
+
+  @override
+  String get runLineReplayNoTime => 'மறுஇயக்கம் · மிக்ஜாம் புயல்';
+
+  @override
+  String runLineLive(String time) {
+    return 'நேரலை · $time';
+  }
+
+  @override
+  String get runLineLiveNoTime => 'நேரலை';
+
+  @override
+  String get language => 'En';
+
+  @override
+  String get addAnotherPlace => 'இடத்தைச் சேர்';
 }

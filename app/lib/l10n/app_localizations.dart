@@ -343,6 +343,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replay'**
   String get replayTag;
+
+  /// No description provided for @runLineReplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay · Cyclone Michaung · {time}'**
+  String runLineReplay(String time);
+
+  /// No description provided for @runLineReplayNoTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay · Cyclone Michaung'**
+  String get runLineReplayNoTime;
+
+  /// No description provided for @runLineLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live · {time}'**
+  String runLineLive(String time);
+
+  /// No description provided for @runLineLiveNoTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get runLineLiveNoTime;
+
+  /// The language switch label: shows the other language.
+  ///
+  /// In en, this message translates to:
+  /// **'த'**
+  String get language;
+
+  /// No description provided for @addAnotherPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get addAnotherPlace;
 }
 
 class _AppLocalizationsDelegate

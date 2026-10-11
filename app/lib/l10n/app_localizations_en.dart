@@ -149,4 +149,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get replayTag => 'Replay';
+
+  @override
+  String runLineReplay(String time) {
+    return 'Replay · Cyclone Michaung · $time';
+  }
+
+  @override
+  String get runLineReplayNoTime => 'Replay · Cyclone Michaung';
+
+  @override
+  String runLineLive(String time) {
+    return 'Live · $time';
+  }
+
+  @override
+  String get runLineLiveNoTime => 'Live';
+
+  @override
+  String get language => 'த';
+
+  @override
+  String get addAnotherPlace => 'Add a place';
 }

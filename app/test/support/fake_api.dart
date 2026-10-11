@@ -1,11 +1,18 @@
 import 'package:nimbus_app/contracts/nimbus.dart';
 import 'package:nimbus_app/data/fixture_api.dart';
+import 'package:nimbus_app/domain/place_view.dart';
 
 import 'file_bundle.dart';
 
 /// The fixture API with no delay, plus hooks to make single calls fail.
 class FakeApi extends FixtureNimbusApi {
-  FakeApi() : super(FileBundle(), delay: Duration.zero);
+  FakeApi({this.places}) : super(FileBundle(), delay: Duration.zero);
+
+  /// Fixed Saved Places with exact Segments, instead of the fixture store.
+  List<PlaceView>? places;
+
+  @override
+  Future<List<PlaceView>> savedPlaces() async => places ?? await super.savedPlaces();
 
   /// Replaces `risk()` when set; the call number starts at 1.
   Future<List<SegmentRisk>> Function(String runId, int call)? onRisk;

@@ -75,6 +75,10 @@ void main() {
         runIds: ['live']));
     await _launch(tester, prefs, api);
     expect(find.byType(HomeScreen), findsOneWidget);
+
+    // Home polls risk: unmount and let the last poll's timers run out.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets('long press on the wordmark toggles the demo Replay', (tester) async {
