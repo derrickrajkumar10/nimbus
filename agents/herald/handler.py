@@ -3,16 +3,18 @@
 Reads Subscribers from PlaceIndex and current risk from SegmentRisk when their
 table env vars are set (always, when deployed); otherwise practice Subscribers and
 an in-memory risk view, for local runs. The per-place alert log is still in memory
-(#42). The send-push Lambda is looked up only when the first alert is sent,
-because its name ships later with #6.
+(#42). With NIMBUS_SEND_PUSH_FUNCTION set, alerts go to the send-push Lambda (#6),
+looked up on the first send; without it the Herald records alerts only and says
+"push not connected".
 """
 
+import os
 from functools import cache
 
 from nimbus_contracts.common import Agent
 
 from common.context import AgentContext
-from common.push import LambdaPushSender
+from common.push import SEND_PUSH_ENV, LambdaPushSender, RecordOnlySender
 from common.runtime import make_handler
 from herald.core import Herald
 from herald.subscribers import DynamoSubscribers, practice_subscribers
@@ -36,7 +38,7 @@ def _herald() -> Herald:
     return Herald(
         segments=load_segments(),
         subscribers=DynamoSubscribers.from_env() or practice_subscribers(),
-        sender=_LazyLambdaSender(),
+        sender=_LazyLambdaSender() if os.environ.get(SEND_PUSH_ENV) else RecordOnlySender(),
         risks=DynamoRiskStore.from_env() or MemoryRiskStore(),
     )
 

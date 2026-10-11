@@ -268,3 +268,34 @@ def test_predictions_never_say_the_street_is_flooded_now():
 def test_ids_sort_by_time_and_carry_a_prefix():
     a, b = new_id("al", T0), new_id("al", T0 + timedelta(seconds=1))
     assert a.startswith("al-") and len(ulid(T0)) == 26 and a < b
+
+
+# --- record-only mode (no send-push Lambda yet, #6) ---------------------------
+
+
+def test_without_a_push_sender_alerts_are_recorded_and_labelled():
+    from common.push import RecordOnlySender
+
+    w = World()
+    w.herald.sender = RecordOnlySender()
+    w.sentinel_tick()
+
+    sent = w.bus.of_type("alert.sent")
+    assert len(sent) == 2  # the console still gets the alerts, with their Tamil text
+    assert all(e.detail.message_ta.startswith("[REPLAY] ") for e in sent)
+    lines = [e.detail.decided for e in w.bus.of_type("agent.activity") if e.detail.agent == "herald"]
+    sends = [line for line in lines if line != "No alert"]
+    assert sends == ["Recorded an alert for 2 devices (push not connected)", "Recorded an alert for 1 device (push not connected)"]
+
+
+def test_handler_records_only_when_no_send_push_function_is_set(monkeypatch):
+    import herald.handler as hh
+    from common.push import SEND_PUSH_ENV, RecordOnlySender
+
+    monkeypatch.delenv(SEND_PUSH_ENV, raising=False)
+    hh._herald.cache_clear()
+    assert isinstance(hh._herald().sender, RecordOnlySender)
+    monkeypatch.setenv(SEND_PUSH_ENV, "nimbus-send-push")
+    hh._herald.cache_clear()
+    assert not isinstance(hh._herald().sender, RecordOnlySender)
+    hh._herald.cache_clear()
