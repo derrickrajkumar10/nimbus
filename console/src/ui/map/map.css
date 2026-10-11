@@ -1,0 +1,178 @@
+/* MapLibre's own controls, the popup and the HTML pins, in the Deep tide palette. */
+
+.maplibregl-ctrl-group {
+  background: var(--panel) !important;
+  border: 1px solid var(--line);
+  box-shadow: none !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--line) !important;
+}
+
+.maplibregl-ctrl-icon {
+  filter: invert(1) opacity(0.7);
+}
+
+.maplibregl-ctrl-bottom-right {
+  margin: 0 4px 4px 0;
+}
+
+.maplibregl-ctrl-attrib {
+  background: rgba(10, 31, 68, 0.7) !important;
+  color: var(--faint);
+  font-size: 10px;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: var(--faint) !important;
+}
+
+.maplibregl-ctrl-attrib-button {
+  filter: invert(1) opacity(0.6);
+}
+
+.nimbus-popup .maplibregl-popup-content {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 32px rgba(3, 12, 30, 0.5);
+  font-family: var(--font);
+}
+
+.nimbus-popup .maplibregl-popup-tip {
+  border-top-color: var(--panel) !important;
+  border-bottom-color: var(--panel) !important;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.nimbus-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--panel) !important;
+}
+
+.nimbus-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--panel) !important;
+}
+
+.nimbus-popup .maplibregl-popup-close-button {
+  color: var(--faint);
+  font-size: 18px;
+  right: 6px;
+  top: 4px;
+}
+
+.nimbus-popup .maplibregl-popup-close-button:hover {
+  background: none;
+  color: var(--text);
+}
+
+.pin {
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.pin-lbl {
+  display: none;
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pin:hover .pin-lbl,
+.pin:focus-visible .pin-lbl {
+  display: block;
+}
+
+.pin-haz {
+  width: 22px;
+  height: 22px;
+  transform: rotate(45deg);
+  background: var(--deep);
+  border: 2px solid var(--likely);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+
+.pin-haz span {
+  transform: rotate(-45deg);
+  color: var(--likely);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.pin-res {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--deep);
+  border: 2px solid var(--teal);
+  color: var(--teal);
+  display: grid;
+  place-items: center;
+}
+
+.pin-working {
+  border-color: var(--muted);
+  color: var(--muted);
+}
+
+.pin-en_route {
+  border-style: dashed;
+}
+
+.pin-sos {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--sos);
+  border: 2px solid #fff;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  position: relative;
+}
+
+.pin-sos::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid var(--sos);
+  animation: sos-ring 2s ease-out infinite;
+}
+
+@keyframes sos-ring {
+  from {
+    opacity: 0.8;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}

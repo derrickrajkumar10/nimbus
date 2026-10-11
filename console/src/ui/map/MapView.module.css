@@ -1,0 +1,11 @@
+.map {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #0b2347;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}

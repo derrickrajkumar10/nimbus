@@ -1,0 +1,82 @@
+.top {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 384px 1fr 344px;
+  align-items: center;
+  background: var(--deep);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 20px;
+}
+
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  font-size: 14px;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--line-2);
+}
+
+.ward {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.clock {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.date {
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 6px;
+  font-size: 13px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 0 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sync {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot,
+.dotWarn {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+.dotWarn {
+  background: var(--watch);
+}

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nimbus console · Deep tide v2</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Noto+Sans+Tamil:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #0A1F44;      /* app deep */
+    --panel: #0D2650;     /* docked surfaces */
+    --raise: #12305E;     /* cards on panels */
+    --line: rgba(169,198,219,.14);
+    --line-2: rgba(169,198,219,.24);
+    --text: #FFFFFF;
+    --muted: #A9C6DB;
+    --faint: #6F93B3;
+    --teal: #4FD1D9;      /* accent: officer actions only */
+    --teal-btn: #2FA9B8;
+    --watch: #F2B34A;
+    --likely: #FF7A57;
+    --water: #59D8E6;     /* observed water only */
+    --low: #CFE3F0;
+    --sos: #E8432A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--deep); color: var(--text); font-family: 'Outfit', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .num { font-variant-numeric: tabular-nums; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .app { height: 100vh; min-height: 760px; min-width: 1280px; display: grid; grid-template-rows: 56px minmax(0,1fr); grid-template-columns: 384px minmax(0,1fr) 344px; }
+
+  /* ---------- top bar ---------- */
+  .top { grid-column: 1 / -1; display: grid; grid-template-columns: 384px 1fr 344px; align-items: center; background: var(--deep); border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 14px; padding: 0 20px; }
+  .mark { display: flex; align-items: center; gap: 9px; font-weight: 600; letter-spacing: .2em; font-size: 14px; }
+  .divider { width: 1px; height: 20px; background: var(--line-2); }
+  .ward { font-size: 14px; color: var(--muted); }
+  .center { display: flex; align-items: center; justify-content: center; gap: 14px; }
+  .run { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px 0 10px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 13px; color: var(--muted); }
+  .run b { color: var(--text); font-weight: 500; }
+  .run .tagr { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--watch); }
+  .clock { font-size: 15px; font-weight: 500; }
+  .clock span { color: var(--muted); font-weight: 400; margin-left: 6px; font-size: 13px; }
+  .user { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 0 20px; font-size: 13px; color: var(--muted); }
+  .sync { display: flex; align-items: center; gap: 7px; }
+  .sync i { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
+
+  /* ---------- panels ---------- */
+  .panel { background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  .left { border-right: 1px solid var(--line); }
+  .right { border-left: 1px solid var(--line); }
+  .scroll { overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin; scrollbar-color: #1E4475 transparent; }
+  .sec { padding: 18px 20px 6px; display: flex; align-items: baseline; justify-content: space-between; }
+  .sec h2 { font-size: 13px; font-weight: 500; letter-spacing: .02em; }
+  .sec h2 .count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: rgba(79,209,217,.14); color: var(--teal); font-size: 12px; margin-left: 8px; }
+  .sec .hint { font-size: 12px; color: var(--faint); }
+
+  /* decisions */
+  .dec { margin: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--raise); padding: 14px 14px 12px; cursor: pointer; transition: border-color .15s; }
+  .dec:hover { border-color: var(--line-2); }
+  .dec.on { border-color: rgba(79,209,217,.55); }
+  .kick { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--faint); letter-spacing: .02em; }
+  .kick .kind { color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+  .held { font-size: 11px; color: var(--watch); border: 1px solid rgba(242,179,74,.4); padding: 1px 7px; border-radius: 5px; }
+  .dec h3 { font-size: 16px; font-weight: 500; line-height: 1.3; margin: 7px 0 5px; }
+  .dec p { font-size: 13px; color: var(--muted); line-height: 1.45; font-weight: 300; }
+  .facts { display: flex; gap: 18px; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); }
+  .facts div { font-size: 11.5px; color: var(--faint); }
+  .facts b { display: block; font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 1px; }
+  .draft { margin-top: 10px; border-left: 2px solid var(--line-2); padding: 2px 0 2px 10px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  .draft .ta { font-family: 'Noto Sans Tamil', sans-serif; font-size: 12px; margin-top: 3px; }
+  .acts { display: flex; align-items: center; gap: 4px; margin-top: 12px; }
+  .approve { height: 34px; padding: 0 16px; border-radius: 8px; background: var(--teal-btn); color: #fff; font-size: 13.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 10px; }
+  .approve:hover { background: #36B9C9; }
+  .approve kbd { font: inherit; font-size: 11px; opacity: .7; border: 1px solid rgba(255,255,255,.35); border-radius: 4px; padding: 0 5px; }
+  .sec-btn { height: 34px; padding: 0 12px; border-radius: 8px; font-size: 13.5px; color: var(--muted); }
+  .sec-btn:hover { background: rgba(169,198,219,.08); color: var(--text); }
+  .done { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--teal); }
+
+  .row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; margin: 0 20px; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; cursor: pointer; }
+  .row:last-child { border-bottom: 0; }
+  .row .sub { display: block; font-size: 12px; color: var(--faint); margin-top: 2px; }
+  .st { font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+  .st.free { color: var(--teal); background: rgba(79,209,217,.12); }
+  .st.work { color: var(--muted); background: rgba(169,198,219,.10); }
+  .st.sos { color: #fff; background: var(--sos); }
+
+  /* activity */
+  .filter { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+  .ev { margin: 0 20px; padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 44px 1fr; }
+  .ev .t { font-size: 12px; color: var(--faint); padding-top: 1px; }
+  .ev .who { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: .02em; display: flex; gap: 8px; align-items: center; }
+  .ev .what { font-size: 13.5px; line-height: 1.45; margin-top: 2px; font-weight: 300; }
+  .ev.officer .who { color: var(--teal); }
+  .ask { border-top: 1px solid var(--line); padding: 14px 16px 16px; }
+  .ask label { display: block; font-size: 12px; color: var(--faint); margin-bottom: 8px; }
+  .field { display: flex; align-items: center; gap: 8px; height: 42px; padding: 0 8px 0 14px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--deep); }
+  .field input { flex: 1; background: none; border: 0; outline: 0; color: var(--text); font: inherit; font-size: 13.5px; }
+  .field input::placeholder { color: var(--faint); }
+  .field kbd { font: inherit; font-size: 11px; color: var(--faint); border: 1px solid var(--line-2); border-radius: 4px; padding: 1px 6px; }
+
+  /* ---------- map ---------- */
+  .stage { position: relative; display: grid; grid-template-rows: minmax(0,1fr) 92px; min-height: 0; }
+  #map { position: relative; }
+  .layers { position: absolute; top: 14px; left: 14px; z-index: 2; display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .layers button { height: 30px; padding: 0 12px; border-radius: 7px; font-size: 12.5px; color: var(--faint); }
+  .layers button.on { color: var(--text); background: var(--raise); }
+  .legend { position: absolute; left: 14px; bottom: 14px; z-index: 2; display: flex; gap: 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 16px; height: 4px; border-radius: 2px; margin-right: 7px; vertical-align: middle; }
+  .maplibregl-ctrl-group { background: var(--panel) !important; border: 1px solid var(--line); box-shadow: none !important; border-radius: 10px !important; }
+  .maplibregl-ctrl-group button { width: 34px; height: 34px; }
+  .maplibregl-ctrl-group button + button { border-top: 1px solid var(--line) !important; }
+  .maplibregl-ctrl-icon { filter: invert(1) opacity(.7); }
+  .maplibregl-ctrl-attrib { background: rgba(10,31,68,.7) !important; color: var(--faint); font-size: 10px; }
+  .maplibregl-ctrl-attrib a { color: var(--faint) !important; }
+
+  /* inspector popup */
+  .maplibregl-popup-content { background: var(--panel); color: var(--text); border: 1px solid var(--line-2); border-radius: 12px; padding: 14px 16px; box-shadow: 0 12px 32px rgba(3,12,30,.5); font-family: 'Outfit'; width: 280px; }
+  .maplibregl-popup-tip { border-top-color: var(--panel) !important; border-bottom-color: var(--panel) !important; }
+  .maplibregl-popup-close-button { color: var(--faint); font-size: 18px; right: 6px; top: 4px; }
+  .ins h4 { font-size: 15px; font-weight: 500; }
+  .ins .seg { font-size: 11.5px; color: var(--faint); margin-top: 1px; }
+  .band { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; margin-top: 10px; }
+  .band i { width: 8px; height: 8px; border-radius: 2px; }
+  .ins .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .ins .stats b { display: block; font-size: 16px; font-weight: 500; }
+  .ins .stats span { font-size: 11px; color: var(--faint); }
+  .reading { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--water); margin-bottom: 8px; }
+  .reading i { width: 8px; height: 8px; border-radius: 50%; background: var(--water); }
+  .ins ol { list-style: none; counter-reset: r; }
+  .ins li { counter-increment: r; font-size: 12.5px; color: var(--muted); line-height: 1.4; padding: 3px 0 3px 20px; position: relative; font-weight: 300; }
+  .ins li::before { content: counter(r); position: absolute; left: 0; top: 3px; font-size: 11px; color: var(--faint); }
+
+  /* markers */
+  .mk { cursor: pointer; }
+  .mk:hover .lbl { display: block; }
+  .mk .lbl { display: none; position: absolute; left: 36px; top: 50%; transform: translateY(-50%); background: var(--panel); border: 1px solid var(--line-2); border-radius: 6px; padding: 3px 8px; font-size: 12px; font-weight: 500; color: #fff; white-space: nowrap; }
+  .res { width: 28px; height: 28px; border-radius: 8px; background: var(--deep); border: 2px solid; display: grid; place-items: center; }
+  .haz { width: 22px; height: 22px; transform: rotate(45deg); background: var(--deep); border: 2px solid var(--likely); border-radius: 4px; display: grid; place-items: center; }
+  .haz span { transform: rotate(-45deg); color: var(--likely); font-weight: 600; font-size: 13px; line-height: 1; }
+  .mk-sos { width: 30px; height: 30px; border-radius: 50%; background: var(--sos); border: 2px solid #fff; display: grid; place-items: center; font-size: 13px; font-weight: 600; position: relative; }
+  .mk-sos::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--sos); animation: ring 2s ease-out infinite; }
+  @keyframes ring { from { opacity: .8; transform: scale(.7); } to { opacity: 0; transform: scale(1.5); } }
+  .rd { width: 14px; height: 14px; border-radius: 50%; background: var(--water); border: 2px solid var(--deep); }
+
+  /* ---------- replay ---------- */
+  .replay { background: var(--panel); border-top: 1px solid var(--line); display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 18px; padding: 0 20px; }
+  .ctl { display: flex; align-items: center; gap: 8px; }
+  .play { width: 40px; height: 40px; border-radius: 50%; background: var(--teal-btn); display: grid; place-items: center; }
+  .speed { height: 30px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 7px; font-size: 12.5px; color: var(--muted); }
+  .chart { position: relative; height: 62px; }
+  .chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
+
+  /* ---------- notes below the fold ---------- */
+  .notes { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+  .notes h2 { color: #fff; font-weight: 500; font-size: 20px; margin-bottom: 14px; }
+  .notes ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 40px; }
+  .notes li b { color: #fff; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M2 13c2.2 0 2.2-2 4.5-2s2.3 2 4.5 2 2.2-2 4.5-2 2.3 2 4.5 2" stroke="#4FD1D9" stroke-width="1.8" stroke-linecap="round"/><path d="M2 17.5c2.2 0 2.2-2 4.5-2s2.3 2 4.5 2 2.2-2 4.5-2 2.3 2 4.5 2" stroke="#4FD1D9" stroke-opacity=".5" stroke-width="1.8" stroke-linecap="round"/><path d="M6.5 8.5a4.5 4.5 0 0 1 9 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        NIMBUS
+      </div>
+      <span class="divider"></span>
+      <span class="ward">Velachery ward</span>
+    </div>
+    <div class="center">
+      <button class="run"><span class="tagr">Replay</span><b>Cyclone Michaung</b>
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" stroke="#A9C6DB" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button>
+      <span class="clock num">02:00<span>Mon 4 Dec 2023</span></span>
+    </div>
+    <div class="user">
+      <span class="sync"><i></i>Updated 2 s ago</span>
+      <span>K. Priya</span>
+    </div>
+  </header>
+
+  <!-- ===== left: decisions ===== -->
+  <aside class="panel left">
+    <div class="scroll">
+      <div class="sec"><h2>Decisions<span class="count num">2</span></h2><span class="hint">Ranked by people affected</span></div>
+
+      <div class="dec on" id="d1">
+        <div class="kick"><span class="kind">Work Order</span><span>Dispatcher · 02:00</span></div>
+        <h3>Send Pump 2 to Velachery Main Road</h3>
+        <p>3 Reports merged into a knee-deep Reading, about 17 buildings nearby.</p>
+        <div class="facts num"><div><b>17</b>buildings</div><div><b>Knee</b>depth</div><div><b>3</b>Reports</div></div>
+        <div class="acts" id="a1"><button class="approve" onclick="approve(event)">Approve <kbd>A</kbd></button><button class="sec-btn">Edit</button><button class="sec-btn">Reject</button></div>
+      </div>
+
+      <div class="dec" id="d2">
+        <div class="kick"><span class="kind">Ward Alert</span><span class="held">Held by Cedar</span></div>
+        <h3>Warn Velachery to avoid Velachery Main Road</h3>
+        <p>The Herald drafted this for the whole ward. Ward-wide alerts wait for an officer.</p>
+        <div class="draft">Velachery Main Road is flooded knee-deep. Use 100 Feet Road.
+          <div class="ta">வேளச்சேரி மெயின் ரோட்டில் முழங்கால் அளவு தண்ணீர். 100 அடி சாலையைப் பயன்படுத்தவும்.</div></div>
+        <div class="acts"><button class="approve">Approve</button><button class="sec-btn">Edit</button><button class="sec-btn">Reject</button></div>
+      </div>
+
+      <div class="sec" style="margin-top:8px"><h2>SOS<span class="count num" style="background:rgba(232,67,42,.16);color:#FF8A75">1</span></h2><span class="hint">Ranked by Triage</span></div>
+      <div class="row" onclick="fly([80.2164186,12.9730212])"><span>Ram Nagar · 3 people<span class="sub">Elderly resident · waiting 5 min</span></span><span class="st sos">Open</span></div>
+
+      <div class="sec" style="margin-top:8px"><h2>Resources</h2><span class="hint num">2 of 3 free</span></div>
+      <div class="row" onclick="fly([80.2213705,12.9775075])"><span>Pump 2<span class="sub">Near Velachery Main Road</span></span><span class="st free">Free</span></div>
+      <div class="row" onclick="fly([80.2219893,12.9775311])"><span>Tree crew 1<span class="sub">Near Velachery Main Road</span></span><span class="st free">Free</span></div>
+      <div class="row" onclick="fly([80.2164319,12.9747602])"><span>Pump 1<span class="sub">Ram Nagar</span></span><span class="st work">Working</span></div>
+    </div>
+  </aside>
+
+  <!-- ===== centre: map + replay ===== -->
+  <main class="stage">
+    <div id="map">
+      <div class="layers">
+        <button class="on">Risk</button><button class="on">Readings</button><button class="on">Hazards</button><button class="on">Resources</button><button class="on">SOS</button>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--water)"></i>Flooded</span>
+        <span><i style="background:var(--likely)"></i>Likely</span>
+        <span><i style="background:var(--watch)"></i>Watch</span>
+        <span><i style="background:var(--low);opacity:.55"></i>Low</span>
+      </div>
+    </div>
+    <div class="replay">
+      <div class="ctl">
+        <button class="play" aria-label="Pause"><svg width="14" height="14" viewBox="0 0 14 14"><rect x="2.5" y="1.5" width="3" height="11" rx="1" fill="#fff"/><rect x="8.5" y="1.5" width="3" height="11" rx="1" fill="#fff"/></svg></button>
+        <button class="speed num">60×</button>
+      </div>
+      <div class="chart" id="chart"></div>
+    </div>
+  </main>
+
+  <!-- ===== right: activity ===== -->
+  <aside class="panel right">
+    <div class="sec"><h2>Activity</h2><button class="filter">All agents <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" stroke="#A9C6DB" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg></button></div>
+    <div class="scroll" id="feed">
+      <div class="ev"><span class="t num">02:00</span><div><div class="who">Cedar <span class="held">Held</span></div><div class="what">Stopped the Herald's ward-wide alert until an officer approves it.</div></div></div>
+      <div class="ev"><span class="t num">02:00</span><div><div class="who">Dispatcher</div><div class="what">Proposed Pump 2 for Velachery Main Road. It is the nearest free pump.</div></div></div>
+      <div class="ev"><span class="t num">02:00</span><div><div class="who">Sentinel</div><div class="what">Velachery Main Road north moved to likely: 32 mm forecast in 3 h, ground saturated.</div></div></div>
+      <div class="ev"><span class="t num">01:55</span><div><div class="who">Triage</div><div class="what">Ranked the Ram Nagar SOS first. 3 people, one elderly.</div></div></div>
+      <div class="ev"><span class="t num">01:50</span><div><div class="who">Verifier</div><div class="what">Merged 3 Reports into a knee-deep Reading on Velachery Main Road. Confidence 0.82.</div></div></div>
+      <div class="ev"><span class="t num">01:50</span><div><div class="who">Verifier</div><div class="what">Found an open manhole. Added a 30 m no-go zone and sent it to the corporation.</div></div></div>
+      <div class="ev"><span class="t num">01:45</span><div><div class="who">Pathfinder</div><div class="what">Closed Velachery Main Road to cars and two-wheelers.</div></div></div>
+    </div>
+    <div class="ask">
+      <label for="q">Ask the Commander</label>
+      <div class="field"><input id="q" placeholder="What changed in the last hour?"><kbd>/</kbd></div>
+    </div>
+  </aside>
+</div>
+
+<section class="notes">
+  <h2>What changed from the first Deep tide</h2>
+  <ul>
+    <li><b>Real map.</b> MapLibre with OpenFreeMap tiles, recoloured to the app's sea palette. The Segments, pins and popup come straight from <code>contracts/fixtures/</code>.</li>
+    <li><b>Solid panels, no glass.</b> Docked, opaque surfaces with hairline borders. Nothing floats over the data except small map controls.</li>
+    <li><b>Colour has a job.</b> Teal means an action the officer can take. Amber and red mean predicted risk. Cyan means water a Reading confirmed. Everything else stays navy and white.</li>
+    <li><b>No decoration.</b> No gradients, glows, avatars or icons for their own sake. The only wave is the storm's rain curve, and it is data.</li>
+    <li><b>One way in for everything.</b> Click a Segment, pin, SOS or Resource, on the map or in a list, and the map flies to it and opens the same inspector.</li>
+    <li><b>Keyboard first.</b> <kbd>A</kbd> approves the selected Decision, <kbd>/</kbd> asks the Commander. Approving updates the card and the feed in place.</li>
+  </ul>
+</section>
+
+<script>
+const SEGMENTS = {"type": "FeatureCollection", "features": [{"type": "Feature", "id": "27480309-1", "geometry": {"type": "LineString", "coordinates": [[80.221206, 12.9775302], [80.2212061, 12.9777428]]}, "properties": {"segment_id": "27480309-1", "osm_way_id": 27480309, "street_name": "Velachery Main Road", "ward": "velachery", "length_m": 23.6, "baseline_threshold_mm": 67.5, "buildings_nearby": 17, "band": "flooded", "score": 92, "minutes_to_flood": 0, "reasons": [{"code": "nearby_reading", "text": "Knee-deep Reading from 3 merged Reports"}, {"code": "forecast_exceeds_threshold", "text": "32 mm forecast in 3 h against a 68 mm threshold"}, {"code": "antecedent_rain", "text": "140 mm in the last 72 h; ground is saturated"}], "flood_threshold_mm": 67.5}}, {"type": "Feature", "id": "27480309-2", "geometry": {"type": "LineString", "coordinates": [[80.2212061, 12.9777428], [80.2212061, 12.9777947]]}, "properties": {"segment_id": "27480309-2", "osm_way_id": 27480309, "street_name": "Velachery Main Road", "ward": "velachery", "length_m": 5.8, "baseline_threshold_mm": 57.4, "buildings_nearby": 16, "band": "low", "score": 5, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "56 mm forecast in 3 h against a 57 mm threshold"}], "flood_threshold_mm": 57.4}}, {"type": "Feature", "id": "27480309-3", "geometry": {"type": "LineString", "coordinates": [[80.2212061, 12.9777947], [80.2212006, 12.9778953], [80.2211832, 12.9782163]]}, "properties": {"segment_id": "27480309-3", "osm_way_id": 27480309, "street_name": "Velachery Main Road", "ward": "velachery", "length_m": 46.9, "baseline_threshold_mm": 89.0, "buildings_nearby": 13, "band": "watch", "score": 58, "minutes_to_flood": 60, "reasons": [{"code": "forecast_exceeds_threshold", "text": "42 mm forecast in 3 h against a 89 mm threshold"}], "flood_threshold_mm": 89.0}}, {"type": "Feature", "id": "27480309-4", "geometry": {"type": "LineString", "coordinates": [[80.2211832, 12.9782163], [80.2211808, 12.9782556], [80.2211783, 12.9782956], [80.2211625, 12.978553], [80.2211596, 12.97858], [80.221155, 12.9786104]]}, "properties": {"segment_id": "27480309-4", "osm_way_id": 27480309, "street_name": "Velachery Main Road", "ward": "velachery", "length_m": 43.9, "baseline_threshold_mm": 89.3, "buildings_nearby": 9, "band": "likely", "score": 82, "minutes_to_flood": 30, "reasons": [{"code": "forecast_exceeds_threshold", "text": "49 mm forecast in 3 h against a 89 mm threshold"}, {"code": "antecedent_rain", "text": "140 mm in the last 72 h; ground is saturated"}], "flood_threshold_mm": 89.3}}, {"type": "Feature", "id": "27320162-0", "geometry": {"type": "LineString", "coordinates": [[80.2161626, 12.9711221], [80.216274, 12.9715826], [80.2163499, 12.9721079], [80.2163977, 12.9725623], [80.2164019, 12.9726539], [80.2164186, 12.9730212], [80.2164253, 12.9731675], [80.216417, 12.9735621], [80.2164206, 12.9736468], [80.2164666, 12.9742305]]}, "properties": {"segment_id": "27320162-0", "osm_way_id": 27320162, "street_name": "Ram Nagar Main Road", "ward": "velachery", "length_m": 348.2, "baseline_threshold_mm": 49.3, "buildings_nearby": 0, "band": "low", "score": 13, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "50 mm forecast in 3 h against a 49 mm threshold"}], "flood_threshold_mm": 49.3}}, {"type": "Feature", "id": "27320162-1", "geometry": {"type": "LineString", "coordinates": [[80.2164666, 12.9742305], [80.2164319, 12.9747602]]}, "properties": {"segment_id": "27320162-1", "osm_way_id": 27320162, "street_name": "Ram Nagar Main Road", "ward": "velachery", "length_m": 59.0, "baseline_threshold_mm": 82.7, "buildings_nearby": 23, "band": "watch", "score": 68, "minutes_to_flood": 120, "reasons": [{"code": "forecast_exceeds_threshold", "text": "21 mm forecast in 3 h against a 83 mm threshold"}], "flood_threshold_mm": 82.7}}, {"type": "Feature", "id": "27320162-2", "geometry": {"type": "LineString", "coordinates": [[80.2164319, 12.9747602], [80.216449, 12.9752769]]}, "properties": {"segment_id": "27320162-2", "osm_way_id": 27320162, "street_name": "Ram Nagar Main Road", "ward": "velachery", "length_m": 57.5, "baseline_threshold_mm": 74.9, "buildings_nearby": 32, "band": "low", "score": 37, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "46 mm forecast in 3 h against a 75 mm threshold"}], "flood_threshold_mm": 74.9}}, {"type": "Feature", "id": "27320166-0", "geometry": {"type": "LineString", "coordinates": [[80.2171068, 12.9757663], [80.2184046, 12.9758552]]}, "properties": {"segment_id": "27320166-0", "osm_way_id": 27320166, "street_name": "Vijayanagar 1st Main Road", "ward": "velachery", "length_m": 141.0, "baseline_threshold_mm": 32.7, "buildings_nearby": 47, "band": "low", "score": 28, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "34 mm forecast in 3 h against a 33 mm threshold"}], "flood_threshold_mm": 32.7}}, {"type": "Feature", "id": "27320166-1", "geometry": {"type": "LineString", "coordinates": [[80.2184046, 12.9758552], [80.2186878, 12.9758716]]}, "properties": {"segment_id": "27320166-1", "osm_way_id": 27320166, "street_name": "Vijayanagar 1st Main Road", "ward": "velachery", "length_m": 30.7, "baseline_threshold_mm": 62.0, "buildings_nearby": 44, "band": "low", "score": 14, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "49 mm forecast in 3 h against a 62 mm threshold"}], "flood_threshold_mm": 62.0}}, {"type": "Feature", "id": "27320166-2", "geometry": {"type": "LineString", "coordinates": [[80.2186878, 12.9758716], [80.2189812, 12.9758898]]}, "properties": {"segment_id": "27320166-2", "osm_way_id": 27320166, "street_name": "Vijayanagar 1st Main Road", "ward": "velachery", "length_m": 31.9, "baseline_threshold_mm": 58.0, "buildings_nearby": 39, "band": "low", "score": 16, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "49 mm forecast in 3 h against a 58 mm threshold"}], "flood_threshold_mm": 58.0}}, {"type": "Feature", "id": "27320166-3", "geometry": {"type": "LineString", "coordinates": [[80.2189812, 12.9758898], [80.219042, 12.9759093], [80.2194643, 12.9758451], [80.2201188, 12.9755981]]}, "properties": {"segment_id": "27320166-3", "osm_way_id": 27320166, "street_name": "Vijayanagar 1st Main Road", "ward": "velachery", "length_m": 129.3, "baseline_threshold_mm": 60.7, "buildings_nearby": 22, "band": "watch", "score": 64, "minutes_to_flood": 180, "reasons": [{"code": "forecast_exceeds_threshold", "text": "54 mm forecast in 3 h against a 61 mm threshold"}], "flood_threshold_mm": 60.7}}, {"type": "Feature", "id": "30604295-0", "geometry": {"type": "LineString", "coordinates": [[80.2218849, 12.9747717], [80.2218997, 12.974951], [80.2219008, 12.9749637]]}, "properties": {"segment_id": "30604295-0", "osm_way_id": 30604295, "street_name": "Sarathy Nagar 1st Main Road", "ward": "velachery", "length_m": 21.4, "baseline_threshold_mm": 87.4, "buildings_nearby": 42, "band": "watch", "score": 41, "minutes_to_flood": 180, "reasons": [{"code": "forecast_exceeds_threshold", "text": "44 mm forecast in 3 h against a 87 mm threshold"}], "flood_threshold_mm": 87.4}}, {"type": "Feature", "id": "30604295-1", "geometry": {"type": "LineString", "coordinates": [[80.2219008, 12.9749637], [80.2219211, 12.9751715]]}, "properties": {"segment_id": "30604295-1", "osm_way_id": 30604295, "street_name": "Sarathy Nagar 1st Main Road", "ward": "velachery", "length_m": 23.2, "baseline_threshold_mm": 64.6, "buildings_nearby": 41, "band": "watch", "score": 51, "minutes_to_flood": 30, "reasons": [{"code": "forecast_exceeds_threshold", "text": "39 mm forecast in 3 h against a 65 mm threshold"}], "flood_threshold_mm": 64.6}}, {"type": "Feature", "id": "30604295-2", "geometry": {"type": "LineString", "coordinates": [[80.2219211, 12.9751715], [80.2219329, 12.9752918], [80.221937, 12.975391]]}, "properties": {"segment_id": "30604295-2", "osm_way_id": 30604295, "street_name": "Sarathy Nagar 1st Main Road", "ward": "velachery", "length_m": 24.5, "baseline_threshold_mm": 36.2, "buildings_nearby": 43, "band": "watch", "score": 61, "minutes_to_flood": 90, "reasons": [{"code": "forecast_exceeds_threshold", "text": "55 mm forecast in 3 h against a 36 mm threshold"}], "flood_threshold_mm": 36.2}}, {"type": "Feature", "id": "30604295-3", "geometry": {"type": "LineString", "coordinates": [[80.221937, 12.975391], [80.2219517, 12.9757501]]}, "properties": {"segment_id": "30604295-3", "osm_way_id": 30604295, "street_name": "Sarathy Nagar 1st Main Road", "ward": "velachery", "length_m": 40.0, "baseline_threshold_mm": 53.1, "buildings_nearby": 41, "band": "low", "score": 26, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "52 mm forecast in 3 h against a 53 mm threshold"}], "flood_threshold_mm": 53.1}}, {"type": "Feature", "id": "428734761-0", "geometry": {"type": "LineString", "coordinates": [[80.2226964, 12.977566], [80.2226906, 12.9780648]]}, "properties": {"segment_id": "428734761-0", "osm_way_id": 428734761, "street_name": "Tansi Nagar 1st Street", "ward": "velachery", "length_m": 55.5, "baseline_threshold_mm": 34.7, "buildings_nearby": 48, "band": "low", "score": 6, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "24 mm forecast in 3 h against a 35 mm threshold"}], "flood_threshold_mm": 34.7}}, {"type": "Feature", "id": "428734761-1", "geometry": {"type": "LineString", "coordinates": [[80.2226906, 12.9780648], [80.2226769, 12.9784353], [80.2226737, 12.9784508], [80.2226644, 12.9784646], [80.2226523, 12.9784704], [80.222636, 12.9784732], [80.2221733, 12.9784418], [80.2221499, 12.9784457], [80.2221343, 12.9784603], [80.2221244, 12.9784791], [80.2221243, 12.9784992], [80.2221383, 12.978722], [80.2221441, 12.9789186], [80.2220314, 12.9789132]]}, "properties": {"segment_id": "428734761-1", "osm_way_id": 428734761, "street_name": "Tansi Nagar 1st Street", "ward": "velachery", "length_m": 166.7, "baseline_threshold_mm": 54.9, "buildings_nearby": 36, "band": "watch", "score": 52, "minutes_to_flood": 180, "reasons": [{"code": "forecast_exceeds_threshold", "text": "51 mm forecast in 3 h against a 55 mm threshold"}], "flood_threshold_mm": 54.9}}, {"type": "Feature", "id": "30605099-0", "geometry": {"type": "LineString", "coordinates": [[80.2226964, 12.977566], [80.2224838, 12.9775548]]}, "properties": {"segment_id": "30605099-0", "osm_way_id": 30605099, "street_name": "LIC Colony Main Road", "ward": "velachery", "length_m": 23.1, "baseline_threshold_mm": 77.4, "buildings_nearby": 45, "band": "low", "score": 38, "minutes_to_flood": null, "reasons": [{"code": "forecast_exceeds_threshold", "text": "42 mm forecast in 3 h against a 77 mm threshold"}], "flood_threshold_mm": 77.4}}, {"type": "Feature", "id": "30605099-1", "geometry": {"type": "LineString", "coordinates": [[80.2224838, 12.9775548], [80.2222232, 12.977541]]}, "properties": {"segment_id": "30605099-1", "osm_way_id": 30605099, "street_name": "LIC Colony Main Road", "ward": "velachery", "length_m": 28.3, "baseline_threshold_mm": 62.4, "buildings_nearby": 45, "band": "watch", "score": 48, "minutes_to_flood": 180, "reasons": [{"code": "forecast_exceeds_threshold", "text": "44 mm forecast in 3 h against a 62 mm threshold"}], "flood_threshold_mm": 62.4}}, {"type": "Feature", "id": "30605099-2", "geometry": {"type": "LineString", "coordinates": [[80.2222232, 12.977541], [80.2219893, 12.9775311], [80.2219607, 12.9775298]]}, "properties": {"segment_id": "30605099-2", "osm_way_id": 30605099, "street_name": "LIC Colony Main Road", "ward": "velachery", "length_m": 28.5, "baseline_threshold_mm": 66.3, "buildings_nearby": 38, "band": "watch", "score": 68, "minutes_to_flood": 120, "reasons": [{"code": "forecast_exceeds_threshold", "text": "56 mm forecast in 3 h against a 66 mm threshold"}], "flood_threshold_mm": 66.3}}, {"type": "Feature", "id": "30605099-3", "geometry": {"type": "LineString", "coordinates": [[80.2219607, 12.9775298], [80.2213705, 12.9775075]]}, "properties": {"segment_id": "30605099-3", "osm_way_id": 30605099, "street_name": "LIC Colony Main Road", "ward": "velachery", "length_m": 64.0, "baseline_threshold_mm": 62.4, "buildings_nearby": 22, "band": "watch", "score": 69, "minutes_to_flood": 90, "reasons": [{"code": "forecast_exceeds_threshold", "text": "23 mm forecast in 3 h against a 62 mm threshold"}], "flood_threshold_mm": 62.4}}]};
+const BAND = { flooded: '#59D8E6', likely: '#FF7A57', watch: '#F2B34A', low: '#CFE3F0' };
+const LABEL = { flooded: 'Flooded · Reading', likely: 'Likely', watch: 'Watch', low: 'Low' };
+
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://tiles.openfreemap.org/styles/fiord',
+  bounds: [[80.2158, 12.9706], [80.2232, 12.9793]],
+  fitBoundsOptions: { padding: { top: 70, bottom: 70, left: 60, right: 60 } },
+  attributionControl: { compact: true }
+});
+map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+
+function recolour() {
+  const set = (id, prop, v) => { if (map.getLayer(id)) map.setPaintProperty(id, prop, v); };
+  map.getStyle().layers.forEach(l => {
+    const id = l.id;
+    if (l.type === 'background') set(id, 'background-color', '#0B2347');
+    else if (id.startsWith('water') && l.type === 'fill') set(id, 'fill-color', '#06183A');
+    else if (id === 'waterway') set(id, 'line-color', '#06183A');
+    else if (id === 'building') { set(id, 'fill-color', '#133463'); set(id, 'fill-opacity', 0.7); }
+    else if (id.startsWith('landuse') || id.startsWith('landcover') || id === 'park') { set(id, 'fill-color', '#0D284F'); set(id, 'fill-opacity', 0.6); }
+    else if (id === 'park_outline') set(id, 'line-opacity', 0);
+    else if (l.type === 'line' && id.includes('casing')) set(id, 'line-color', '#1B3F70');
+    else if (l.type === 'line' && (id.startsWith('highway') || id.startsWith('tunnel') || id.startsWith('road'))) set(id, 'line-color', '#21497D');
+    else if (l.type === 'line' && id.startsWith('railway')) set(id, 'line-color', '#2A5588');
+    else if (l.type === 'symbol') { set(id, 'text-color', '#7FA3C2'); set(id, 'text-halo-color', '#0B2347'); set(id, 'text-halo-width', 1.4); }
+  });
+}
+
+function circle(lon, lat, r) {
+  const pts = [];
+  for (let i = 0; i <= 48; i++) {
+    const a = (i / 48) * Math.PI * 2;
+    pts.push([lon + (r / (111320 * Math.cos(lat * Math.PI / 180))) * Math.cos(a), lat + (r / 110540) * Math.sin(a)]);
+  }
+  return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [pts] } };
+}
+
+function inspector(p) {
+  const reasons = JSON.parse(p.reasons || '[]');
+  const ttf = p.band === 'flooded' ? 'Now' : (p.minutes_to_flood !== 'null' && p.minutes_to_flood != null ? p.minutes_to_flood + ' min' : '—');
+  return `<div class="ins">
+    <h4>${p.street_name}</h4><div class="seg num">Segment ${p.segment_id}</div>
+    <div class="band" style="color:${BAND[p.band]}"><i style="background:${BAND[p.band]}"></i>${LABEL[p.band]}</div>
+    <div class="stats num"><div><b>${p.score}</b><span>Risk Score</span></div><div><b>${ttf}</b><span>to flood</span></div><div><b>${p.flood_threshold_mm}</b><span>mm threshold</span></div></div>
+    ${p.band === 'flooded' ? '<div class="reading"><i></i>Reading: knee-deep · confidence 0.82 · 3 Reports</div>' : ''}
+    <ol>${reasons.map(r => `<li>${r.text}</li>`).join('')}</ol></div>`;
+}
+
+const popup = new maplibregl.Popup({ offset: 16, maxWidth: '300px' });
+const firstPopup = new maplibregl.Popup({ offset: 16, maxWidth: '300px', anchor: 'right' });
+
+function marker(lngLat, html) {
+  const el = document.createElement('div'); el.className = 'mk'; el.innerHTML = html;
+  el.addEventListener('click', e => { e.stopPropagation(); fly(lngLat); });
+  return new maplibregl.Marker({ element: el }).setLngLat(lngLat).addTo(map);
+}
+const pumpIcon = c => `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2c2 2.6 3.5 4.4 3.5 6.2A3.5 3.5 0 0 1 3.5 8.2C3.5 6.4 5 4.6 7 2z" stroke="${c}" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+const crewIcon = c => `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.8l4 5.2H8.6l2.4 3.4H3l2.4-3.4H3z" stroke="${c}" stroke-width="1.5" stroke-linejoin="round"/><path d="M7 10.4v2" stroke="${c}" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
+map.on('load', () => {
+  recolour();
+  map.addSource('segments', { type: 'geojson', data: SEGMENTS });
+  map.addSource('nogo', { type: 'geojson', data: circle(80.2212061, 12.9777428, 30) });
+  map.addLayer({ id: 'nogo-fill', type: 'fill', source: 'nogo', paint: { 'fill-color': '#FF7A57', 'fill-opacity': 0.08 } });
+  map.addLayer({ id: 'nogo-line', type: 'line', source: 'nogo', paint: { 'line-color': '#FF7A57', 'line-width': 1.2, 'line-dasharray': [3, 2] } });
+  map.addLayer({ id: 'seg-case', type: 'line', source: 'segments', layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: { 'line-color': '#0A1F44', 'line-width': ['interpolate', ['linear'], ['zoom'], 14, 6, 18, 16] } });
+  map.addLayer({ id: 'seg', type: 'line', source: 'segments', layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'score'] },
+    paint: {
+      'line-color': ['match', ['get', 'band'], 'flooded', BAND.flooded, 'likely', BAND.likely, 'watch', BAND.watch, BAND.low],
+      'line-opacity': ['match', ['get', 'band'], 'low', 0.45, 1],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 14, 3, 18, 10]
+    } });
+  map.on('mouseenter', 'seg', () => map.getCanvas().style.cursor = 'pointer');
+  map.on('mouseleave', 'seg', () => map.getCanvas().style.cursor = '');
+  map.on('click', 'seg', e => { firstPopup.remove(); } ); map.on('click', 'seg', e => popup.setLngLat(e.lngLat).setHTML(inspector(e.features[0].properties)).addTo(map));
+
+  marker([80.2212061, 12.9777428], `<div class="haz"><span>!</span></div><span class="lbl">Open manhole</span>`);
+  marker([80.2213705, 12.9775075], `<div class="res" style="border-color:#4FD1D9">${pumpIcon('#4FD1D9')}</div><span class="lbl">Pump 2</span>`);
+  marker([80.2219893, 12.9775311], `<div class="res" style="border-color:#4FD1D9">${crewIcon('#4FD1D9')}</div><span class="lbl">Tree crew 1</span>`);
+  marker([80.2164319, 12.9747602], `<div class="res" style="border-color:#A9C6DB">${pumpIcon('#A9C6DB')}</div><span class="lbl">Pump 1 · working</span>`);
+  marker([80.2164186, 12.9730212], `<div class="mk-sos num">3</div><span class="lbl">SOS · Ram Nagar</span>`);
+
+  const f = SEGMENTS.features.find(x => x.properties.segment_id === '27480309-1');
+  const c = f.geometry.coordinates[0];
+  map.jumpTo({ center: c, zoom: 15.75 });
+  map.panBy([-150, 90], { duration: 0 });
+  firstPopup.setLngLat([c[0] - 0.00012, c[1]]).setHTML(inspector({ ...f.properties, reasons: JSON.stringify(f.properties.reasons) })).addTo(map);
+});
+
+function fly(lngLat) { map.flyTo({ center: lngLat, zoom: 17.4, speed: 1.4 }); }
+
+function approve(e) {
+  e.stopPropagation();
+  document.getElementById('a1').outerHTML = `<div class="done"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2.5 7.5l3 3 6-7" stroke="#4FD1D9" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Approved by K. Priya · Pump 2 en route</div>`;
+  document.querySelector('.sec h2 .count').textContent = '1';
+  document.getElementById('feed').insertAdjacentHTML('afterbegin', `<div class="ev officer"><span class="t num">02:01</span><div><div class="who">K. Priya</div><div class="what">Approved the Work Order: Pump 2 to Velachery Main Road.</div></div></div>`);
+}
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === '/') { e.preventDefault(); document.getElementById('q').focus(); }
+  if (e.key.toLowerCase() === 'a' && document.getElementById('a1')) approve(e);
+});
+
+// rain curve: hourly Michaung-shaped rainfall, 3 Dec 18:00 → 4 Dec 12:00
+(function chart() {
+  const rain = [4,6,9,8,13,18,22,27,31,35,38,33,29,24,19,15,11,8,6,5];
+  const now = 8; // 02:00
+  const el = document.getElementById('chart');
+  const W = el.clientWidth, H = el.clientHeight, top = 14, base = H - 16;
+  const max = 40, x = i => (i / (rain.length - 1)) * W, y = v => base - (v / max) * (base - top);
+  const path = rain.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const area = `${path} L${W},${base} L0,${base} Z`;
+  const ticks = [[0, '18:00 · 3 Dec'], [6, '00:00'], [12, '06:00'], [19, '12:00 · 4 Dec']];
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}">
+    <defs><clipPath id="past"><rect x="0" y="0" width="${x(now)}" height="${H}"/></clipPath></defs>
+    <path d="${area}" fill="#21497D" opacity=".45"/>
+    <path d="${path}" fill="none" stroke="#3E78A0" stroke-width="1.5"/>
+    <g clip-path="url(#past)"><path d="${area}" fill="#3E78A0" opacity=".55"/><path d="${path}" fill="none" stroke="#A9C6DB" stroke-width="1.8"/></g>
+    <line x1="${x(now)}" x2="${x(now)}" y1="2" y2="${base}" stroke="#fff" stroke-width="1.5"/>
+    <circle cx="${x(now)}" cy="${y(rain[now])}" r="4" fill="#fff"/>
+    <text x="${x(now) + 8}" y="11" fill="#fff" font-size="12" font-family="Outfit" font-weight="500">02:00 · 31 mm/h</text>
+    ${ticks.map(([i, t]) => `<text x="${x(i)}" y="${H - 2}" fill="#6F93B3" font-size="11" font-family="Outfit" text-anchor="${i === 0 ? 'start' : i === 19 ? 'end' : 'middle'}">${t}</text>`).join('')}
+  </svg>`;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+.empty {
+  margin: 8px 20px 4px;
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.decided {
+  margin: 4px 12px 0;
+}
+
+.toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 8px;
+  border-radius: var(--radius-control);
+  font-size: 12.5px;
+  color: var(--faint);
+}
+
+.toggle:hover {
+  color: var(--muted);
+  background: rgba(169, 198, 219, 0.06);
+}
+
+.toggle span {
+  display: inline-flex;
+  transition: transform 0.15s;
+}
+
+.toggle .open {
+  transform: rotate(180deg);
+}
+
+.list {
+  list-style: none;
+  padding: 0 8px;
+}
+
+.list li {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+}
+
+.itemTitle {
+  font-size: 13px;
+}
+
+.itemLine {
+  font-size: 12px;
+  color: var(--faint);
+}

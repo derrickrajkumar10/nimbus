@@ -1,0 +1,30 @@
+/* Deep tide tokens. Each colour has one job; see console/docs/design.md "Visual system". */
+:root {
+  --deep: #0a1f44;
+  --panel: #0d2650;
+  --raise: #12305e;
+  --line: rgba(169, 198, 219, 0.14);
+  --line-2: rgba(169, 198, 219, 0.24);
+
+  --text: #ffffff;
+  --muted: #a9c6db;
+  --faint: #6f93b3;
+
+  /* Officer actions, selection and "free" only. */
+  --teal: #4fd1d9;
+  --teal-btn: #2fa9b8;
+  --teal-btn-hover: #36b9c9;
+
+  /* Risk Bands. Cyan is for water a Reading observed, never for a prediction. */
+  --watch: #f2b34a;
+  --likely: #ff7a57;
+  --water: #59d8e6;
+  --low: #cfe3f0;
+
+  --sos: #e8432a;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+  --font: 'Outfit', system-ui, sans-serif;
+  --font-ta: 'Noto Sans Tamil', 'Outfit', sans-serif;
+}

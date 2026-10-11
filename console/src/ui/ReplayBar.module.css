@@ -1,0 +1,70 @@
+.replay {
+  flex: none;
+  height: 92px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 0 20px;
+}
+
+.ctl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--teal-btn);
+  display: grid;
+  place-items: center;
+  transition: background 0.15s;
+}
+
+.play:hover {
+  background: var(--teal-btn-hover);
+}
+
+.speed {
+  height: 30px;
+  min-width: 52px;
+  padding: 0 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 7px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.speed:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+
+.chart {
+  height: 62px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chart svg {
+  display: block;
+  overflow: visible;
+}
+
+.now {
+  fill: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font);
+}
+
+.tick {
+  fill: var(--faint);
+  font-size: 11px;
+  font-family: var(--font);
+}
