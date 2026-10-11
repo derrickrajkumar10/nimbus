@@ -77,4 +77,20 @@ void main() {
     expect(first, hasLength(37));
     expect(await loadInstallId(prefs), first);
   });
+
+  test('places survive a restart when given prefs', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await FixtureNimbusApi(FileBundle(), delay: Duration.zero, prefs: prefs).putPlace(
+      'pl-1',
+      label: 'Home',
+      kind: SavedPlaceKind.HOME,
+      location: GeoPoint(lat: 12.9777428, lon: 80.2212061),
+      runIds: ['replay-michaung'],
+    );
+    final restarted = FixtureNimbusApi(FileBundle(), delay: Duration.zero, prefs: prefs);
+    final places = await restarted.savedPlaces();
+    expect(places.single.place.label, 'Home');
+    expect(places.single.runIds, ['replay-michaung']);
+  });
 }

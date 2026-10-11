@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 
 import '../theme/tide_colors.dart';
 
+/// Layer tops on Home, as in the Deep tide mockup (waves from 186 px of a
+/// 580 px phone, 66 px apart).
+const homeLayerTops = [0.32, 0.434, 0.548, 0.662, 0.776, 0.89];
+
 /// The Deep tide sea: a storm-sky gradient, thin rain, and layered waves that
 /// drift slowly. Screens lay their content on the layers via [layerRects].
 class TideBackground extends StatefulWidget {

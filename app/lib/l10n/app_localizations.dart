@@ -98,6 +98,30 @@ abstract class AppLocalizations {
     Locale('ta'),
   ];
 
+  /// No description provided for @appTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Know before the water does'**
+  String get appTagline;
+
+  /// No description provided for @yourPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Your places'**
+  String get yourPlaces;
+
+  /// No description provided for @placesNeedYou.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 of your places needs you now} other{{count} of your places need you now}}'**
+  String placesNeedYou(int count);
+
+  /// No description provided for @allClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All your places are clear'**
+  String get allClear;
+
   /// No description provided for @bandLow.
   ///
   /// In en, this message translates to:
@@ -133,6 +157,192 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{m}m'**
   String durationM(int m);
+
+  /// No description provided for @report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
+  String get report;
+
+  /// No description provided for @route.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get route;
+
+  /// No description provided for @map.
+  ///
+  /// In en, this message translates to:
+  /// **'Map'**
+  String get map;
+
+  /// No description provided for @sos.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS'**
+  String get sos;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @verifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying…'**
+  String get verifying;
+
+  /// No description provided for @dry.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry'**
+  String get dry;
+
+  /// No description provided for @ankleDeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Ankle-deep'**
+  String get ankleDeep;
+
+  /// No description provided for @kneeDeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Knee-deep'**
+  String get kneeDeep;
+
+  /// No description provided for @waistDeep.
+  ///
+  /// In en, this message translates to:
+  /// **'Waist-deep'**
+  String get waistDeep;
+
+  /// No description provided for @aboveWaist.
+  ///
+  /// In en, this message translates to:
+  /// **'Above the waist'**
+  String get aboveWaist;
+
+  /// No description provided for @taughtTheMap.
+  ///
+  /// In en, this message translates to:
+  /// **'You taught the map.'**
+  String get taughtTheMap;
+
+  /// No description provided for @confirmedPrediction.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photo confirmed the prediction.'**
+  String get confirmedPrediction;
+
+  /// No description provided for @noSafeRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'No safe route'**
+  String get noSafeRoute;
+
+  /// No description provided for @replayNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'The Replay hasn\'t started yet. Start it, then try again.'**
+  String get replayNotStarted;
+
+  /// No description provided for @routingUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Routing is coming online. Try again in a minute.'**
+  String get routingUnavailable;
+
+  /// No description provided for @offlineUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline · updated {time}'**
+  String offlineUpdated(String time);
+
+  /// No description provided for @noStreetsNearby.
+  ///
+  /// In en, this message translates to:
+  /// **'No streets nearby'**
+  String get noStreetsNearby;
+
+  /// No description provided for @noDataYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No data yet'**
+  String get noDataYet;
+
+  /// No description provided for @moveToHigherGround.
+  ///
+  /// In en, this message translates to:
+  /// **'Move your vehicle to higher ground'**
+  String get moveToHigherGround;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @chooseLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your language'**
+  String get chooseLanguage;
+
+  /// No description provided for @allowAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get alerts for your streets'**
+  String get allowAlertsTitle;
+
+  /// No description provided for @allowAlertsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll tell you before water reaches the places you care about.'**
+  String get allowAlertsBody;
+
+  /// No description provided for @allowAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow alerts'**
+  String get allowAlerts;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @addFirstPlaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place you care about'**
+  String get addFirstPlaceTitle;
+
+  /// No description provided for @addFirstPlaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Home, office, school, or where your bike is parked.'**
+  String get addFirstPlaceBody;
+
+  /// No description provided for @addPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get addPlace;
+
+  /// No description provided for @replayTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay'**
+  String get replayTag;
 }
 
 class _AppLocalizationsDelegate

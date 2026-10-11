@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../contracts/nimbus.dart';
 import '../domain/geo.dart';
@@ -13,12 +14,24 @@ import 'nimbus_api.dart';
 
 /// The citizen API answered from `assets/fixtures/`, with a short delay so
 /// loading states show. The fixture scene is the `replay-michaung` Run, so
-/// `live` lists are empty. Saved Places live in memory.
+/// `live` lists are empty. Saved Places live in memory, and in [prefs] when
+/// given, so a demo phone keeps its places across restarts.
 class FixtureNimbusApi implements NimbusApi {
-  FixtureNimbusApi(this.bundle, {this.delay = const Duration(milliseconds: 600)});
+  FixtureNimbusApi(this.bundle, {this.delay = const Duration(milliseconds: 600), this.prefs}) {
+    final stored = prefs?.getString(_placesKey);
+    if (stored != null) {
+      for (final j in (jsonDecode(stored) as List).cast<Map<String, dynamic>>()) {
+        final view = PlaceView.fromJson(j);
+        _places[view.id] = view;
+      }
+    }
+  }
 
   final AssetBundle bundle;
   final Duration delay;
+  final SharedPreferences? prefs;
+
+  static const _placesKey = 'fixture_places';
 
   /// How long the "Verifier" takes before a new Report's Reading appears.
   static const verifyTime = Duration(seconds: 3);
@@ -97,13 +110,19 @@ class FixtureNimbusApi implements NimbusApi {
       ),
       runIds: runIds,
     );
-    return _places[placeId] = view;
+    _places[placeId] = view;
+    await _savePlaces();
+    return view;
   }
+
+  Future<void> _savePlaces() async =>
+      prefs?.setString(_placesKey, jsonEncode([for (final p in _places.values) p.toJson()]));
 
   @override
   Future<void> deletePlace(String placeId) async {
     await Future<void>.delayed(delay);
     _places.remove(placeId);
+    await _savePlaces();
   }
 
   @override
