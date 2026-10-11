@@ -17,6 +17,8 @@ Future<void> _launch(WidgetTester tester, SharedPreferences prefs, FakeApi api) 
       prefsProvider.overrideWithValue(prefs),
       apiProvider.overrideWithValue(api),
       notificationPermissionProvider.overrideWithValue(() async {}),
+      // No video platform in tests: the intro shows the still logo instead.
+      introVideoProvider.overrideWithValue(() => null),
     ],
     child: const NimbusApp(),
   ));
@@ -53,13 +55,13 @@ void main() {
     expect(find.byType(OnboardingScreen), findsOneWidget);
   });
 
-  testWidgets('intro finishes by itself after about 6 s', (tester) async {
+  testWidgets('intro shows the logo and finishes by itself after about 4 s', (tester) async {
     final api = FakeApi();
     await _launch(tester, prefs, api);
-    expect(find.text('NIMBUS'), findsOneWidget);
+    expect(find.bySemanticsLabel('NIMBUS'), findsOneWidget);
     await tester.pump(const Duration(seconds: 3));
     expect(find.byType(IntroScreen), findsOneWidget);
-    await tester.pump(const Duration(seconds: 4));
+    await tester.pump(const Duration(seconds: 2));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(OnboardingScreen), findsOneWidget);
     expect(prefs.getBool('intro_seen'), isTrue);

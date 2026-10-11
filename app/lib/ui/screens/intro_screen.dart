@@ -1,117 +1,127 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../theme/tide_colors.dart';
-import '../widgets/tide_background.dart';
 
-/// The one-time intro, about 6 s: rain falls, the tide rises to the Home
-/// layers, then the wordmark and the tagline in English and Tamil.
-class IntroScreen extends StatefulWidget {
+const introLogo = 'assets/brand/nimbus_logo.png';
+const _introVideo = 'assets/brand/nimbus_intro.mp4';
+const _navy = Color(0xFF0B2A5C);
+
+/// Makes the intro's video player. Null shows the still logo instead (tests,
+/// where there's no video platform).
+final introVideoProvider = Provider<VideoPlayerController? Function()>(
+    (ref) => () => VideoPlayerController.asset(_introVideo));
+
+/// The one-time intro: the 4 s NIMBUS logo film on white, then the launch
+/// gate cross-fades into the tide. With reduce motion, or if the video can't
+/// play, the still logo shows briefly instead.
+class IntroScreen extends ConsumerStatefulWidget {
   const IntroScreen({super.key, required this.onDone});
 
   final VoidCallback onDone;
 
-  static const length = Duration(seconds: 6);
+  /// How long the still logo shows when there's no video.
+  static const stillLength = Duration(seconds: 4);
+
+  /// Never hold the user longer than this, even if the video stalls.
+  static const maxLength = Duration(seconds: 8);
 
   @override
-  State<IntroScreen> createState() => _IntroScreenState();
+  ConsumerState<IntroScreen> createState() => _IntroScreenState();
 }
 
-class _IntroScreenState extends State<IntroScreen> with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(vsync: this, duration: IntroScreen.length)
-    ..addStatusListener((s) {
-      if (s == AnimationStatus.completed) _finish();
-    });
-  Timer? _still;
+class _IntroScreenState extends ConsumerState<IntroScreen> {
+  VideoPlayerController? _video;
+  var _playing = false;
+  var _started = false;
   var _done = false;
-
-  late final Animation<double> _tide =
-      CurvedAnimation(parent: _c, curve: const Interval(1.5 / 6, 3.5 / 6, curve: Curves.easeInOutCubic));
-  late final Animation<double> _mark =
-      CurvedAnimation(parent: _c, curve: const Interval(3.5 / 6, 5 / 6, curve: Curves.easeOut));
-  late final Animation<double> _tagline =
-      CurvedAnimation(parent: _c, curve: const Interval(5 / 6, 1, curve: Curves.easeOut));
+  final _timers = <Timer>[];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_c.isAnimating || _c.isCompleted || _still != null) return;
-    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
-      // Reduce motion: show the final frame, then move on.
-      _c.value = 1;
-      _still = Timer(const Duration(seconds: 2), _finish);
-    } else {
-      _c.forward();
+    if (_started) return;
+    _started = true;
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final video = still ? null : ref.read(introVideoProvider)();
+    if (video == null) {
+      _timers.add(Timer(still ? const Duration(seconds: 2) : IntroScreen.stillLength, _finish));
+      return;
     }
+    _video = video;
+    _timers.add(Timer(IntroScreen.maxLength, _finish));
+    video.initialize().then((_) {
+      if (!mounted) return;
+      video.addListener(_onTick);
+      setState(() => _playing = true);
+      video.play();
+    }).catchError((Object _) {
+      // No playable video: fall back to the still logo.
+      _timers.add(Timer(IntroScreen.stillLength, _finish));
+    });
+  }
+
+  void _onTick() {
+    final v = _video!.value;
+    if (v.isCompleted || (v.duration > Duration.zero && v.position >= v.duration)) _finish();
   }
 
   void _finish() {
     if (_done) return;
     _done = true;
+    _video?.pause();
     widget.onDone();
   }
 
   @override
   void dispose() {
-    _still?.cancel();
-    _c.dispose();
+    for (final t in _timers) {
+      t.cancel();
+    }
+    _video?.removeListener(_onTick);
+    _video?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        body: AnimatedBuilder(
-          animation: _c,
-          builder: (context, _) => TideBackground(
-            layerTops: [for (final t in homeLayerTops) 1.0 + (t - 1.0) * _tide.value],
-            child: Stack(
-              children: [
-                Align(
-                  alignment: const Alignment(0, -0.42),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Opacity(
-                        opacity: _mark.value,
-                        child: const Text('NIMBUS',
-                            style: TextStyle(
-                              fontFamily: 'Outfit',
-                              fontSize: 34,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 34 * 0.32,
-                              color: TideColors.text,
-                            )),
-                      ),
-                      const SizedBox(height: 14),
-                      Opacity(
-                        opacity: _tagline.value,
-                        child: const Column(children: [
-                          // Both languages, whatever the app language.
-                          Text('Know before the water does',
-                              style: TextStyle(fontFamily: 'Outfit', fontSize: 16, color: TideColors.text)),
-                          SizedBox(height: 4),
-                          Text('நீர் வரும் முன் அறிந்திடுங்கள்',
-                              style: TextStyle(fontFamily: 'NotoSansTamil', fontSize: 13, color: TideColors.muted)),
-                        ]),
-                      ),
-                    ],
-                  ),
-                ),
-                SafeArea(
-                  child: Align(
-                    alignment: Alignment.topRight,
-                    child: TextButton(
-                      onPressed: _finish,
-                      style: TextButton.styleFrom(foregroundColor: TideColors.text),
-                      child: Text(AppLocalizations.of(context).skip),
+  Widget build(BuildContext context) {
+    final video = _video;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(children: [
+          Center(
+            child: _playing && video != null
+                ? FittedBox(
+                    fit: BoxFit.contain,
+                    child: SizedBox(
+                      width: video.value.size.width,
+                      height: video.value.size.height,
+                      child: Semantics(label: 'NIMBUS', image: true, child: VideoPlayer(video)),
                     ),
+                  )
+                : FractionallySizedBox(
+                    widthFactor: 0.62,
+                    child: Image.asset(introLogo, semanticLabel: 'NIMBUS', fit: BoxFit.contain),
                   ),
-                ),
-              ],
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: TextButton(
+                onPressed: _finish,
+                style: TextButton.styleFrom(foregroundColor: _navy),
+                child: Text(AppLocalizations.of(context).skip),
+              ),
             ),
           ),
-        ),
-      );
+        ]),
+      ),
+    );
+  }
 }
