@@ -38,8 +38,8 @@ _EXCLUDE = [
 
 
 def _projector_code() -> lambda_.Code:
-    # Needs a container runtime (Docker or Podman) at synth. Tests skip it with
-    # the context {"aws:cdk:bundling-stacks": []}.
+    # Needs a container runtime (Docker, or Podman with CDK_DOCKER=podman) at synth. Tests
+    # skip it with the context {"aws:cdk:bundling-stacks": []}.
     return lambda_.Code.from_asset(
         str(REPO),
         exclude=_EXCLUDE,
@@ -50,6 +50,11 @@ def _projector_code() -> lambda_.Code:
                 "-c",
                 "pip install --no-cache-dir ./contracts -t /asset-output && cp -r api/projector /asset-output/projector",
             ],
+            # Same options as stacks/agents.py. Rootless Podman maps the host user to root, and
+            # SELinux (Fedora) needs label=disable for the mounts. Harmless under Docker.
+            user="root",
+            security_opt="label=disable",
+            environment={"PIP_CACHE_DIR": "/tmp/pip", "HOME": "/tmp"},
         ),
     )
 
