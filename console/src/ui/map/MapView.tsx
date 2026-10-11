@@ -77,7 +77,8 @@ export function MapView() {
     map.on('mouseenter', 'seg', () => (map.getCanvas().style.cursor = 'pointer'))
     map.on('mouseleave', 'seg', () => (map.getCanvas().style.cursor = ''))
 
-    const popup = new maplibregl.Popup({ offset: 16, maxWidth: '300px', className: 'nimbus-popup', closeOnClick: false })
+    // Opens to the right of the point; the camera shifts left so it fits on short screens.
+    const popup = new maplibregl.Popup({ offset: 16, maxWidth: '300px', className: 'nimbus-popup', closeOnClick: false, anchor: 'left' })
     popup.setDOMContent(popupNode)
     popup.on('close', () => inspectRef.current(null))
 
@@ -169,7 +170,7 @@ export function MapView() {
     const at = locate(target, data)
     if (!at) return
     flownTo.current = key
-    map.flyTo({ center: at, zoom: FOCUS_ZOOM, speed: 1.4 })
+    map.flyTo({ center: at, zoom: FOCUS_ZOOM, speed: 1.4, offset: [-160, 0] })
     popup.setLngLat(at).addTo(map)
   }, [ready, target, data])
 

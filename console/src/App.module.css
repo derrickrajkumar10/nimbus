@@ -1,6 +1,6 @@
 .app {
   height: 100vh;
-  min-height: 760px;
+  min-height: 640px;
   min-width: 1280px;
   display: grid;
   grid-template-rows: 56px minmax(0, 1fr);
