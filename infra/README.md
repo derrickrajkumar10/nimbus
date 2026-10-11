@@ -46,6 +46,14 @@ cdk deploy NimbusShared      # deploy one stack; deploy only your own lane's sta
 
 Deploy your own lane's stack by name. Never `cdk deploy --all`.
 
+## NimbusApi
+
+Holds the event projector (`api/projector/`): one Lambda and one EventBridge rule on the shared bus, with a dead-letter queue. It may write only `Activity`, `Proposals`, `Alerts`, `Hazards`, `Readings` and `Sos`. `tests/test_api.py` fails if its role can touch any other table.
+
+- **Bundling needs Docker or Podman** at `cdk synth`/`deploy`, to build the Lambda for Linux. The tests skip it (`aws:cdk:bundling-stacks: []`), so `pytest` doesn't need a container runtime.
+- It reads the shared stack's tables directly, so deploy `NimbusShared` first.
+- A deploy needs `cdk bootstrap` to have been run for the account (issue #1).
+
 ## Changing a table
 
 Edit `TABLES` in `stacks/shared.py` **and** `contracts/storage.md` in the same PR. `tests/test_shared.py` fails if they disagree. Changing a key of a deployed table replaces it, because DynamoDB keys can't be altered in place, so ask in the team chat first.

@@ -1,0 +1,25 @@
+[project]
+name = "nimbus-api"
+version = "0.1.0"
+description = "NIMBUS HTTP API and event projector Lambdas."
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.43.111",
+    "nimbus-contracts",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv]
+# Not an installable package: Lambdas are bundled from this folder (see infra/stacks/api.py).
+package = false
+
+[tool.uv.sources]
+nimbus-contracts = { path = "../contracts", editable = true }
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
