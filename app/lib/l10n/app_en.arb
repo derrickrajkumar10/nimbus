@@ -94,5 +94,22 @@
   },
   "@language": {
     "description": "The language switch label: shows the other language."
+  },
+  "showMeTheWay": "Show me the way",
+  "edit": "Edit",
+  "whatToDo": "What to do",
+  "whyLabel": "Why",
+  "floodsIn": "Floods in about {time}",
+  "wardMapTitle": "Velachery ward",
+  "legendObserved": "Water seen",
+  "legendHazard": "Hazard · keep out",
+  "placeGone": "This place was removed.",
+  "back": "Back",
+  "@floodsIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

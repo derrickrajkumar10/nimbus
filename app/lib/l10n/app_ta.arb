@@ -46,5 +46,15 @@
   "runLineLive": "நேரலை · {time}",
   "runLineLiveNoTime": "நேரலை",
   "language": "En",
-  "addAnotherPlace": "இடத்தைச் சேர்"
+  "addAnotherPlace": "இடத்தைச் சேர்",
+  "showMeTheWay": "வழியைக் காட்டு",
+  "edit": "திருத்து",
+  "whatToDo": "என்ன செய்வது",
+  "whyLabel": "ஏன்",
+  "floodsIn": "சுமார் {time}-இல் வெள்ளம் வரலாம்",
+  "wardMapTitle": "வேளச்சேரி வார்டு",
+  "legendObserved": "நீர் காணப்பட்டது",
+  "legendHazard": "ஆபத்து · நெருங்காதீர்",
+  "placeGone": "இந்த இடம் நீக்கப்பட்டது.",
+  "back": "பின்செல்"
 }

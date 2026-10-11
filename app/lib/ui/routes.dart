@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 import 'screens/launch_gate.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/place_detail_screen.dart';
+import 'screens/ward_map_screen.dart';
 import 'theme/tide_colors.dart';
 
 /// Route names. `/place/:id` carries the place id in the path.
@@ -32,6 +34,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       page = const OnboardingScreen();
     case Routes.home:
       page = const HomeScreen();
+    case Routes.map:
+      page = const WardMapScreen();
+    case _ when name.startsWith('/place/') && name != Routes.placeEdit:
+      page = PlaceDetailScreen(placeId: Uri.decodeComponent(name.substring('/place/'.length)));
     default:
       page = _NotBuiltYet(name);
   }

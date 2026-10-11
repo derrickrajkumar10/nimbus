@@ -379,6 +379,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add a place'**
   String get addAnotherPlace;
+
+  /// No description provided for @showMeTheWay.
+  ///
+  /// In en, this message translates to:
+  /// **'Show me the way'**
+  String get showMeTheWay;
+
+  /// No description provided for @edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
+
+  /// No description provided for @whatToDo.
+  ///
+  /// In en, this message translates to:
+  /// **'What to do'**
+  String get whatToDo;
+
+  /// No description provided for @whyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why'**
+  String get whyLabel;
+
+  /// No description provided for @floodsIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Floods in about {time}'**
+  String floodsIn(String time);
+
+  /// No description provided for @wardMapTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Velachery ward'**
+  String get wardMapTitle;
+
+  /// No description provided for @legendObserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Water seen'**
+  String get legendObserved;
+
+  /// No description provided for @legendHazard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hazard · keep out'**
+  String get legendHazard;
+
+  /// No description provided for @placeGone.
+  ///
+  /// In en, this message translates to:
+  /// **'This place was removed.'**
+  String get placeGone;
+
+  /// No description provided for @back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
 }
 
 class _AppLocalizationsDelegate

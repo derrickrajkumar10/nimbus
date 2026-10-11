@@ -68,6 +68,7 @@ flutter:
   generate: true
   assets:
     - assets/fixtures/
+    - assets/map/
   fonts:
     - family: Outfit
       fonts:

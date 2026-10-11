@@ -171,4 +171,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addAnotherPlace => 'Add a place';
+
+  @override
+  String get showMeTheWay => 'Show me the way';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get whatToDo => 'What to do';
+
+  @override
+  String get whyLabel => 'Why';
+
+  @override
+  String floodsIn(String time) {
+    return 'Floods in about $time';
+  }
+
+  @override
+  String get wardMapTitle => 'Velachery ward';
+
+  @override
+  String get legendObserved => 'Water seen';
+
+  @override
+  String get legendHazard => 'Hazard · keep out';
+
+  @override
+  String get placeGone => 'This place was removed.';
+
+  @override
+  String get back => 'Back';
 }

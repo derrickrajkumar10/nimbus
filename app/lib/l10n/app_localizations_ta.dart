@@ -174,4 +174,36 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get addAnotherPlace => 'இடத்தைச் சேர்';
+
+  @override
+  String get showMeTheWay => 'வழியைக் காட்டு';
+
+  @override
+  String get edit => 'திருத்து';
+
+  @override
+  String get whatToDo => 'என்ன செய்வது';
+
+  @override
+  String get whyLabel => 'ஏன்';
+
+  @override
+  String floodsIn(String time) {
+    return 'சுமார் $time-இல் வெள்ளம் வரலாம்';
+  }
+
+  @override
+  String get wardMapTitle => 'வேளச்சேரி வார்டு';
+
+  @override
+  String get legendObserved => 'நீர் காணப்பட்டது';
+
+  @override
+  String get legendHazard => 'ஆபத்து · நெருங்காதீர்';
+
+  @override
+  String get placeGone => 'இந்த இடம் நீக்கப்பட்டது.';
+
+  @override
+  String get back => 'பின்செல்';
 }

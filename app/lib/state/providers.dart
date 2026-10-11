@@ -127,6 +127,9 @@ final riskProvider = StreamProvider.autoDispose<RiskSnapshot>((ref) async* {
 final hazardsProvider = FutureProvider.autoDispose<List<Hazard>>(
     (ref) => ref.watch(apiProvider).hazards(ref.watch(runIdProvider)));
 
+final readingsProvider = FutureProvider.autoDispose<List<Reading>>(
+    (ref) => ref.watch(apiProvider).readings(ref.watch(runIdProvider)));
+
 /// This install's Saved Places.
 class PlacesNotifier extends AsyncNotifier<List<PlaceView>> {
   @override
