@@ -22,7 +22,8 @@ class NimbusApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       theme: tideTheme(locale),
-      initialRoute: Routes.launch,
+      // `flutter run --route /map` (or a deep link) opens on that screen.
+      initialRoute: WidgetsBinding.instance.platformDispatcher.defaultRouteName,
       onGenerateRoute: generateRoute,
     );
   }
