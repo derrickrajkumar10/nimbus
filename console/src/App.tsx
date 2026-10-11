@@ -4,6 +4,7 @@ import type { FeedItem } from './domain/activity'
 import { ActivityPanel } from './ui/ActivityPanel'
 import { AskCommander } from './ui/AskCommander'
 import { DecisionsPanel } from './ui/DecisionsPanel'
+import { MapView } from './ui/map/MapView'
 import { ResourcesSection } from './ui/ResourcesSection'
 import { SosSection } from './ui/SosSection'
 import { TopBar } from './ui/TopBar'
@@ -29,7 +30,9 @@ export default function App() {
           <ResourcesSection />
         </div>
       </aside>
-      <main className={s.stage} aria-label="Map" />
+      <main className={s.stage} aria-label="Map">
+        <MapView />
+      </main>
       <aside className={`${s.panel} ${s.right}`} aria-label="Activity">
         <ActivityPanel extra={asked} footer={<AskCommander onItem={upsert} />} />
       </aside>

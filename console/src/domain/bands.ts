@@ -8,6 +8,17 @@ export const BAND_COLOR: Record<RiskBand, string> = {
   low: '#CFE3F0',
 }
 
+// Risk Score cut-offs from contracts/src/nimbus_contracts/rules.py (Python only; a test guards drift).
+export const WATCH_FROM = 40
+export const LIKELY_FROM = 70
+
+/** The predicted band for a score. Never "flooded": only a Reading makes that. */
+export function bandForScore(score: number): Exclude<RiskBand, 'flooded'> {
+  if (score >= LIKELY_FROM) return 'likely'
+  if (score >= WATCH_FROM) return 'watch'
+  return 'low'
+}
+
 export const BAND_LABEL: Record<RiskBand, string> = {
   flooded: 'Flooded',
   likely: 'Likely',

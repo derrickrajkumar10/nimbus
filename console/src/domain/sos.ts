@@ -1,4 +1,9 @@
-import type { HazardClass, HazardOwner, VulnerabilityFlags } from '@contracts/generated/ts/nimbus'
+import type { Hazard, HazardClass, HazardOwner, VulnerabilityFlags } from '@contracts/generated/ts/nimbus'
+
+/** The Hazard's no-go radius; the contract defaults it to 30 m. */
+export function noGoRadius(h: Hazard): number {
+  return h.no_go_radius_m ?? 30
+}
 
 export function sosFlagsText(f: VulnerabilityFlags): string {
   const words: string[] = []

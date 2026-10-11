@@ -1,4 +1,11 @@
-import { HAZARD_LABEL, OWNER_LABEL, sosFlagsText } from './sos'
+import { hazards } from '../test/fixtures'
+import { HAZARD_LABEL, OWNER_LABEL, noGoRadius, sosFlagsText } from './sos'
+
+test('noGoRadius uses the contract default of 30 m when omitted', () => {
+  expect(noGoRadius({ ...hazards[0], no_go_radius_m: 45 })).toBe(45)
+  const { no_go_radius_m: _, ...without } = hazards[0]
+  expect(noGoRadius(without)).toBe(30)
+})
 
 test('sosFlagsText names each flag in words', () => {
   expect(sosFlagsText({ elderly: true, child: false, medical: true })).toBe('Elderly resident · Medical need')

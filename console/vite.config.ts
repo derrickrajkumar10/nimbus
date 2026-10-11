@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: { '@contracts': contracts },
   },
+  worker: { format: 'es' },
   server: {
     fs: { allow: ['..'] },
   },
