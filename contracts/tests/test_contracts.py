@@ -14,6 +14,7 @@ from nimbus_contracts.entities import (
     Sos,
 )
 from nimbus_contracts.events import Event, RiskChanged
+from nimbus_contracts.routes import RouteRequest, RouteResponse
 
 ROOT = Path(__file__).resolve().parent.parent
 FIXTURES = ROOT / "fixtures"
@@ -29,6 +30,8 @@ FIXTURES = ROOT / "fixtures"
         ("resources.json", Resource),
         ("proposals.json", Proposal),
         ("sos.json", Sos),
+        ("route_requests.json", RouteRequest),
+        ("routes.json", RouteResponse),
     ],
 )
 def test_fixtures_match_contracts(name, model):

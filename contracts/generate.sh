@@ -12,7 +12,7 @@ npx -y json-schema-to-typescript@15 -i schema/nimbus.schema.json -o generated/ts
   --bannerComment "/* Generated from contracts/schema/nimbus.schema.json. Do not edit; run contracts/generate.sh. */"
 
 defs=()
-for m in Segment SegmentRisk Report Reading Hazard Sos RankedSos SavedPlace Resource Proposal Alert; do
+for m in Segment SegmentRisk Report Reading Hazard Sos RankedSos SavedPlace Resource Proposal Alert RouteRequest RouteResponse; do
   defs+=("schema/nimbus.schema.json#/\$defs/$m")
 done
 npx -y quicktype@23 -s schema -l dart --null-safety --required-props -o generated/dart/nimbus.dart "${defs[@]}"

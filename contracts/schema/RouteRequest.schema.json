@@ -1,0 +1,66 @@
+{
+  "$defs": {
+    "GeoPoint": {
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "maximum": 90,
+          "minimum": -90,
+          "title": "Lat",
+          "type": "number"
+        },
+        "lon": {
+          "maximum": 180,
+          "minimum": -180,
+          "title": "Lon",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "title": "GeoPoint",
+      "type": "object"
+    },
+    "VehicleType": {
+      "enum": [
+        "two_wheeler",
+        "car",
+        "ambulance"
+      ],
+      "title": "VehicleType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "run_id": {
+      "examples": [
+        "live",
+        "replay-michaung"
+      ],
+      "pattern": "^(live|replay-[a-z0-9-]+)$",
+      "title": "Run Id",
+      "type": "string"
+    },
+    "origin": {
+      "$ref": "#/$defs/GeoPoint"
+    },
+    "destination": {
+      "$ref": "#/$defs/GeoPoint"
+    },
+    "vehicle": {
+      "$ref": "#/$defs/VehicleType"
+    }
+  },
+  "required": [
+    "run_id",
+    "origin",
+    "destination",
+    "vehicle"
+  ],
+  "title": "RouteRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

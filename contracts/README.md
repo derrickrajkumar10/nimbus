@@ -11,6 +11,7 @@ The shapes every lane agrees on: entities, bus events, Segment IDs, a few shared
 | `src/nimbus_contracts/` | Pydantic models, the source of truth | Python lanes import it: `uv add ../contracts` |
 | `src/nimbus_contracts/segments.py` | `split_ways`: the only way to make Segment IDs | F1, fixtures |
 | `src/nimbus_contracts/rules.py` | Score → Risk Band cut-offs, vehicle depth limits, travel modes | Sentinel, Pathfinder, app |
+| `src/nimbus_contracts/routes.py` | `RouteRequest` and `RouteResponse` for `POST /routes`; `no_safe_route` carries no geometry | API, Pathfinder, app |
 | `schema/` | JSON Schema, one file per entity and event, plus `nimbus.schema.json` bundling everything | Anything not in Python |
 | `generated/ts/nimbus.ts` | TypeScript types, with `Event` as a discriminated union on `type` | Console |
 | `generated/dart/nimbus.dart` | Dart classes with `fromJson`/`toJson` for entities | Flutter app |

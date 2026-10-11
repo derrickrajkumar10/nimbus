@@ -249,6 +249,36 @@ export type MinutesToFlood = number | null;
  * @maxItems 3
  */
 export type Reasons1 = [] | [Reason2] | [Reason2, Reason2] | [Reason2, Reason2, Reason2];
+export type RunId16 = string;
+/**
+ * This interface was referenced by `Nimbus`'s JSON-Schema
+ * via the `definition` "VehicleType".
+ */
+export type VehicleType = "two_wheeler" | "car" | "ambulance";
+export type RunId17 = string;
+/**
+ * This interface was referenced by `Nimbus`'s JSON-Schema
+ * via the `definition` "RouteStatus".
+ */
+export type RouteStatus = "ok" | "no_safe_route";
+export type DistanceM = number | null;
+export type DurationS = number | null;
+/**
+ * Segments the route keeps out of, flooded now or expected to flood before arrival.
+ */
+export type AvoidedSegmentIds = string[];
+/**
+ * Hazards (open manholes, live wires) the route keeps clear of.
+ */
+export type AvoidedHazardIds = string[];
+/**
+ * One line for the traveller, in English.
+ */
+export type Reason3 = string;
+/**
+ * The same line in Tamil, when the Pathfinder has one.
+ */
+export type ReasonTa = string | null;
 export type PlaceId = string;
 export type DeviceId = string;
 export type Label1 = string;
@@ -275,7 +305,7 @@ export type DistanceToWaterM = number;
  * OSM building count in the catchment; the impact proxy.
  */
 export type BuildingsNearby = number;
-export type RunId16 = string;
+export type RunId18 = string;
 export type SegmentId4 = string;
 export type SimTime10 = string;
 export type Score1 = number;
@@ -292,7 +322,7 @@ export type Reasons2 = [] | [Reason2] | [Reason2, Reason2] | [Reason2, Reason2, 
  */
 export type FloodThresholdMm = number;
 export type SosId1 = string;
-export type RunId17 = string;
+export type RunId19 = string;
 export type ReporterId1 = string;
 export type CreatedAt1 = string;
 export type PeopleCount = number;
@@ -301,7 +331,7 @@ export type Child = boolean;
 export type Medical = boolean;
 export type PhotoKey1 = string | null;
 export type EventId10 = string;
-export type RunId18 = string;
+export type RunId20 = string;
 export type SimTime11 = string;
 /**
  * Wall time, for logs only. Domain logic uses sim_time.
@@ -310,7 +340,7 @@ export type EmittedAt10 = string;
 export type Source10 = string;
 export type Type11 = "sos.created";
 export type EventId11 = string;
-export type RunId19 = string;
+export type RunId21 = string;
 export type SimTime12 = string;
 /**
  * Wall time, for logs only. Domain logic uses sim_time.
@@ -693,6 +723,34 @@ export interface RiskChangedDetail {
 }
 /**
  * This interface was referenced by `Nimbus`'s JSON-Schema
+ * via the `definition` "RouteRequest".
+ */
+export interface RouteRequest {
+  run_id: RunId16;
+  origin: GeoPoint;
+  destination: GeoPoint;
+  vehicle: VehicleType;
+}
+/**
+ * This interface was referenced by `Nimbus`'s JSON-Schema
+ * via the `definition` "RouteResponse".
+ */
+export interface RouteResponse {
+  run_id: RunId17;
+  status: RouteStatus;
+  /**
+   * The route. None when status is no_safe_route.
+   */
+  geometry?: LineString | null;
+  distance_m?: DistanceM;
+  duration_s?: DurationS;
+  avoided_segment_ids?: AvoidedSegmentIds;
+  avoided_hazard_ids?: AvoidedHazardIds;
+  reason: Reason3;
+  reason_ta?: ReasonTa;
+}
+/**
+ * This interface was referenced by `Nimbus`'s JSON-Schema
  * via the `definition` "SavedPlace".
  */
 export interface SavedPlace {
@@ -737,7 +795,7 @@ export interface TerrainFactors {
  * via the `definition` "SegmentRisk".
  */
 export interface SegmentRisk {
-  run_id: RunId16;
+  run_id: RunId18;
   segment_id: SegmentId4;
   sim_time: SimTime10;
   score: Score1;
@@ -752,7 +810,7 @@ export interface SegmentRisk {
  */
 export interface Sos {
   sos_id: SosId1;
-  run_id: RunId17;
+  run_id: RunId19;
   reporter_id: ReporterId1;
   created_at: CreatedAt1;
   location: GeoPoint;
@@ -775,7 +833,7 @@ export interface VulnerabilityFlags {
  */
 export interface SosCreated {
   event_id: EventId10;
-  run_id: RunId18;
+  run_id: RunId20;
   sim_time: SimTime11;
   emitted_at: EmittedAt10;
   source: Source10;
@@ -788,7 +846,7 @@ export interface SosCreated {
  */
 export interface SosRanked {
   event_id: EventId11;
-  run_id: RunId19;
+  run_id: RunId21;
   sim_time: SimTime12;
   emitted_at: EmittedAt11;
   source: Source11;
