@@ -2,8 +2,8 @@
 
 Names come from NimbusShared's SSM parameters under /nimbus/, resolved at deploy
 time, never hard-coded. Every agent Lambda shares one code bundle: agents/ plus
-the contracts package and the fixtures (the Sentinel scores fixtures until the
-risk engine #4 lands).
+the contracts package, the risk engine (engines/risk, bundled as `risk`) and the
+fixtures (the Sentinel's fallback outside a Michaung Replay).
 
 Context values (cdk.json or `-c key=value`):
   nova_lite_id, nova_pro_id   Bedrock inference-profile IDs from issue #1
@@ -114,6 +114,7 @@ class NimbusAgents(Stack):
         command = (
             f"pip install --no-cache-dir --quiet --target /asset-output {install}"
             f" && cp -r {copy} /asset-output/"
+            " && cp -r /asset-input/engines/risk /asset-output/risk"
             " && mkdir -p /asset-output/contracts && cp -r /asset-input/contracts/fixtures /asset-output/contracts/"
             " && find /asset-output -name __pycache__ -prune -exec rm -rf {} +"
         )
@@ -124,6 +125,9 @@ class NimbusAgents(Stack):
                 "!agents",
                 *(f"!agents/{p}" for p in AGENT_PACKAGES),
                 *(f"!agents/{p}/**" for p in AGENT_PACKAGES),
+                "!engines",
+                "!engines/risk",
+                "!engines/risk/**",
                 "!contracts",
                 "!contracts/pyproject.toml",
                 "!contracts/README.md",
