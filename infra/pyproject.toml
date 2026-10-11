@@ -1,0 +1,22 @@
+[project]
+name = "nimbus-infra"
+version = "0.1.0"
+description = "NIMBUS AWS CDK app: one stack per lane, shared bus, tables and buckets."
+requires-python = ">=3.12"
+dependencies = [
+    "aws-cdk-lib>=2.170.0",
+    "constructs>=10.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+]
+
+[tool.uv]
+# Not an installable package: `cdk` runs app.py from this folder.
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
