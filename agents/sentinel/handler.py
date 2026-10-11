@@ -61,3 +61,6 @@ def handle(ctx: AgentContext, event) -> None:
         if "rain covers" not in str(exc):
             raise
         ctx.activity(saw=f"Tick {event.tick_index} at {event.sim_time:%d %b %Y %H:%M}", decided="Skipped this tick", why=str(exc))
+
+
+handler = make_handler(Agent.SENTINEL, handle)

@@ -85,3 +85,12 @@ def test_importing_the_lambda_module_needs_no_aws_setup():
     import stub.handler
 
     assert callable(stub.handler.handler)
+
+
+@pytest.mark.parametrize("module", ["stub.handler", "sentinel.handler", "herald.handler"])
+def test_every_agent_module_exposes_its_lambda_entry_point(module):
+    # infra/stacks/agents.py points each Lambda at "<module>.handler"; a missing name only fails in AWS.
+    import importlib
+
+    entry = getattr(importlib.import_module(module), "handler", None)
+    assert callable(entry), f"{module}.handler is missing"
