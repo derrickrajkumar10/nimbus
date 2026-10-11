@@ -1,5 +1,9 @@
 name: CI
 
+# Every job runs on every PR, with no path filters. A required check that a path filter
+# skips stays "pending" and blocks the merge. Add a job here when a lane adds code
+# (engines/, console/, app/ are still README-only).
+
 on:
   pull_request:
   push:
@@ -11,6 +15,26 @@ jobs:
     defaults:
       run:
         working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --python 3.12 pytest -q
+
+  agents:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agents
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run --python 3.12 pytest -q
+
+  infra:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
