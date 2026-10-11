@@ -4,6 +4,12 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// google-services.json is never committed (get it from the Firebase console).
+// Without it the app builds and runs with push off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "in.nimbus.app"
     compileSdk = flutter.compileSdkVersion
