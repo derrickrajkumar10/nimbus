@@ -206,4 +206,62 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get back => 'பின்செல்';
+
+  @override
+  String get addPlaceTitle => 'இடத்தைச் சேர்';
+
+  @override
+  String get editPlaceTitle => 'இடத்தைத் திருத்து';
+
+  @override
+  String get kindHome => 'வீடு';
+
+  @override
+  String get kindOffice => 'அலுவலகம்';
+
+  @override
+  String get kindSchool => 'பள்ளி';
+
+  @override
+  String get kindParking => 'வாகன நிறுத்தம்';
+
+  @override
+  String get placeLabelHint => 'இந்த இடத்திற்குப் பெயரிடுங்கள்';
+
+  @override
+  String get pinHint => 'குறியை இடத்தின் மேல் வைக்க வரைபடத்தை நகர்த்துங்கள்';
+
+  @override
+  String radiusLabel(int metres) {
+    return '$metres மீ சுற்றளவில் உள்ள தெருக்களைக் கவனி';
+  }
+
+  @override
+  String get save => 'சேமி';
+
+  @override
+  String get delete => 'நீக்கு';
+
+  @override
+  String get cancel => 'ரத்து';
+
+  @override
+  String get remove => 'நீக்கு';
+
+  @override
+  String get removePlaceTitle => 'இந்த இடத்தை நீக்கவா?';
+
+  @override
+  String get removePlaceBody => 'இதற்கான எச்சரிக்கைகள் இனி வராது.';
+
+  @override
+  String get tooManyPlaces =>
+      'அதிகபட்சம் 20 இடங்களைச் சேமிக்கலாம். புதியதைச் சேர்க்க ஒன்றை நீக்குங்கள்.';
+
+  @override
+  String get saveFailed =>
+      'சேமிக்க முடியவில்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயலுங்கள்.';
+
+  @override
+  String get findingYou => 'நீங்கள் இருக்கும் இடத்தைக் கண்டறிகிறது…';
 }

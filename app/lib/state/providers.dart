@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
@@ -34,6 +35,22 @@ final apiProvider = Provider<NimbusApi>((ref) {
 
 /// Asks for notification permission; replaced in tests. Task 10 wires FCM.
 final notificationPermissionProvider = Provider<Future<void> Function()>((ref) => () async {});
+
+/// The phone's position, or null when location is off, refused or slow.
+/// Replaced in tests.
+final currentPositionProvider = FutureProvider.autoDispose<GeoPoint?>((ref) async {
+  try {
+    if (!await Geolocator.isLocationServiceEnabled()) return null;
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) return null;
+    final p = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(timeLimit: Duration(seconds: 8)));
+    return GeoPoint(lat: p.latitude, lon: p.longitude);
+  } catch (_) {
+    return null;
+  }
+});
 
 /// A small persisted string setting.
 abstract class _PrefNotifier extends Notifier<String> {

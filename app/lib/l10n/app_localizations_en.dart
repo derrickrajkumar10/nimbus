@@ -203,4 +203,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get back => 'Back';
+
+  @override
+  String get addPlaceTitle => 'Add a place';
+
+  @override
+  String get editPlaceTitle => 'Edit place';
+
+  @override
+  String get kindHome => 'Home';
+
+  @override
+  String get kindOffice => 'Office';
+
+  @override
+  String get kindSchool => 'School';
+
+  @override
+  String get kindParking => 'Parking';
+
+  @override
+  String get placeLabelHint => 'Name this place';
+
+  @override
+  String get pinHint => 'Move the map to put the pin on the place';
+
+  @override
+  String radiusLabel(int metres) {
+    return 'Watch streets within $metres m';
+  }
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get removePlaceTitle => 'Remove this place?';
+
+  @override
+  String get removePlaceBody => 'You\'ll stop getting alerts for it.';
+
+  @override
+  String get tooManyPlaces =>
+      'You can save up to 20 places. Remove one to add another.';
+
+  @override
+  String get saveFailed =>
+      'Couldn\'t save. Check your connection and try again.';
+
+  @override
+  String get findingYou => 'Finding where you are…';
 }

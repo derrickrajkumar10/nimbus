@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'screens/launch_gate.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/place_detail_screen.dart';
+import 'screens/place_edit_screen.dart';
 import 'screens/ward_map_screen.dart';
 import 'theme/tide_colors.dart';
 
@@ -36,7 +37,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       page = const HomeScreen();
     case Routes.map:
       page = const WardMapScreen();
-    case _ when name.startsWith('/place/') && name != Routes.placeEdit:
+    case Routes.placeEdit:
+      page = PlaceEditScreen(placeId: settings.arguments as String?);
+    case _ when name.startsWith('/place/'):
       page = PlaceDetailScreen(placeId: Uri.decodeComponent(name.substring('/place/'.length)));
     default:
       page = _NotBuiltYet(name);

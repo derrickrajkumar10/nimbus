@@ -34,6 +34,7 @@ class TideMap extends ConsumerStatefulWidget {
     this.points = const {},
     this.waterMarks = const [],
     this.onTap,
+    this.onCentre,
     this.interactive = true,
   });
 
@@ -54,6 +55,9 @@ class TideMap extends ConsumerStatefulWidget {
   final List<GeoPoint> waterMarks;
 
   final ValueChanged<GeoPoint>? onTap;
+
+  /// The map's centre each time the camera comes to rest.
+  final ValueChanged<GeoPoint>? onCentre;
   final bool interactive;
 
   @override
@@ -159,6 +163,11 @@ class _TideMapState extends ConsumerState<TideMap> {
     if (mounted) _pushSources();
   }
 
+  void _cameraIdle() {
+    final at = _map?.cameraPosition?.target;
+    if (at != null) widget.onCentre?.call(GeoPoint(lat: at.latitude, lon: at.longitude));
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!ref.watch(mapEnabledProvider)) return const ColoredBox(color: TideColors.mapBg, child: SizedBox.expand());
@@ -169,6 +178,8 @@ class _TideMapState extends ConsumerState<TideMap> {
       onMapCreated: (c) => _map = c,
       onStyleLoadedCallback: _addLayers,
       onMapClick: (Point<double> _, LatLng at) => widget.onTap?.call(GeoPoint(lat: at.latitude, lon: at.longitude)),
+      trackCameraPosition: widget.onCentre != null,
+      onCameraIdle: _cameraIdle,
       compassEnabled: false,
       rotateGesturesEnabled: false,
       tiltGesturesEnabled: false,

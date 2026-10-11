@@ -111,5 +111,30 @@
         "type": "String"
       }
     }
+  },
+  "addPlaceTitle": "Add a place",
+  "editPlaceTitle": "Edit place",
+  "kindHome": "Home",
+  "kindOffice": "Office",
+  "kindSchool": "School",
+  "kindParking": "Parking",
+  "placeLabelHint": "Name this place",
+  "pinHint": "Move the map to put the pin on the place",
+  "radiusLabel": "Watch streets within {metres} m",
+  "save": "Save",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "removePlaceTitle": "Remove this place?",
+  "removePlaceBody": "You'll stop getting alerts for it.",
+  "tooManyPlaces": "You can save up to 20 places. Remove one to add another.",
+  "saveFailed": "Couldn't save. Check your connection and try again.",
+  "findingYou": "Finding where you are…",
+  "@radiusLabel": {
+    "placeholders": {
+      "metres": {
+        "type": "int"
+      }
+    }
   }
 }

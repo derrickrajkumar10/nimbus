@@ -55,8 +55,13 @@ class PlaceDetailScreen extends ConsumerWidget {
     return Scaffold(
       body: LayoutBuilder(builder: (context, box) {
         final mapHeight = box.maxHeight * 0.46;
-        return Stack(children: [
-          SizedBox(
+        // The body's constraints are loose: without expand the Stack would
+        // end under the map and clip the panel to 40 px.
+        return Stack(fit: StackFit.expand, children: [
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
             height: mapHeight + 40,
             child: TideMap(
               segments: segments,
@@ -68,24 +73,29 @@ class PlaceDetailScreen extends ConsumerWidget {
               points: {'': view.place.location},
             ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(children: [
-                RoundButton(
-                  size: 40,
-                  color: TideColors.deep,
-                  onTap: () => Navigator.of(context).maybePop(),
-                  child: nimbusIcon(NimbusIcon.back, size: 20),
-                ),
-                const Spacer(),
-                RoundButton(
-                  size: 40,
-                  color: TideColors.deep,
-                  onTap: () => Navigator.of(context).pushNamed(Routes.placeEdit, arguments: placeId),
-                  child: Text(l.edit, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600)),
-                ),
-              ]),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(children: [
+                  RoundButton(
+                    size: 40,
+                    color: TideColors.deep,
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: nimbusIcon(NimbusIcon.back, size: 20),
+                  ),
+                  const Spacer(),
+                  RoundButton(
+                    size: 40,
+                    color: TideColors.deep,
+                    onTap: () => Navigator.of(context).pushNamed(Routes.placeEdit, arguments: placeId),
+                    child: Text(l.edit, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600)),
+                  ),
+                ]),
+              ),
             ),
           ),
           Positioned.fill(

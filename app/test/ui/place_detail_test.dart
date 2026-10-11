@@ -45,4 +45,17 @@ void main() {
         api: _api(), risk: fixtureSnapshot(), overrides: noMap, lang: 'ta');
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('the panel fills the screen under the map and takes taps', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pumpScreen(tester, const PlaceDetailScreen(placeId: 'pl-home'),
+        api: _api(), risk: fixtureSnapshot(), overrides: noMap);
+    expect(tester.getRect(find.byType(SingleChildScrollView)).bottom, 844);
+    await tester.tap(find.text('Show me the way'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('/route'), findsOneWidget);
+  });
 }

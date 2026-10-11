@@ -439,6 +439,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back'**
   String get back;
+
+  /// No description provided for @addPlaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a place'**
+  String get addPlaceTitle;
+
+  /// No description provided for @editPlaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit place'**
+  String get editPlaceTitle;
+
+  /// No description provided for @kindHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get kindHome;
+
+  /// No description provided for @kindOffice.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get kindOffice;
+
+  /// No description provided for @kindSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get kindSchool;
+
+  /// No description provided for @kindParking.
+  ///
+  /// In en, this message translates to:
+  /// **'Parking'**
+  String get kindParking;
+
+  /// No description provided for @placeLabelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name this place'**
+  String get placeLabelHint;
+
+  /// No description provided for @pinHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Move the map to put the pin on the place'**
+  String get pinHint;
+
+  /// No description provided for @radiusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch streets within {metres} m'**
+  String radiusLabel(int metres);
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @removePlaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this place?'**
+  String get removePlaceTitle;
+
+  /// No description provided for @removePlaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll stop getting alerts for it.'**
+  String get removePlaceBody;
+
+  /// No description provided for @tooManyPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'You can save up to 20 places. Remove one to add another.'**
+  String get tooManyPlaces;
+
+  /// No description provided for @saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Check your connection and try again.'**
+  String get saveFailed;
+
+  /// No description provided for @findingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding where you are…'**
+  String get findingYou;
 }
 
 class _AppLocalizationsDelegate
