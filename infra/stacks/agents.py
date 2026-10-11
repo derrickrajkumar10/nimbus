@@ -182,8 +182,10 @@ class NimbusAgents(Stack):
         )
 
         fn.add_to_role_policy(iam.PolicyStatement(actions=["events:PutEvents"], resources=[self._ssm("bus/arn")]))
-        if spec.reads:
-            fn.add_to_role_policy(iam.PolicyStatement(actions=TABLE_READ, resources=[self._table_arn(t) for t in spec.reads]))
+        # An agent reads every table it writes (the Sentinel reads its previous bands from SegmentRisk).
+        readable = tuple(dict.fromkeys((*spec.reads, *spec.writes)))
+        if readable:
+            fn.add_to_role_policy(iam.PolicyStatement(actions=TABLE_READ, resources=[self._table_arn(t) for t in readable]))
         if spec.writes:
             fn.add_to_role_policy(iam.PolicyStatement(actions=TABLE_WRITE, resources=[self._table_arn(t) for t in spec.writes]))
         if spec.uses_nova_lite:

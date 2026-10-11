@@ -158,3 +158,19 @@ def test_bundle_includes_the_risk_engine():
     source = inspect.getsource(agents.NimbusAgents._bundle)
     assert "cp -r /asset-input/engines/risk /asset-output/risk" in source
     assert "!engines/risk/**" in source
+
+
+def test_each_agent_can_read_every_table_it_writes(template):
+    """The Sentinel queries SegmentRisk for its previous bands before writing new ones (#42)."""
+    params = ssm_parameter_names(template)
+    by_role: dict[str, dict[str, set]] = {}
+    for policy, actions, resource in statements(template):
+        role = str(policy["Properties"]["Roles"])
+        tables = {params.get(r) for r in refs(resource)} - {None}
+        entry = by_role.setdefault(role, {"read": set(), "write": set()})
+        if "dynamodb:Query" in actions:
+            entry["read"] |= tables
+        if "dynamodb:PutItem" in actions:
+            entry["write"] |= tables
+    assert by_role and all(e["write"] <= e["read"] for e in by_role.values())
+    assert any("/nimbus/tables/SegmentRisk" in e["write"] and "/nimbus/tables/SegmentRisk" in e["read"] for e in by_role.values())
