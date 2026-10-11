@@ -116,8 +116,7 @@ class Herald:
         saw = f"{street} {d.previous_band}→{d.band}"
         subs = self.subscribers.for_segment(event.run_id, d.segment_id)
         if not subs:
-            ctx.activity(saw=saw, decided="No alert", why="No Subscribers have a Saved Place on this Segment")
-            return
+            return  # nobody to tell: stay out of the feed so it shows only real alerts
 
         if rank(d.band) < rank(d.previous_band):
             self._all_clear(ctx, event, subs, saw)
