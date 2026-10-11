@@ -442,32 +442,6 @@ def aws() -> None:
     svg("aws", w, h, "".join(body), css, "AWS Lambda, EventBridge, DynamoDB, API Gateway, S3, SSM, CDK, Strands Agents, Cedar")
 
 
-# --- team ----------------------------------------------------------------------
-
-
-def team() -> None:
-    w, h = 900, 170
-    people = [
-        ("Vishwa", "Agents · AWS deployment", "Sentinel, Herald, Dispatcher", TEAL),
-        ("Varun", "Infrastructure · APIs", "CDK, projector, APIs, push", WATER),
-        ("Goutam", "Engines · Storm Replay", "risk engine, dispatch solver", WATCH),
-        ("Derrick", "Contracts · Design · Frontend", "domain model, console, app", LIKELY),
-    ]
-    cw = 210
-    body = []
-    for i, (name, lane, did, colour) in enumerate(people):
-        x = i * (cw + 20)
-        body.append(
-            f'<g class="up" style="animation-delay:{0.12 * i:.2f}s"><g transform="translate({x} 0)">{card(cw, h)}'
-            f'<circle cx="44" cy="52" r="22" fill="{RAISE}" stroke="{colour}" stroke-width="2"/>'
-            f'<text x="44" y="59" font-size="20" font-weight="600" text-anchor="middle" fill="{colour}">{name[0]}</text>'
-            f'<text x="78" y="58" font-size="18" font-weight="600">{name}</text>'
-            f'<text x="22" y="104" font-size="12.5" font-weight="600" fill="{colour}">{esc(lane)}</text>'
-            f'<text x="22" y="126" font-size="12" class="muted">{esc(did)}</text></g></g>'
-        )
-    svg("team", w, h, "".join(body), label="Team: Vishwa, Varun, Goutam, Derrick")
-
-
 def footer() -> None:
     w, h = 900, 70
     wave = lambda y, amp: f"M0 {y} " + " ".join(f"Q{x + 37.5} {y - amp} {x + 75} {y} T{x + 150} {y}" for x in range(0, w * 2, 150)) + f" V{h} H0 Z"  # noqa: E731
@@ -480,6 +454,6 @@ def footer() -> None:
 
 
 if __name__ == "__main__":
-    for draw in (hero, stats, storm, flow, agents, approve, aws, team, footer):
+    for draw in (hero, stats, storm, flow, agents, approve, aws, footer):
         draw()
     print("\n".join(f"{p.name} {p.stat().st_size // 1024} KB" for p in sorted(HERE.glob("*.svg"))))

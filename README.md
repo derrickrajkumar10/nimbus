@@ -130,11 +130,7 @@ The URLs are the `NimbusApi` stack outputs (also SSM `/nimbus/api/console-url` a
 
 Start with [`CONTEXT.md`](CONTEXT.md) for the domain terms, [`docs/adr/`](docs/adr) for the decisions, and [`docs/AI_TOOLS.md`](docs/AI_TOOLS.md) for the AI tools we used.
 
-## Team
-
 <div align="center">
-<img src="docs/readme/team.svg" width="100%" alt="Vishwa: agents and AWS deployment; Varun: infrastructure and APIs; Goutam: engines and Storm Replay; Derrick: contracts, design and frontend">
-
 <img src="docs/readme/footer.svg" width="100%" alt="">
 
 <sub>Heat &amp; Water track · built on AWS · ஒவ்வொரு தெருவுக்கும் வெள்ள எச்சரிக்கை</sub>
